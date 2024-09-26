@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset("assets/images/img.png", width:50,height: 50,),
+                      Image.asset("assets/images/NovoRachamentoIcon.png", width:50,height: 50,),
                       const Text(
                         "Nova Divisão",
                         style: TextStyle(color: Colors.black),)
