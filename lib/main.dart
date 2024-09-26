@@ -7,7 +7,7 @@ import 'Cadastro.dart';
 void main() {
   runApp(
     const MaterialApp(
-      home: MyApp(),
+      home: Cadastro(),
     )
   );
 }
