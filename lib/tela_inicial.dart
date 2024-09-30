@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'perfil_usuario.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Home extends StatelessWidget {
+  const Home({super.key});
 
   // This widget is the root of your application.
   @override
@@ -27,86 +28,90 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(15))),
           automaticallyImplyLeading: false,
           centerTitle: true,
-          title: const IconButton(
-                icon: Icon(Icons.account_circle_outlined,
-                color: Colors.green, size: 50,),
-                onPressed: null,
-          ),
-      ),
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          toolbarHeight: 80, // Ajuste a altura da AppBar aqui
+          title: Column(
+            mainAxisAlignment:
+                MainAxisAlignment.center, // Centraliza verticalmente
             children: [
-              SizedBox(width: 150, height: 150, child: FittedBox(
-                child:FloatingActionButton.large(
-                  backgroundColor: Colors.white,
-                  onPressed: null,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset("assets/images/NovoRachamentoIcon.png", width:50,height: 50,),
-                      const Text(
-                        "Nova Divisão",
-                        style: TextStyle(color: Colors.black),)
-                    ],
-                  ),
-                ),
+              IconButton(
+                icon: const Icon(Icons.account_circle_outlined,
+                    color: Colors.green, size: 50),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Usuario()),
+                  );
+                },
               ),
-              // const FloatingActionButton.large(
-              //   backgroundColor: Colors.white,
-              //   onPressed: null,
-              //   child: Column(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //     children: [
-              //       Icon(Icons.alarm, color: Colors.greenAccent,),
-              //       Text(
-              //         "Histórico",
-              //         style: TextStyle(color: Colors.black),)
-              //     ],
-              //   ),
-              // ),
-              ),
-              SizedBox(width: 150, height: 150, child: FittedBox(
-                child:FloatingActionButton.large(
-                  backgroundColor: Colors.white,
-                  onPressed: null,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.alarm, color: Colors.green,),
-                      const Text(
-                        "Histórico",
-                        style: TextStyle(color: Colors.black),)
-                    ],
-                  ),
-                ),
-              ),
-                // const FloatingActionButton.large(
-                //   backgroundColor: Colors.white,
-                //   onPressed: null,
-                //   child: Column(
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     children: [
-                //       Icon(Icons.alarm, color: Colors.greenAccent,),
-                //       Text(
-                //         "Histórico",
-                //         style: TextStyle(color: Colors.black),)
-                //     ],
-                //   ),
-                // ),
-              )],
+            ],
           ),
-        ],
-      )
-    );
+        ),
+        body: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: FittedBox(
+                    child: FloatingActionButton.large(
+                      backgroundColor: Colors.white,
+                      onPressed: null,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            "assets/images/NovoRachamentoIcon.png",
+                            width: 50,
+                            height: 50,
+                          ),
+                          const SizedBox(height: 5,),
+                          const Text("Nova Divisão",
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 8))
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: FittedBox(
+                    child: FloatingActionButton.large(
+                      backgroundColor: Colors.white,
+                      onPressed: null,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.alarm,
+                            color: Colors.green,
+                            size: 50,
+                          ),
+                          SizedBox(height: 5,),
+                          Text(
+                            "Histórico",
+                            style: TextStyle(color: Colors.black, fontSize: 8),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ],
+        ));
   }
 }

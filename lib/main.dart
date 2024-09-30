@@ -8,7 +8,7 @@ import 'perfil_usuario.dart';
 void main() {
   runApp(
     const MaterialApp(
-      home: Usuario(),
+      home: Home(),
     )
   );
 }
