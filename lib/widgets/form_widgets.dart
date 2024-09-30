@@ -11,7 +11,7 @@ Widget form(String hint, IconData ico, TextInputType tip, TextEditingController 
       controller: controller,
       onChanged: onChanged,
       enabled: enabled,
-      style: TextStyle(fontSize: 25.0, color: enabled ? Colors.black : Colors.grey,),
+      style: TextStyle(fontSize: 15.0, color: enabled ? Colors.black : Colors.grey,),
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -54,7 +54,7 @@ Widget senhaOculta(String hint, IconData ico, TextInputType tip, TextEditingCont
       obscureText: true,
       onChanged: onChanged,
       enabled: enabled,
-      style: TextStyle(fontSize: 25.0, color: enabled ? Colors.black : Colors.grey,), // Cor condicional)
+      style: TextStyle(fontSize: 15.0, color: enabled ? Colors.black : Colors.grey,), // Cor condicional)
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -97,7 +97,7 @@ Widget passwordForm(String hint, IconData ico, TextEditingController controller,
       controller: controller,
       onChanged: onChanged,
       obscureText: obscureText,
-      style: const TextStyle(fontSize: 25.0, color: Colors.black), // Cor condicional),
+      style: const TextStyle(fontSize: 15.0, color: Colors.black), // Cor condicional),
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,

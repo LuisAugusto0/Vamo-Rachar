@@ -33,14 +33,23 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final TextEditingController _userText = TextEditingController();
-  final TextEditingController _emailText = TextEditingController();
-  final TextEditingController _passwordText = TextEditingController();
+  final TextEditingController _userController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  @override void initState() {
+  @override void dispose() {
+    _userController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
     super.initState();
-    _emailText.text = "exemplo@email.com";
-    _passwordText.text = "Vi@dao";
+    _emailController.text = "exemplo@email.com";
+    _passwordController.text = "senh@forte";
+    _userController.text = "Usuário";
   }
 
   @override
@@ -48,25 +57,60 @@ class _MyHomePageState extends State<MyHomePage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(240),
+        preferredSize:
+        const Size.fromHeight(80), // Define a altura da AppBar como 0
         child: Padding(
-          padding: const EdgeInsets.only(top: 40),
+          padding: const EdgeInsets.all(10.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              userAvatar("https://thispersondoesnotexist.com"),
+              IconButton(
+                onPressed: (){
+                Navigator.pop(context);
+              }, icon: const Icon(Icons.close, size: 35,)),
             ],
           ),
         ),
       ),
       body: Column(
         children: [
-          form("Usuário", Icons.account_circle_outlined, TextInputType.text,
-              _userText, validateUser(_userText), (text) => setState(() => ()), true),
-          form("E-mail", Icons.account_circle_outlined, TextInputType.emailAddress,
-              _emailText, validateEmail(_emailText), (text) => setState(() => ()), false),
-          senhaOculta("Senha", Icons.key_outlined, TextInputType.text,
-              _passwordText, validatePassword(_passwordText), (text) => setState(() => ()), false),
+          Padding(
+            padding:
+                const EdgeInsets.all(15), // Adiciona padding ao conteúdo
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                userAvatar(
+                    "https://thispersondoesnotexist.com"), // Mover o avatar para o corpo
+              ],
+            ),
+          ),
+          form(
+            "Usuário", //Label do TextField
+            Icons.account_circle_outlined, //Ícone do TextField
+            TextInputType.text, //Tipo do Teclado
+            _userController, // Controlador do TextField
+            validateUser(_userController), // Verifica se há erro
+            (text) => setState(() => ()), // OnChanged
+            true, // Enabled?
+          ),
+          form(
+            "E-mail", //Label do TextField
+            Icons.email_outlined, //Ícone do TextField
+            TextInputType.emailAddress, //Tipo do Teclado
+            _emailController, // Controlador do TextField
+            validateEmail(_emailController), // Verifica se há erro
+            (text) => setState(() => ()), // OnChanged
+            false, // Enabled?
+          ),
+          senhaOculta(
+            "Senha", //Label do TextField
+            Icons.key_outlined, //Ícone do TextField
+            TextInputType.text, //Tipo do Teclado
+            _passwordController, // Controlador do TextField
+            validatePassword(_passwordController), // Verifica se há erro
+            (text) => setState(() => ()), // OnChanged
+            false, // Enabled?
+          ),
         ],
       ),
       floatingActionButton: Padding(
