@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import 'tela_inicial.dart';
 import 'Cadastro.dart';
-import 'perfil_usuario.dart';
+import 'Login_inicial.dart';
 
 void main() {
   runApp(
     const MaterialApp(
-      home: Home(),
+      home: LoginInicial(),
     )
   );
 }

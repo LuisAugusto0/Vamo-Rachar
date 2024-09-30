@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
+import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
+import 'package:vamorachar_telacadastro/constants/colors.dart';
+import 'tela_inicial.dart';
 
 class Cadastro extends StatelessWidget {
   const Cadastro({super.key});
@@ -10,7 +14,7 @@ class Cadastro extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF64C278),
+        scaffoldBackgroundColor: const Color(verdePrimario),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -31,29 +35,42 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _obscureText = true; // Boolean para trocar visibilidade
 
-  final TextEditingController _userText = TextEditingController();
-  final TextEditingController _emailText = TextEditingController();
-  final TextEditingController _passwordText = TextEditingController();
-  final TextEditingController _passwordConfirmationText = TextEditingController();
+  final TextEditingController _userController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordConfirmationController = TextEditingController();
 
-  // Caracteres alfanuméricos
-  // static final validCharacters = RegExp(r'^[a-zA-Z]');
-  static final specialCharacters = RegExp(r'[!@#$%^&*(),.?":{}|<>]');
 
+  Route _homeRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => const Home(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(0.0, 1.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
 
   @override
   void dispose() {
-    _userText.dispose();
-    _emailText.dispose();
-    _passwordText.dispose();
-    _passwordConfirmationText.dispose();
+    _userController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _passwordConfirmationController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    _userText.text = "Teste";
   }
 
   void _toggleVisibility() {
@@ -62,138 +79,36 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  String? get _errorUser {
-    String? result;
-    String password = _userText.value.text;
-    if(password.isEmpty){
-      result = "Escreva um nome de usuário";
-    }
-    return result;
-  }
-  String? get _errorEmail {
-    String? result;
-    String password = _emailText.value.text;
-    if(password.length < 6 ){
-      result = "Escreva um email";
-    }
-    return result;
-  }
-  String? get _errorPassword {
-    String? result;
-    String password = _passwordText.value.text;
-    if(password.length < 6 ){
-      result = "Mínimo 6 caracteres";
-    } else if(!password.contains(specialCharacters)){
-      result = "Necessita de pelomenos um caractere especial";
-    }
-    return result;
-  }
-  String? get _errorPasswordConfirm {
-    String? result;
-    String password = _passwordText.value.text;
-    String passwordConfirmation = _passwordConfirmationText.value.text;
-    if(password.compareTo(passwordConfirmation) != 0){
-      result = "As senhas não estão iguais";
-    }
-    return result;
-  }
-
   VoidCallback? _submit(){
-    (text) => setState(() => _errorUser);
-    (text) => setState(() => _errorEmail);
-    (text) => setState(() => _errorPassword);
-    (text) => setState(() => _errorPasswordConfirm);
+    String? userError = validateUser(_userController);
+    String? emailError = validateEmail(_emailController);
+    String? passwordError = validatePassword(_passwordController);
+    String? passwordConfirmationError = validatePasswordConfirmation(_passwordController, _passwordConfirmationController);
+
+
     print("Botão de registrar pressionado");
-    if(_errorEmail == null && _errorUser == null && _errorPassword == null && _errorPasswordConfirm == null ){
-      print(_userText.value.text);
-      print(_emailText.value.text);
-      print(_passwordText.value.text);
-      print(_passwordConfirmationText.value.text);
+    if( emailError == null && userError == null && passwordError == null && passwordConfirmationError == null ){
+      print(_userController.value.text);
+      print(_emailController.value.text);
+      print(_passwordController.value.text);
+      print(_passwordConfirmationController.value.text);
+      Navigator.of(context).push(_homeRoute());
     } else {
       print("Erro - os seguintes campos estão incorretos:");
-      _errorUser != null ? print(_errorUser) : null ;
-      _errorEmail != null ? print(_errorEmail) : null ;
-      _errorPassword != null ? print(_errorPassword) : null ;
-      _errorPasswordConfirm != null ? print(_errorPasswordConfirm) : null ;
+      userError != null ? print(userError) : null ;
+      emailError != null ? print(emailError) : null ;
+      passwordError != null ? print(passwordError) : null ;
+      passwordConfirmationError != null ? print(passwordConfirmationError) : null ;
 
     }
 
     return null;
   }
 
-
-  Widget form(String hint, IconData ico, TextInputType tip, TextEditingController controller, String? error){
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-          keyboardType: tip,
-          controller: controller,
-          onChanged: (text) => setState(() => error),
-          style: const TextStyle(
-            fontSize: 25.0,
-            color: Colors.black,
-          ),
-          decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-              prefixIcon: Icon(ico, color: Colors.black,),
-              hintStyle: const TextStyle(fontSize: 20.0, color: Colors.black54),
-              hintText: hint,
-              errorText: error,
-              // labelStyle: const TextStyle(fontSize: 20.0, color: Colors.black54),
-              // labelText: hint,
-              border: OutlineInputBorder( borderSide: const BorderSide(color: Colors.black, width: 32.0), borderRadius: BorderRadius.circular(15.0)),
-              focusedBorder: OutlineInputBorder( borderSide: const BorderSide(color: Colors.white, width: 32.0), borderRadius: BorderRadius.circular(15.0))
-          )
-      ),
-    );
-  }
-
-  Widget passwordForm (String hint, IconData ico, TextEditingController controller, String? error){
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        controller: controller,
-        obscureText: _obscureText, // Toggle the visibility of the text
-        onChanged: (text) => setState(() => error),
-        style: const TextStyle(
-          fontSize: 25.0,
-          color: Colors.black,
-        ),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-          prefixIcon: const Icon(Icons.lock, color: Colors.black), // Example icon
-          suffixIcon: IconButton(
-            icon: Icon(
-              _obscureText ? Icons.visibility_off : Icons.visibility,
-              color: Colors.black,
-            ),
-            onPressed: _toggleVisibility,
-          ),
-          hintStyle: const TextStyle(fontSize: 20.0, color: Colors.black54),
-          hintText: hint,
-          errorText: error,
-          border: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.black, width: 2.0), // Adjust width as needed
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.black, width: 2.0), // Adjust width as needed
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     return Scaffold(
-
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(200),
         child: Padding(
@@ -218,16 +133,53 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                form("Usuário", Icons.account_circle_outlined, TextInputType.text, _userText, _errorUser),
-                form("E-mail", Icons.email_outlined, TextInputType.emailAddress, _emailText, _errorEmail),
-                passwordForm("Senha", Icons.key_outlined, _passwordText, _errorPassword),
-                passwordForm("Confirmar senha", Icons.key_outlined, _passwordConfirmationText, _errorPasswordConfirm),
+                form(
+                  "Usuário", //Label do TextField
+                  Icons.account_circle_outlined, //Ícone do TextField
+                  TextInputType.text, //Tipo do Teclado
+                  _userController, // Controlador do TextField
+                  validateUser(_userController), // Verifica se há erro
+                  (text) => setState(() => ()), // OnChanged
+                  true // Enabled?
+                ),
+                form(
+                    "E-mail", //Label do TextField
+                    Icons.email_outlined, //Ícone do TextField
+                    TextInputType.emailAddress, //Tipo do Teclado
+                    _emailController, // Controlador do TextField
+                    validateUser(_userController), // Verifica se há erro
+                    (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                ),
+                passwordForm(
+                  // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
+                    "Senha", //Lable do TextField
+                    Icons.key_outlined, //Ícone do TextField
+                    _passwordController, // Controlador do TextField
+                    validatePassword(_passwordController), // Verifica se há erro
+                    _obscureText, // boolean para controlar visibilidade
+                    _toggleVisibility,
+                    (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                ),
+                passwordForm(
+                  // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
+                    "Confirmar senha", //Lable do TextField
+                    Icons.key_outlined, //Ícone do TextField
+                    _passwordConfirmationController, // Controlador do TextField
+                    validatePasswordConfirmation(_passwordController, _passwordConfirmationController), // Verifica se há erro
+                    _obscureText, // boolean para controlar visibilidade
+                    _toggleVisibility,
+                        (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                ),
+
                 ElevatedButton(
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                      borderRadius: BorderRadius.circular(20.0), // Rounded corners
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0), // Padding inside the button
                   ),
