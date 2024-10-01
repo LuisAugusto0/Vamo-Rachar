@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:vamorachar_telacadastro/Login_inicial.dart';
 import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
 import 'package:vamorachar_telacadastro/widgets/avatar_widget.dart';
 import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
@@ -11,15 +12,10 @@ class Usuario extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFFFFFFF),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Perfil do usuário'),
+    return const Scaffold(
+      body: MyHomePage(title: 'Perfil do usuário'),
     );
+
   }
 }
 
@@ -56,6 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize:
         const Size.fromHeight(80), // Define a altura da AppBar como 0
@@ -120,13 +117,20 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             FloatingActionButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginInicial()),
+                );
+              },
               foregroundColor: const Color(verdeSecundario),
               backgroundColor: const Color(verdePrimario),
               child: const Icon(Icons.logout),
             ),
             FloatingActionButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pop(context);
+              },
               foregroundColor: const Color(verdeSecundario),
               backgroundColor: const Color(verdePrimario),
               child: const Icon(Icons.check),
