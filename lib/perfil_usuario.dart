@@ -117,6 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             FloatingActionButton(
+              heroTag: 'btnLogout',
               onPressed: () {
                 Navigator.push(
                   context,
@@ -128,6 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Icon(Icons.logout),
             ),
             FloatingActionButton(
+              heroTag: 'btnSave',
               onPressed: () {
                 Navigator.pop(context);
               },

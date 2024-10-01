@@ -27,6 +27,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
         backgroundColor: const Color(verdePrimario),
         appBar: AppBar(
+          backgroundColor: Colors.white,
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(15))),
           automaticallyImplyLeading: false,
@@ -75,6 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 200,
                   child: FittedBox(
                     child: FloatingActionButton.large(
+                      heroTag: 'btnNovaDivisao',
                       backgroundColor: Colors.white,
                       onPressed: null,
                       child: Column(
@@ -99,6 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 200,
                   child: FittedBox(
                     child: FloatingActionButton.large(
+                      heroTag: 'btnHistory',
                       backgroundColor: Colors.white,
                       onPressed: null,
                       child: Column(
