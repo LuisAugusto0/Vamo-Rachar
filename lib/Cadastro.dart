@@ -11,14 +11,8 @@ class Cadastro extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(verdePrimario),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Tela de cadastro'),
+    return const Scaffold(
+      body: MyHomePage(title: 'Tela de cadastro'),
     );
   }
 }
@@ -45,14 +39,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => const Home(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(0.0, 1.0);
+        const begin = Offset(0.0, -1.0); // De cima para baixo
         const end = Offset.zero;
         const curve = Curves.ease;
 
         var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var offsetAnimation = animation.drive(tween);
 
         return SlideTransition(
-          position: animation.drive(tween),
+          position: offsetAnimation,
           child: child,
         );
       },
@@ -109,6 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     return Scaffold(
+      backgroundColor: const Color(verdePrimario),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(200),
         child: Padding(

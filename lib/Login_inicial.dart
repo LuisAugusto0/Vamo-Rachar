@@ -9,14 +9,8 @@ class LoginInicial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF64C278),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Tela de cadastro'),
+    return const Scaffold(
+      body: MyHomePage(title: 'Tela de cadastro'),
     );
   }
 }
@@ -86,8 +80,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    return Scaffold(
 
+    return Scaffold(
+      backgroundColor: Color(verdePrimario),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Spread content between top and bottom
         children: [

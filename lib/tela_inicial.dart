@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'perfil_usuario.dart';
 
 class Home extends StatelessWidget {
@@ -7,15 +8,8 @@ class Home extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Vamo Rachar',
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF64C27B),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(),
+    return const Scaffold(
+      body: MyHomePage(),
     );
   }
 }
@@ -31,6 +25,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: const Color(verdePrimario),
         appBar: AppBar(
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(15))),
