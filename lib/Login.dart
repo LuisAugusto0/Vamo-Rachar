@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
+import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
+import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
+import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'tela_inicial.dart';
 import 'Cadastro.dart';
-import 'Login.dart';
 
-class LoginInicial extends StatelessWidget {
-  const LoginInicial({super.key});
+class Login extends StatelessWidget {
+  const Login({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,38 +28,21 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-// Boolean para trocar visibilidade
-
-  final TextEditingController _userText = TextEditingController();
-  final TextEditingController _emailText = TextEditingController();
-  final TextEditingController _passwordText = TextEditingController();
-  final TextEditingController _passwordConfirmationText = TextEditingController();
+  bool _obscureText = true; // Boolean para trocar visibilidade
+  final TextEditingController _userController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    _userText.dispose();
-    _emailText.dispose();
-    _passwordText.dispose();
-    _passwordConfirmationText.dispose();
+    _userController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  Route _cadastroRoute() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const Cadastro(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(0.0, 1.0);
-      const end = Offset.zero;
-      const curve = Curves.ease;
-
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-      return SlideTransition(
-      position: animation.drive(tween),
-      child: child,
-      );
-      },
-    );
+  void _toggleVisibility() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
   }
 
   Route _homeRoute() {
@@ -78,9 +63,9 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Route _loginRoute() {
+  Route _cadastroRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const Login(),
+      pageBuilder: (context, animation, secondaryAnimation) => const Cadastro(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
@@ -101,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     return Scaffold(
-      backgroundColor: Color(verdePrimario),
+      backgroundColor: const Color(verdePrimario),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Spread content between top and bottom
         children: [
@@ -114,10 +99,28 @@ class _MyHomePageState extends State<MyHomePage> {
                 fit: BoxFit.contain,
                 height: 200,
               ),
+              form(
+                  "Usuário", //Label do TextField
+                  Icons.account_circle_outlined, //Ícone do TextField
+                  TextInputType.text, //Tipo do Teclado
+                  _userController, // Controlador do TextField
+                  validateUser(_userController), // Verifica se há erro
+                      (text) => setState(() => ()), // OnChanged
+                  true // Enabled?
+              ),
+              passwordForm(
+                // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
+                  "Senha", //Lable do TextField
+                  Icons.key_outlined, //Ícone do TextField
+                  _passwordController, // Controlador do TextField
+                  validatePassword(_passwordController), // Verifica se há erro
+                  _obscureText, // boolean para controlar visibilidade
+                  _toggleVisibility,
+                      (text) => setState(() => ()), // OnChanged
+                  true // Enabled?
+              ),
               ElevatedButton(
-                onPressed: () {
-                    Navigator.of(context).push(_loginRoute());
-                  },
+                onPressed: null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, // Background color
                   shape: RoundedRectangleBorder(
