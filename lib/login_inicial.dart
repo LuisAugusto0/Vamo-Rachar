@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
+import 'package:vamorachar_telacadastro/sobre.dart';
+import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
 import 'tela_inicial.dart';
-import 'Cadastro.dart';
+import 'cadastro.dart';
 import 'login.dart';
+
 
 class LoginInicial extends StatelessWidget {
   const LoginInicial({super.key});
@@ -105,12 +108,22 @@ class _MyHomePageState extends State<MyHomePage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     return Scaffold(
-      backgroundColor: Color(verdePrimario),
+      backgroundColor: const Color(verdePrimario),
       body: Column(
         mainAxisAlignment: MainAxisAlignment
             .spaceBetween, // Spread content between top and bottom
         children: [
-          Text(""), //Texto vazio apenas para centralizar a coluna a seguir
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(onPressed: (){
+                  NavigationHelper.pushNavigatorNoTransition(context, const SobreNos());
+                }, icon: const Icon(Icons.question_mark_outlined, color: Color(0xEEEEEEEE),)),
+              ],
+            ),
+          ), //Texto vazio apenas para centralizar a coluna a seguir
           Column(
             // Essa coluna representa a parte centralizada
             mainAxisAlignment: MainAxisAlignment.center,

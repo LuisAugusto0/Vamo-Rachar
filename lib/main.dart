@@ -5,7 +5,7 @@ import 'package:vamorachar_telacadastro/historico.dart';
 import 'package:vamorachar_telacadastro/novo_rachamento.dart';
 import 'constants/colors.dart';
 import 'tela_inicial.dart';
-import 'Cadastro.dart';
+import 'cadastro.dart';
 import 'login_inicial.dart';
 
 void main() {

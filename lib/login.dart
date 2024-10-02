@@ -5,7 +5,7 @@ import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
 import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'tela_inicial.dart';
-import 'Cadastro.dart';
+import 'cadastro.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});

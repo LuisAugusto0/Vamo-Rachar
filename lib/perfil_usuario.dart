@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                userAvatar(
+                userAvatarCustom(
                     "https://thispersondoesnotexist.com"), // Mover o avatar para o corpo
               ],
             ),
