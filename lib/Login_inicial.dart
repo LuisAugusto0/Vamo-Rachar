@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'tela_inicial.dart';
 import 'Cadastro.dart';
-import 'Login.dart';
+import 'login.dart';
 
 class LoginInicial extends StatelessWidget {
   const LoginInicial({super.key});
@@ -31,7 +31,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _userText = TextEditingController();
   final TextEditingController _emailText = TextEditingController();
   final TextEditingController _passwordText = TextEditingController();
-  final TextEditingController _passwordConfirmationText = TextEditingController();
+  final TextEditingController _passwordConfirmationText =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -46,16 +47,17 @@ class _MyHomePageState extends State<MyHomePage> {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => const Cadastro(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(0.0, 1.0);
-      const end = Offset.zero;
-      const curve = Curves.ease;
+        const begin = Offset(0.0, 1.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
 
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
-      return SlideTransition(
-      position: animation.drive(tween),
-      child: child,
-      );
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
       },
     );
   }
@@ -68,7 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
         const end = Offset.zero;
         const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -86,7 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
         const end = Offset.zero;
         const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -103,10 +107,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Color(verdePrimario),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Spread content between top and bottom
+        mainAxisAlignment: MainAxisAlignment
+            .spaceBetween, // Spread content between top and bottom
         children: [
           Text(""), //Texto vazio apenas para centralizar a coluna a seguir
-          Column( // Essa coluna representa a parte centralizada
+          Column(
+            // Essa coluna representa a parte centralizada
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
@@ -116,19 +122,19 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                    Navigator.of(context).push(_loginRoute());
-                  },
+                  Navigator.of(context).push(_loginRoute());
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, // Background color
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0), // Rounded corners
+                    borderRadius:
+                        BorderRadius.circular(25.0), // Rounded corners
                   ),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 100.0,
-                      vertical: 12.0
-                  ),
+                      horizontal: 100.0, vertical: 12.0),
                 ),
-                child: const Text('Login', style: TextStyle(color: Color(0xEEEEEEEE))),
+                child: const Text('Login',
+                    style: TextStyle(color: Color(0xEEEEEEEE))),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -140,23 +146,23 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(_cadastroRoute());
-                  },
+                      onPressed: () {
+                        Navigator.of(context).push(_cadastroRoute());
+                      },
                       child: const Text(
-                          "Registre-se",
-                          style: TextStyle(
-                            color: Color(0xEEEEEEEE),
-                          ),
-                      )
-                  )
+                        "Registre-se",
+                        style: TextStyle(
+                          color: Color(0xEEEEEEEE),
+                        ),
+                      ))
                 ],
               ),
             ],
           ),
           Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Column( // Essa coluna representa a parte inferior
+            child: Column(
+              // Essa coluna representa a parte inferior
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 // Linha horizontal

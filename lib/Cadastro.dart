@@ -32,8 +32,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _passwordConfirmationController = TextEditingController();
-
+  final TextEditingController _passwordConfirmationController =
+      TextEditingController();
 
   Route _homeRoute() {
     return PageRouteBuilder(
@@ -43,7 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
         const end = Offset.zero;
         const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
         var offsetAnimation = animation.drive(tween);
 
         return SlideTransition(
@@ -74,15 +75,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  VoidCallback? _submit(){
+  VoidCallback? _submit() {
     String? userError = validateUser(_userController);
     String? emailError = validateEmail(_emailController);
     String? passwordError = validatePassword(_passwordController);
-    String? passwordConfirmationError = validatePasswordConfirmation(_passwordController, _passwordConfirmationController);
-
+    String? passwordConfirmationError = validatePasswordConfirmation(
+        _passwordController, _passwordConfirmationController);
 
     print("Botão de registrar pressionado");
-    if( emailError == null && userError == null && passwordError == null && passwordConfirmationError == null ){
+    if (emailError == null &&
+        userError == null &&
+        passwordError == null &&
+        passwordConfirmationError == null) {
       print(_userController.value.text);
       print(_emailController.value.text);
       print(_passwordController.value.text);
@@ -90,11 +94,12 @@ class _MyHomePageState extends State<MyHomePage> {
       Navigator.of(context).push(_homeRoute());
     } else {
       print("Erro - os seguintes campos estão incorretos:");
-      userError != null ? print(userError) : null ;
-      emailError != null ? print(emailError) : null ;
-      passwordError != null ? print(passwordError) : null ;
-      passwordConfirmationError != null ? print(passwordConfirmationError) : null ;
-
+      userError != null ? print(userError) : null;
+      emailError != null ? print(emailError) : null;
+      passwordError != null ? print(passwordError) : null;
+      passwordConfirmationError != null
+          ? print(passwordConfirmationError)
+          : null;
     }
 
     return null;
@@ -130,14 +135,14 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 form(
-                  "Usuário", //Label do TextField
-                  Icons.account_circle_outlined, //Ícone do TextField
-                  TextInputType.text, //Tipo do Teclado
-                  _userController, // Controlador do TextField
-                  validateUser(_userController), // Verifica se há erro
-                  (text) => setState(() => ()), // OnChanged
-                  true // Enabled?
-                ),
+                    "Usuário", //Label do TextField
+                    Icons.account_circle_outlined, //Ícone do TextField
+                    TextInputType.text, //Tipo do Teclado
+                    _userController, // Controlador do TextField
+                    validateUser(_userController), // Verifica se há erro
+                    (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                    ),
                 form(
                     "E-mail", //Label do TextField
                     Icons.email_outlined, //Ícone do TextField
@@ -146,40 +151,45 @@ class _MyHomePageState extends State<MyHomePage> {
                     validateUser(_userController), // Verifica se há erro
                     (text) => setState(() => ()), // OnChanged
                     true // Enabled?
-                ),
+                    ),
                 passwordForm(
-                  // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
+                    // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
                     "Senha", //Lable do TextField
                     Icons.key_outlined, //Ícone do TextField
                     _passwordController, // Controlador do TextField
-                    validatePassword(_passwordController), // Verifica se há erro
+                    validatePassword(
+                        _passwordController), // Verifica se há erro
                     _obscureText, // boolean para controlar visibilidade
                     _toggleVisibility,
                     (text) => setState(() => ()), // OnChanged
                     true // Enabled?
-                ),
+                    ),
                 passwordForm(
-                  // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
+                    // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
                     "Confirmar senha", //Lable do TextField
                     Icons.key_outlined, //Ícone do TextField
                     _passwordConfirmationController, // Controlador do TextField
-                    validatePasswordConfirmation(_passwordController, _passwordConfirmationController), // Verifica se há erro
+                    validatePasswordConfirmation(_passwordController,
+                        _passwordConfirmationController), // Verifica se há erro
                     _obscureText, // boolean para controlar visibilidade
                     _toggleVisibility,
-                        (text) => setState(() => ()), // OnChanged
+                    (text) => setState(() => ()), // OnChanged
                     true // Enabled?
-                ),
-
+                    ),
                 ElevatedButton(
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Background color
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0), // Rounded corners
+                      borderRadius:
+                          BorderRadius.circular(20.0), // Rounded corners
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0), // Padding inside the button
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0,
+                        vertical: 12.0), // Padding inside the button
                   ),
-                  child: const Text('Registrar', style: TextStyle(color: Colors.white)),
+                  child: const Text('Registrar',
+                      style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),

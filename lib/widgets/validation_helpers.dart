@@ -30,7 +30,8 @@ String? validatePassword(TextEditingController controller) {
   return null;
 }
 
-String? validatePasswordConfirmation(TextEditingController passwordController, TextEditingController passwordConfirmationController) {
+String? validatePasswordConfirmation(TextEditingController passwordController,
+    TextEditingController passwordConfirmationController) {
   String password = passwordController.text;
   String passwordConfirmation = passwordConfirmationController.text;
   if (password != passwordConfirmation) {

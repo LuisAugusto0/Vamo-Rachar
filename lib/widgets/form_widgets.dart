@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart'; // Importa as cores
 
 // Widget de campo de formulário genérico
-Widget form(String hint, IconData ico, TextInputType tip, TextEditingController controller, String? error, Function(String)? onChanged, bool enabled) {
+Widget form(
+    String hint,
+    IconData ico,
+    TextInputType tip,
+    TextEditingController controller,
+    String? error,
+    Function(String)? onChanged,
+    bool enabled) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: TextField(
@@ -11,7 +18,10 @@ Widget form(String hint, IconData ico, TextInputType tip, TextEditingController 
       controller: controller,
       onChanged: onChanged,
       enabled: enabled,
-      style: TextStyle(fontSize: 15.0, color: enabled ? Colors.black : Colors.grey,),
+      style: TextStyle(
+        fontSize: 15.0,
+        color: enabled ? Colors.black : Colors.grey,
+      ),
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -36,7 +46,7 @@ Widget form(String hint, IconData ico, TextInputType tip, TextEditingController 
           borderSide: const BorderSide(color: Colors.red, width: 2.0),
           borderRadius: BorderRadius.circular(15.0),
         ),
-        disabledBorder:OutlineInputBorder(
+        disabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.black, width: 2.0),
           borderRadius: BorderRadius.circular(15.0),
         ),
@@ -45,7 +55,14 @@ Widget form(String hint, IconData ico, TextInputType tip, TextEditingController 
   );
 }
 
-Widget senhaOculta(String hint, IconData ico, TextInputType tip, TextEditingController controller, String? error, Function(String)? onChanged, bool enabled) {
+Widget senhaOculta(
+    String hint,
+    IconData ico,
+    TextInputType tip,
+    TextEditingController controller,
+    String? error,
+    Function(String)? onChanged,
+    bool enabled) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: TextField(
@@ -54,7 +71,10 @@ Widget senhaOculta(String hint, IconData ico, TextInputType tip, TextEditingCont
       obscureText: true,
       onChanged: onChanged,
       enabled: enabled,
-      style: TextStyle(fontSize: 15.0, color: enabled ? Colors.black : Colors.grey,), // Cor condicional)
+      style: TextStyle(
+        fontSize: 15.0,
+        color: enabled ? Colors.black : Colors.grey,
+      ), // Cor condicional)
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -79,7 +99,7 @@ Widget senhaOculta(String hint, IconData ico, TextInputType tip, TextEditingCont
           borderSide: const BorderSide(color: Colors.red, width: 2.0),
           borderRadius: BorderRadius.circular(15.0),
         ),
-        disabledBorder:OutlineInputBorder(
+        disabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.black, width: 2.0),
           borderRadius: BorderRadius.circular(15.0),
         ),
@@ -89,7 +109,15 @@ Widget senhaOculta(String hint, IconData ico, TextInputType tip, TextEditingCont
 }
 
 // Widget específico para campos de senha
-Widget passwordForm(String hint, IconData ico, TextEditingController controller, String? error, bool obscureText, Function toggleVisibility, Function(String)? onChanged, bool enabled) {
+Widget passwordForm(
+    String hint,
+    IconData ico,
+    TextEditingController controller,
+    String? error,
+    bool obscureText,
+    Function toggleVisibility,
+    Function(String)? onChanged,
+    bool enabled) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: TextField(
@@ -97,14 +125,16 @@ Widget passwordForm(String hint, IconData ico, TextEditingController controller,
       controller: controller,
       onChanged: onChanged,
       obscureText: obscureText,
-      style: const TextStyle(fontSize: 15.0, color: Colors.black), // Cor condicional),
+      style: const TextStyle(
+          fontSize: 15.0, color: Colors.black), // Cor condicional),
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
         prefixIcon: Icon(ico, color: Colors.black),
         suffixIcon: IconButton(
-          icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility, color: Colors.black),
+          icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility,
+              color: Colors.black),
           onPressed: () => toggleVisibility(),
         ),
         hintStyle: const TextStyle(fontSize: 20.0, color: Colors.black54),
@@ -133,7 +163,7 @@ Widget passwordForm(String hint, IconData ico, TextEditingController controller,
           borderSide: const BorderSide(color: Colors.red, width: 2.0),
           borderRadius: BorderRadius.circular(15.0),
         ),
-        disabledBorder:OutlineInputBorder(
+        disabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.black12, width: 2.0),
           borderRadius: BorderRadius.circular(15.0),
         ),

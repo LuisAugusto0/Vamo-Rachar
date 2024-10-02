@@ -53,7 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
         const end = Offset.zero;
         const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -71,7 +72,8 @@ class _MyHomePageState extends State<MyHomePage> {
         const end = Offset.zero;
         const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -88,10 +90,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: const Color(verdePrimario),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Spread content between top and bottom
+        mainAxisAlignment: MainAxisAlignment
+            .spaceBetween, // Spread content between top and bottom
         children: [
           Text(""), //Texto vazio apenas para centralizar a coluna a seguir
-          Column( // Essa coluna representa a parte centralizada
+          Column(
+            // Essa coluna representa a parte centralizada
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
@@ -105,33 +109,33 @@ class _MyHomePageState extends State<MyHomePage> {
                   TextInputType.text, //Tipo do Teclado
                   _userController, // Controlador do TextField
                   validateUser(_userController), // Verifica se há erro
-                      (text) => setState(() => ()), // OnChanged
+                  (text) => setState(() => ()), // OnChanged
                   true // Enabled?
-              ),
+                  ),
               passwordForm(
-                // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
+                  // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
                   "Senha", //Lable do TextField
                   Icons.key_outlined, //Ícone do TextField
                   _passwordController, // Controlador do TextField
                   validatePassword(_passwordController), // Verifica se há erro
                   _obscureText, // boolean para controlar visibilidade
                   _toggleVisibility,
-                      (text) => setState(() => ()), // OnChanged
+                  (text) => setState(() => ()), // OnChanged
                   true // Enabled?
-              ),
+                  ),
               ElevatedButton(
                 onPressed: null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green, // Background color
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0), // Rounded corners
+                    borderRadius:
+                        BorderRadius.circular(25.0), // Rounded corners
                   ),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 100.0,
-                      vertical: 12.0
-                  ),
+                      horizontal: 100.0, vertical: 12.0),
                 ),
-                child: const Text('Login', style: TextStyle(color: Color(0xEEEEEEEE))),
+                child: const Text('Login',
+                    style: TextStyle(color: Color(0xEEEEEEEE))),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -143,23 +147,23 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(_cadastroRoute());
-                  },
+                      onPressed: () {
+                        Navigator.of(context).push(_cadastroRoute());
+                      },
                       child: const Text(
-                          "Registre-se",
-                          style: TextStyle(
-                            color: Color(0xEEEEEEEE),
-                          ),
-                      )
-                  )
+                        "Registre-se",
+                        style: TextStyle(
+                          color: Color(0xEEEEEEEE),
+                        ),
+                      ))
                 ],
               ),
             ],
           ),
           Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Column( // Essa coluna representa a parte inferior
+            child: Column(
+              // Essa coluna representa a parte inferior
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 // Linha horizontal

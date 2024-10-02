@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vamorachar_telacadastro/Login_inicial.dart';
+import 'package:vamorachar_telacadastro/login_inicial.dart';
 import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
 import 'package:vamorachar_telacadastro/widgets/avatar_widget.dart';
 import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
@@ -15,7 +15,6 @@ class Usuario extends StatelessWidget {
     return const Scaffold(
       body: MyHomePage(title: 'Perfil do usuário'),
     );
-
   }
 }
 
@@ -33,7 +32,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  @override void dispose() {
+  @override
+  void dispose() {
     _userController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -55,15 +55,19 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize:
-        const Size.fromHeight(80), // Define a altura da AppBar como 0
+            const Size.fromHeight(80), // Define a altura da AppBar como 0
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
             children: [
               IconButton(
-                onPressed: (){
-                Navigator.pop(context);
-              }, icon: const Icon(Icons.close, size: 35,)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.close,
+                    size: 35,
+                  )),
             ],
           ),
         ),
@@ -71,8 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [
           Padding(
-            padding:
-                const EdgeInsets.all(15), // Adiciona padding ao conteúdo
+            padding: const EdgeInsets.all(15), // Adiciona padding ao conteúdo
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
