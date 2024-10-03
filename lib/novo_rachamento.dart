@@ -124,6 +124,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
     Item.padrao(5, "1"),
     Item.padrao(2, "2"),
     Item.padrao(6, "3"),
+    Item.padrao(3, "4")
   ];
 
   List<String> selectedOptions = [];
@@ -136,10 +137,10 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Preencha seu nome'),
+          title: const Text('Preencha seu nome'),
           content: TextField(
             controller: nameController,
-            decoration: InputDecoration(hintText: 'Seu nome'),
+            decoration: const InputDecoration(hintText: 'Seu nome'),
           ),
           actions: [
             TextButton(
@@ -149,13 +150,13 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                     Participante.create(nameController.text, ++ultimoIdUsado));
                 Navigator.of(context).pop();
               },
-              child: Text('Enviar'),
+              child: const Text('Enviar'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancelar'),
+              child: const Text('Cancelar'),
             ),
           ],
         );
@@ -334,15 +335,18 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       bottomNavigationBar: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text(
-              "Cancelar",
-              style: TextStyle(
-                color: Color.fromARGB(255, 54, 226, 143),
-                fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                "Cancelar",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 54, 226, 143),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -493,17 +497,20 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       bottomNavigationBar: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                estado = 0;
-              });
-            },
-            child: const Text(
-              "Cancelar",
-              style: TextStyle(
-                color: Color.fromARGB(255, 54, 226, 143),
-                fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  estado = 0;
+                });
+              },
+              child: const Text(
+                "Cancelar",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 54, 226, 143),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
