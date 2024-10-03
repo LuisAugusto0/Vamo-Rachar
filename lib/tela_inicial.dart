@@ -130,7 +130,7 @@ class HistoricoButton extends StatelessWidget {
           heroTag: 'btnHistory',
           backgroundColor: Colors.white,
           onPressed: () {
-            NavigationHelper.pushNavigatorNoTransition(context, NovoRachamento());
+            NavigationHelper.pushNavigatorNoTransition(context, const Historico());
           },
           child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
