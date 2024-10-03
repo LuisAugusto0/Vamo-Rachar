@@ -65,8 +65,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.pop(context);
                   },
                   icon: const Icon(
-                    Icons.close,
-                    size: 35,
+                    Icons.arrow_back_outlined,
+                    size: 40,
+                    color: Colors.black,
                   )),
             ],
           ),
@@ -117,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
         padding:
             const EdgeInsets.symmetric(horizontal: 16.0), // Margem nas laterais
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 80, left: 20, right: 20),
+          padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -129,8 +130,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => const LoginInicial()),
                   );
                 },
-                foregroundColor: const Color(verdeSecundario),
-                backgroundColor: const Color(verdePrimario),
+                foregroundColor: const Color(vermelhoLogOut),
+                backgroundColor: const Color(vermelhoLogOut2),
                 child: const Icon(Icons.logout),
               ),
               FloatingActionButton.large(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vamorachar_telacadastro/historico_detalhes.dart';
 import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
-import 'perfil_usuario.dart';
 
 class Participants {
   const Participants({
@@ -188,23 +187,26 @@ class HistoricoAppbar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: 80,
 
 
-      leading: IconButton(
+      leading: Transform.translate(
+        offset: const Offset(6, 0),  // Desloca o botão 10 pixels à direita
+        child: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
           icon: const Icon(
-            Icons.close,
-            size: 35,
-          )
+            Icons.arrow_back_outlined,
+            size: 40,
+          ),
+        ),
       ),
       title: Expanded(
-          child: SearchBar(
-            padding: const WidgetStatePropertyAll<EdgeInsets>(
-                EdgeInsets.symmetric(horizontal: 16.0)
-            ),
-            leading: const Icon(Icons.search),
-            onChanged: onChanged,
+        child: SearchBar(
+          padding: const WidgetStatePropertyAll<EdgeInsets>(
+            EdgeInsets.symmetric(horizontal: 16.0),
           ),
+          leading: const Icon(Icons.search),
+          onChanged: onChanged,
+        ),
       ),
 
     );
