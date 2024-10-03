@@ -114,13 +114,13 @@ class _MyHomePageState extends State<MyHomePage> {
             .spaceBetween, // Spread content between top and bottom
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(onPressed: (){
                   NavigationHelper.pushNavigatorNoTransition(context, const SobreNos());
-                }, icon: const Icon(Icons.question_mark_outlined, color: Color(0xEEEEEEEE),)),
+                }, icon: const Icon(Icons.question_mark_outlined, color: Color(0xEEEEEEEE), size: 35,)),
               ],
             ),
           ), //Texto vazio apenas para centralizar a coluna a seguir

@@ -116,31 +116,34 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: Padding(
         padding:
             const EdgeInsets.symmetric(horizontal: 16.0), // Margem nas laterais
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            FloatingActionButton(
-              heroTag: 'btnLogout',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginInicial()),
-                );
-              },
-              foregroundColor: const Color(verdeSecundario),
-              backgroundColor: const Color(verdePrimario),
-              child: const Icon(Icons.logout),
-            ),
-            FloatingActionButton(
-              heroTag: 'btnSave',
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              foregroundColor: const Color(verdeSecundario),
-              backgroundColor: const Color(verdePrimario),
-              child: const Icon(Icons.check),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 80, left: 20, right: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FloatingActionButton.large(
+                heroTag: 'btnLogout',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginInicial()),
+                  );
+                },
+                foregroundColor: const Color(verdeSecundario),
+                backgroundColor: const Color(verdePrimario),
+                child: const Icon(Icons.logout),
+              ),
+              FloatingActionButton.large(
+                heroTag: 'btnSave',
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                foregroundColor: const Color(verdeSecundario),
+                backgroundColor: const Color(verdePrimario),
+                child: const Icon(Icons.check),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation:
