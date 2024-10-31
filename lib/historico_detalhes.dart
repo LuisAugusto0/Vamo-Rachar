@@ -151,7 +151,7 @@ class HistoricoDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Appbar(),
+      appBar: const Appbar(),
       body: Body(data: HistoryDataExtractor.fetchHistoryFullData()),
     );
   }
@@ -312,14 +312,14 @@ class ParticipantDisplay extends StatelessWidget {
           leading: getImage(participant.image),
           title: Text(
             participant.name,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
             ),
           ),
           subtitle: Text(
             "Gasto total: R\$ ${totalSpends.toStringAsFixed(2)}",
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16.0,
             ),
           ),

@@ -186,27 +186,43 @@ class HistoricoAppbar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       toolbarHeight: 80,
 
-
-      leading: Transform.translate(
-        offset: const Offset(6, 0),  // Desloca o botão 10 pixels à direita
-        child: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_outlined,
-            size: 40,
-          ),
+      leading: IconButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        icon: const Icon(
+          Icons.arrow_back_outlined,
+          size: 40,
         ),
       ),
+
+      // leading: Transform.translate(
+      //   offset: const Offset(6, 0),  // Desloca o botão 10 pixels à direita
+      //   child: IconButton(
+      //     onPressed: () {
+      //       Navigator.pop(context);
+      //     },
+      //     icon: const Icon(
+      //       Icons.arrow_back_outlined,
+      //       size: 40,
+      //     ),
+      //   ),
+      // ),
+
       title: Expanded(
-        child: SearchBar(
-          padding: const WidgetStatePropertyAll<EdgeInsets>(
-            EdgeInsets.symmetric(horizontal: 16.0),
-          ),
-          leading: const Icon(Icons.search),
-          onChanged: onChanged,
-        ),
+        child: Row (
+          children: [
+            Expanded(
+              child: SearchBar(
+                padding: const WidgetStatePropertyAll<EdgeInsets>(
+                  EdgeInsets.symmetric(horizontal: 16.0),
+                ),
+                leading: const Icon(Icons.search),
+                onChanged: onChanged,
+              )
+            ),
+          ]
+        )
       ),
 
     );
@@ -232,7 +248,7 @@ class HistoricoBody extends StatelessWidget {
               TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
         ),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 12.0),
           child: HistoryList(list: list),
         ));
   }
@@ -240,7 +256,7 @@ class HistoricoBody extends StatelessWidget {
 
 
 class HistoryList extends StatelessWidget {
-  const HistoryList({required this.list, super.key});
+  const   HistoryList({required this.list, super.key});
 
   final List<HistoryData> list;
 
@@ -254,7 +270,23 @@ class HistoryList extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 8.0, vertical: 4.0),
 
-              child: HistoryWidget(data: historyItem),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  textTheme: Theme.of(context).textTheme.copyWith(
+                    titleMedium: const TextStyle(
+                      color: Colors.black, // Set your desired color here
+                      fontWeight: FontWeight.bold,
+                    ),
+                    bodyMedium: const TextStyle(
+                      color: Colors.black, // Set body text color here
+                    ),
+                    bodySmall: const TextStyle(
+                      color: Colors.grey, // Set caption text color here
+                    ),
+                  ),
+                ),
+                child: HistoryWidget(data: historyItem),
+              )
           );
         }
       );
@@ -262,30 +294,21 @@ class HistoryList extends StatelessWidget {
 }
 
 
-class HistoryWidgetTile extends StatelessWidget {
-  const HistoryWidgetTile({required this.data, super.key});
-  final HistoryData data;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-        leading: HistoryItemImage(
-          image: data.image, // Add default image
-        ),
-        title: HistoryItemText(historyData: data)
-    );
-  }
-}
-
 class HistoryWidget extends StatelessWidget {
   const HistoryWidget({required this.data, super.key});
   final HistoryData data;
 
-  Widget buildWidgetLayout() {
+  Widget buildWidgetLayout(BuildContext context) {
     return ClipRRect (
       borderRadius: BorderRadius.circular(15.0),
-      child: Container(
-          color: Colors.white,
+      child: Material(
+        color: Colors.white,
+        child: InkWell(
+          onTap: () => {
+            NavigationHelper.pushNavigatorNoTransition(
+              context, HistoricoDetails(id: data.id)
+            )
+          },
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -297,15 +320,13 @@ class HistoryWidget extends StatelessWidget {
               )
             ],
           )
+        )
       ),
     );
   }
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => {NavigationHelper.pushNavigatorNoTransition(context, HistoricoDetails(id: data.id))},
-      child: buildWidgetLayout()
-    );
+    return buildWidgetLayout(context);
   }
 }
 
@@ -399,8 +420,11 @@ class HistoryItemText extends StatelessWidget {
       return DateFormat('dd-MM-yyyy').format(historyData.dateTime);
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       child: Column(
@@ -410,24 +434,22 @@ class HistoryItemText extends StatelessWidget {
           if (historyData.establishment != null)
             Text(
               historyData.establishment!,
-              style: const TextStyle(fontWeight: FontWeight.bold), // Optional: Set a different style for the establishment
+              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-
           Text(
             historyData.location,
+            style: textTheme.bodyMedium, // Use default body style from TextTheme
           ),
-
           Padding(
             padding: const EdgeInsets.only(top: 10),
-            child: Text (
-              getTimeDifference()
-            )
-          )
-        ]
-      )
+            child: Text(
+              getTimeDifference(),
+              style: textTheme.bodySmall, // Use caption style from TextTheme
+            ),
+          ),
+        ],
+      ),
     );
-
-
   }
 }
 

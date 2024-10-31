@@ -29,7 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return const Scaffold(
         backgroundColor: Color(verdePrimario),
-        appBar: HomePageAppBar(),
+        //appBar: HomePageAppBar(),
         body: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

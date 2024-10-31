@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
+//import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 //import 'package:image_picker/image_picker.dart';
 //import 'package:gallery_picker/gallery_picker.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 //import 'package:novorachamento/card.dart';
-import 'tela_inicial.dart';
+//import 'tela_inicial.dart';
 
 class Item {
   late String nome;
@@ -262,8 +262,18 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   Scaffold iniciarTela() {
     String dropdownText = "Participantes";
     return Scaffold(
+
       backgroundColor: const Color(0xFF64C278),
       appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_outlined,
+              size: 40,
+            ),
+          ),
           toolbarHeight: 100,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +316,8 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                 ],
               )
             ],
-          )),
+          )
+      ),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
