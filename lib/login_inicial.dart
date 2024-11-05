@@ -109,7 +109,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       backgroundColor: const Color(verdePrimario),
-      body: Column(
+      body:
+      Column(
         mainAxisAlignment: MainAxisAlignment
             .spaceBetween, // Spread content between top and bottom
         children: [

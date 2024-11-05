@@ -49,3 +49,12 @@ String? validateOldPassword(TextEditingController passwordController,
   }
   return null;
 }
+
+String? validateLogin(TextEditingController passwordController, Map<String, Object?>? user){
+  if(user == null){
+    return "Usuário não encontrado";
+  } else if (passwordController.text != user['senha']){
+    return "A senha não está correta";
+  }
+  return null;
+}
