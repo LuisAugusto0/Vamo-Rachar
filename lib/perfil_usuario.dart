@@ -32,12 +32,16 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _oldPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _userController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _oldPasswordController.dispose();
+    _newPasswordController.dispose();
     super.dispose();
   }
 
@@ -49,14 +53,33 @@ class _MyHomePageState extends State<MyHomePage> {
     _userController.text = "Usuário";
   }
 
+  void _alterarSenha() {
+    // Simule a verificação da senha antiga e a alteração para a nova senha
+    if (validateOldPassword(_oldPasswordController, _passwordController) != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(validateOldPassword(_oldPasswordController, _passwordController) ?? 'Erro desconhecido')),
+      );
+    } else if(validatePassword(_passwordController) == null){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(validatePassword(_passwordController) ?? 'Erro desconhecido')),
+      );
+    } else {
+      setState(() {
+        _passwordController.text = _newPasswordController.text;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Senha alterada com sucesso!')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
-        child: SafeArea(  // Adiciona SafeArea aqui para garantir o espaçamento adequado
+        child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Row(
@@ -79,77 +102,93 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(15), // Adiciona padding ao conteúdo
+            padding: const EdgeInsets.all(15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                userAvatarCustom(
-                    "https://thispersondoesnotexist.com"), // Mover o avatar para o corpo
+                userAvatarCustom("https://thispersondoesnotexist.com"),
               ],
             ),
           ),
           form(
-            "Usuário", //Label do TextField
-            Icons.account_circle_outlined, //Ícone do TextField
-            TextInputType.text, //Tipo do Teclado
-            _userController, // Controlador do TextField
-            validateUser(_userController), // Verifica se há erro
-                (text) => setState(() => ()), // OnChanged
-            true, // Enabled?
+            "Usuário",
+            Icons.account_circle_outlined,
+            TextInputType.text,
+            _userController,
+            validateUser(_userController),
+                (text) => setState(() {}),
+            true,
           ),
           form(
-            "E-mail", //Label do TextField
-            Icons.email_outlined, //Ícone do TextField
-            TextInputType.emailAddress, //Tipo do Teclado
-            _emailController, // Controlador do TextField
-            validateEmail(_emailController), // Verifica se há erro
-                (text) => setState(() => ()), // OnChanged
-            false, // Enabled?
+            "E-mail",
+            Icons.email_outlined,
+            TextInputType.emailAddress,
+            _emailController,
+            validateEmail(_emailController),
+                (text) => setState(() {}),
+            false,
           ),
-          senhaOculta(
-            "Senha", //Label do TextField
-            Icons.key_outlined, //Ícone do TextField
-            TextInputType.text, //Tipo do Teclado
-            _passwordController, // Controlador do TextField
-            validatePassword(_passwordController), // Verifica se há erro
-                (text) => setState(() => ()), // OnChanged
-            false, // Enabled?
-          ),
-        ],
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0), // Margem nas laterais
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Row(
             children: [
-              FloatingActionButton.large(
-                heroTag: 'btnLogout',
+              Expanded(
+                child: senhaOculta(
+                  "Senha",
+                  Icons.key_outlined,
+                  TextInputType.text,
+                  _passwordController,
+                  validatePassword(_passwordController),
+                      (text) => setState(() {}),
+                  false,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                color: const Color(verdePrimario),
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginInicial()),
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Alterar Senha'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextField(
+                              controller: _oldPasswordController,
+                              obscureText: true,
+                              decoration: const InputDecoration(labelText: 'Senha Antiga'),
+                            ),
+                            TextField(
+                              controller: _newPasswordController,
+                              obscureText: true,
+                              decoration: const InputDecoration(labelText: 'Nova Senha'),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Cancelar'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              _alterarSenha();
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Alterar'),
+                          ),
+                        ],
+                      );
+                    },
                   );
                 },
-                foregroundColor: const Color(vermelhoLogOut),
-                backgroundColor: const Color(vermelhoLogOut2),
-                child: const Icon(Icons.logout),
-              ),
-              FloatingActionButton.large(
-                heroTag: 'btnSave',
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                foregroundColor: const Color(verdeSecundario),
-                backgroundColor: const Color(verdePrimario),
-                child: const Icon(Icons.check),
               ),
             ],
           ),
-        ),
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat, // Ajusta a localização
     );
   }
 }

@@ -39,3 +39,13 @@ String? validatePasswordConfirmation(TextEditingController passwordController,
   }
   return null;
 }
+
+String? validateOldPassword(TextEditingController passwordController,
+    TextEditingController passwordConfirmationController) {
+  String password = passwordController.text;
+  String passwordConfirmation = passwordConfirmationController.text;
+  if (password != passwordConfirmation) {
+    return "Senha antiga incorreta";
+  }
+  return null;
+}
