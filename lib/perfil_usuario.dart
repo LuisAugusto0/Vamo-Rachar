@@ -5,6 +5,7 @@ import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
 import 'package:vamorachar_telacadastro/widgets/avatar_widget.dart';
 import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
+import 'package:sqflite/sqflite.dart';
 
 class Usuario extends StatelessWidget {
   const Usuario({super.key});
@@ -54,13 +55,13 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize:
-            const Size.fromHeight(80), // Define a altura da AppBar como 0
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Row(
-            children: [
-              IconButton(
+        preferredSize: const Size.fromHeight(80),
+        child: SafeArea(  // Adiciona SafeArea aqui para garantir o espaçamento adequado
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              children: [
+                IconButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
@@ -68,8 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     Icons.arrow_back_outlined,
                     size: 40,
                     color: Colors.black,
-                  )),
-            ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -91,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
             TextInputType.text, //Tipo do Teclado
             _userController, // Controlador do TextField
             validateUser(_userController), // Verifica se há erro
-            (text) => setState(() => ()), // OnChanged
+                (text) => setState(() => ()), // OnChanged
             true, // Enabled?
           ),
           form(
@@ -100,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
             TextInputType.emailAddress, //Tipo do Teclado
             _emailController, // Controlador do TextField
             validateEmail(_emailController), // Verifica se há erro
-            (text) => setState(() => ()), // OnChanged
+                (text) => setState(() => ()), // OnChanged
             false, // Enabled?
           ),
           senhaOculta(
@@ -109,14 +112,13 @@ class _MyHomePageState extends State<MyHomePage> {
             TextInputType.text, //Tipo do Teclado
             _passwordController, // Controlador do TextField
             validatePassword(_passwordController), // Verifica se há erro
-            (text) => setState(() => ()), // OnChanged
+                (text) => setState(() => ()), // OnChanged
             false, // Enabled?
           ),
         ],
       ),
       floatingActionButton: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16.0), // Margem nas laterais
+        padding: const EdgeInsets.symmetric(horizontal: 16.0), // Margem nas laterais
         child: Padding(
           padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
           child: Row(
@@ -147,8 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.centerFloat, // Ajusta a localização
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat, // Ajusta a localização
     );
   }
 }

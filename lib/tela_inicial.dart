@@ -11,6 +11,7 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
+      appBar: HomePageAppBar(),
       body: MyHomePage(),
     );
   }
@@ -61,7 +62,7 @@ class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(15))),
       automaticallyImplyLeading: false,
       centerTitle: true,
-      toolbarHeight: 80, // Ajuste a altura da AppBar aqui
+      toolbarHeight: 100, // Ajuste a altura da AppBar aqui
       title: IconButton(
             icon: const Icon(
                 Icons.account_circle_outlined,
