@@ -9,6 +9,7 @@ import 'package:animated_custom_dropdown/custom_dropdown.dart';
 class Item {
   late String nome;
   late int quantidade;
+  late double preco;
 
   Item() {
     quantidade = -1;
@@ -24,47 +25,45 @@ class Item {
 class Participante {
   late int id;
   late String nome;
+  late String CPF;
   late List<Item> itens = [];
 
   int identificarPosItem(String nome) {
     int pos = -1;
-    for (int i = 0; i < this.itens.length; i++) {
-      if (this.itens[i].nome.compareTo(nome) == 0) {
+    for (int i = 0; i < itens.length; i++) {
+      if (itens[i].nome.compareTo(nome) == 0) {
         pos = i;
-        i = this.itens.length;
+        i = itens.length;
       }
     }
     return pos;
   }
 
-  void removeItem(Item item) {
-    for (int i = 0; i < this.itens.length; i++) {
-      if (this.itens[i].nome.compareTo(item.nome) == 0) {
-        if (this.itens[i].quantidade > 1) {
-          this.itens[i].quantidade--;
-        } else {
-          this.itens.remove(item);
-        }
+  bool removeItem(Item item) {
+    bool funcionou = true;
+    int aux = identificarPosItem(item.nome);
+    if(aux != -1) {
+      if(itens[aux].quantidade > 1){
+        itens[aux].quantidade--;
+      }
+      else if(itens[aux].quantidade == 1){
+        itens.removeAt(aux);
       }
     }
+    else{
+      funcionou = false;
+    }
+    return funcionou;
   }
 
   void addItem(Item item) {
-    if (this.itens.isNotEmpty) {
-      bool itemFound = false;
-      for (int i = 0; i < this.itens.length; i++) {
-        if (this.itens[i].nome.compareTo(item.nome) == 0) {
-          itemFound = true;
-          this.itens[i].quantidade++;
-          i = this.itens.length;
-        }
-      }
-      if (!itemFound) {
-        this.itens.add(item);
-        this.itens[this.itens.length].quantidade++;
-      }
-    } else {
-      this.itens.add(item);
+    int aux = identificarPosItem(item.nome);
+    if(aux != -1){
+      itens[aux].quantidade++;
+    }
+    else{
+      Item aux = new Item.padrao(1, item.nome);
+      itens.add(aux);
     }
   }
 
@@ -74,9 +73,10 @@ class Participante {
   }
 
   Participante() {
-    this.id = -1;
-    this.nome = "";
-    this.itens = [];
+    id = -1;
+    nome = "";
+    CPF = "";
+    itens = [];
   }
 }
 
@@ -210,9 +210,9 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   int indentificarParticipante(String comparativo) {
     int pos = -1;
     for (int i = 0; i < this.participantes.length; i++) {
-      if (this.participantes[i].nome.compareTo(comparativo) == 0) {
+      if (participantes[i].nome.compareTo(comparativo) == 0) {
         pos = i;
-        i = this.participantes.length;
+        i = participantes.length;
       }
     }
     return pos;
@@ -220,10 +220,10 @@ class _NovoRachamentoState extends State<NovoRachamento> {
 
   int indentificarItem(String comparativo) {
     int pos = -1;
-    for (int i = 0; i < this.itens.length; i++) {
-      if (this.itens[i].nome.compareTo(comparativo) == 0) {
+    for (int i = 0; i < itens.length; i++) {
+      if (itens[i].nome.compareTo(comparativo) == 0) {
         pos = i;
-        i = this.itens.length;
+        i = itens.length;
       }
     }
     return pos;
@@ -234,14 +234,19 @@ class _NovoRachamentoState extends State<NovoRachamento> {
     int posParticipante;
 
     posParticipante = indentificarParticipante(nome);
+    print("Posicao participante: ${posParticipante} - nome do participante: ${participantes[posParticipante].nome}");
 
     int posItem = indentificarItem(nomeItem);
-
+    for(int i = 0; i < participantes[posParticipante].itens.length; i++){
+      print("Item: ${participantes[posParticipante].itens[i].nome} - quantidade: ${participantes[posParticipante].itens[i].quantidade}");
+    }
     if (itens[posItem].quantidade > 0) {
       participantes[posParticipante].addItem(itens[posItem]);
-      print("Antes de subtrair a quantidade: ${itens[posItem].quantidade}");
       itens[posItem].quantidade--;
-      print("Depois de subtrair a quantidade: ${itens[posItem].quantidade}");
+      for(int i = 0; i < participantes[posParticipante].itens.length; i++){
+        print("BANANA TESTE BLA BLA BLA: ${participantes[posParticipante].itens[i].nome} - quantidade: ${participantes[posParticipante].itens[i].quantidade}");
+      }
+      print("Quantidade de itens restante: ${itens[posItem].quantidade}");
     }
   }
 
@@ -252,10 +257,16 @@ class _NovoRachamentoState extends State<NovoRachamento> {
     posParticipante = indentificarParticipante(nome);
 
     int posItem = indentificarItem(nomeItem);
-
-    if (participantes[posParticipante].itens.contains(itens[posItem])) {
-      participantes[posParticipante].removeItem(itens[posItem]);
+    for(int i = 0; i < participantes[posParticipante].itens.length; i++){
+      print("Item: ${participantes[posParticipante].itens[i].nome} - quantidade: ${participantes[posParticipante].itens[i].quantidade}");
+    }
+    if (participantes[posParticipante].removeItem(itens[posItem])) {
       itens[posItem].quantidade++;
+      for(int i = 0; i < participantes[posParticipante].itens.length; i++){
+        print("Item: ${participantes[posParticipante].itens[i].nome} - quantidade: ${participantes[posParticipante].itens[i].quantidade}");
+      }
+    } else {
+      print("Erro ao tentar remover, item não atribuido à esse participante\n");
     }
   }
 
@@ -343,26 +354,6 @@ class _NovoRachamentoState extends State<NovoRachamento> {
           )
         ],
       ),
-      bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                "Cancelar",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 54, 226, 143),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -371,6 +362,17 @@ class _NovoRachamentoState extends State<NovoRachamento> {
     return Scaffold(
       backgroundColor: const Color(0xFF64C278),
       appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              setState(() {
+                estado = 0;
+              });
+            },
+            icon: const Icon(
+              Icons.arrow_back_outlined,
+              size: 40,
+            ),
+          ),
           toolbarHeight: 100,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,9 +429,9 @@ class _NovoRachamentoState extends State<NovoRachamento> {
           ),
           itemCount: itens.length, // Quantidade total de itens
           itemBuilder: (context, index) {
-            final item = itens[index];
+            final Item item = itens[index];
             int qtd = item.quantidade;
-            late String textoPadrao = "Quantidade - $qtd";
+            late String textoPadrao = "Quantidade - ${qtd}";
             return Container(
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
@@ -466,13 +468,13 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                             backgroundColor: Colors.transparent,
                           ),
                           onPressed: () {
-                            for (int i = 0; i < selectedOptions.length; i++) {
-                              addItem(selectedOptions[i], itens[index].nome);
-                            }
-                            //setState(() {
-                            //qtd = itens[index].quantidade;
-                            //textoPadrao = "Quantidade - $qtd";
-                            //});
+                            setState(() {
+                              for (int i = 0; i < selectedOptions.length; i++) {
+                                addItem(selectedOptions[i], itens[index].nome);
+                              }
+                              qtd = itens[index].quantidade;
+                              textoPadrao = "Quantidade - ${qtd}";
+                            });
                           },
                           child: const Icon(
                             Icons.add_rounded,
@@ -485,13 +487,13 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                             backgroundColor: Colors.transparent,
                           ),
                           onPressed: () {
-                            for (int i = 0; i < selectedOptions.length; i++) {
-                              subItem(selectedOptions[i], itens[index].nome);
-                            }
-                            //setState(() {
-                            //qtd = itens[index].quantidade;
-                            //textoPadrao = "Quantidade - $qtd";
-                            //});
+                            setState( (){
+                              for (int i = 0; i < selectedOptions.length; i++) {
+                                subItem(selectedOptions[i], itens[index].nome);
+                              }
+                              qtd = itens[index].quantidade;
+                              textoPadrao = "Quantidade - ${qtd}";
+                            });
                           },
                           child: const Icon(
                             Icons.remove,
@@ -504,28 +506,6 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                 ));
           },
         ),
-      ),
-      bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  estado = 0;
-                });
-              },
-              child: const Text(
-                "Cancelar",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 54, 226, 143),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
