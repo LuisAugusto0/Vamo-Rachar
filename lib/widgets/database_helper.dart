@@ -25,20 +25,19 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'users.bd');
 
-    // Check if the database file already exists
-    final dbFile = File(path);
-    if (await dbFile.exists()) {
-      // Delete the existing database file
-      await dbFile.delete();
-      print("Existing database file deleted.");
-    }
+    // // Check if the database file already exists
+    // final dbFile = File(path);
+    // if (await dbFile.exists()) {
+    //   // Delete the existing database file
+    //   await dbFile.delete();
+    //   print("Existing database file deleted.");
+    // }
 
     return await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) {
-        const sql = 'CREATE TABLE usuario (id INTEGER PRIMARY KEY AUTOINCREMENT, nome VARCHAR, email VARCHAR, senha VARCHAR);'
-                    'CREATE TABLE usuarioAtual (id INTEGER, nome VARCHAR, email VARCHAR, senha VARCHAR)';
+        const sql = 'CREATE TABLE usuario (id INTEGER PRIMARY KEY AUTOINCREMENT, nome VARCHAR, email VARCHAR, senha VARCHAR)';
         db.execute(sql);
       },
     );
@@ -59,22 +58,6 @@ class DatabaseHelper {
     listarUmUsuario(id);
   }
 
-  Future<void> saveLogin(String email) async {
-    final db = await _getDatabase();
-    final usuario = await db.query(
-      'usuario',
-      columns: ['id', 'nome', 'email', 'senha'],
-      where: 'email = ?',
-      whereArgs: [email],
-    );
-    Map<String, Object?>? newUser = usuario.first;
-    const sql = 'SELECT * FROM usuario';
-    final usuarioAtual = await db.rawQuery(sql);
-    if(usuarioAtual.isEmpty){
-      createLogin(newUser);
-    }
-
-  }
 
   Future<Map<String, Object?>?> findUser(String email) async {
     final db = await _getDatabase();
