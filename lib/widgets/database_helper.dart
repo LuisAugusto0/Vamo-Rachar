@@ -89,15 +89,15 @@ class DatabaseHelper {
   //   print('Itens excluidos: $retorno');
   // }
 
-  // Future<void> updateUser(int id, String nome, String email, String senha) async {
-  //   final db = await _getDatabase();
-  //   final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
-  //   final retorno = await db.update(
-  //     'usuario',
-  //     dadosUsuario,
-  //     where: 'id = ?',
-  //     whereArgs: [id],
-  //   );
-  //   print('Itens atualizados: $retorno');
-  // }
+  Future<void> updateUser(int id, String nome, String email, String senha) async {
+    final db = await _getDatabase();
+    final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
+    final retorno = await db.update(
+      'usuario',
+      dadosUsuario,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    print('Itens atualizados: $retorno');
+  }
 }
