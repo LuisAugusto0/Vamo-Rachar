@@ -1,5 +1,5 @@
 // database_helper.dart
-
+import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -25,12 +25,19 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'users.bd');
 
+    // // Check if the database file already exists
+    // final dbFile = File(path);
+    // if (await dbFile.exists()) {
+    //   // Delete the existing database file
+    //   await dbFile.delete();
+    //   print("Existing database file deleted.");
+    // }
+
     return await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) {
-        const sql = 'CREATE TABLE usuario (id INTEGER PRIMARY KEY AUTOINCREMENT, nome VARCHAR, email VARCHAR, senha VARCHAR);'
-                    'CREATE TABLE usuarioAtual (id INTEGER PRIMARY KEY AUTOINCREMENT, nome VARCHAR, email VARCHAR, senha VARCHAR)';
+        const sql = 'CREATE TABLE usuario (id INTEGER PRIMARY KEY AUTOINCREMENT, nome VARCHAR, email VARCHAR, senha VARCHAR)';
         db.execute(sql);
       },
     );
@@ -43,6 +50,14 @@ class DatabaseHelper {
     print('Salvo: $id');
     listarUmUsuario(id);
   }
+
+  Future<void> createLogin(Map<String, Object?>? newUser) async {
+    final db = await _getDatabase();
+    final id = await db.insert('usuarioAtual', newUser!);
+    print('Salvo: $id');
+    listarUmUsuario(id);
+  }
+
 
   Future<Map<String, Object?>?> findUser(String email) async {
     final db = await _getDatabase();
@@ -89,15 +104,15 @@ class DatabaseHelper {
   //   print('Itens excluidos: $retorno');
   // }
 
-  // Future<void> updateUser(int id, String nome, String email, String senha) async {
-  //   final db = await _getDatabase();
-  //   final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
-  //   final retorno = await db.update(
-  //     'usuario',
-  //     dadosUsuario,
-  //     where: 'id = ?',
-  //     whereArgs: [id],
-  //   );
-  //   print('Itens atualizados: $retorno');
-  // }
+  Future<void> updateUser(int id, String nome, String email, String senha) async {
+    final db = await _getDatabase();
+    final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
+    final retorno = await db.update(
+      'usuario',
+      dadosUsuario,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    print('Itens atualizados: $retorno');
+  }
 }

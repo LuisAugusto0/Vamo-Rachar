@@ -6,13 +6,14 @@ import 'novo_rachamento.dart';
 import 'perfil_usuario.dart';
 
 class Home extends StatelessWidget {
-  const Home({super.key});
+  final String emailUsuario;
+  Home({required this.emailUsuario});
   // Scaffold de scaffold??
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: HomePageAppBar(),
-      body: MyHomePage(),
+    return Scaffold(
+      appBar: HomePageAppBar(emailUsuario: emailUsuario,),
+      body: const MyHomePage(),
     );
   }
 }
@@ -48,7 +49,8 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const HomePageAppBar({super.key});
+  final String emailUsuario;
+  HomePageAppBar({required this.emailUsuario});
 
   @override
   Size get preferredSize => const Size.fromHeight(80);
@@ -70,7 +72,7 @@ class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
                 size: 50
             ),
             onPressed: () {
-              NavigationHelper.pushNavigatorTransitionDown(context, const Usuario());
+              NavigationHelper.pushNavigatorTransitionDown(context, Usuario(emailUsuario: emailUsuario,));
             },
           ),
       );

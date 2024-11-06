@@ -67,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Route _homeRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const Home(),
+      pageBuilder: (context, animation, secondaryAnimation) => Home(emailUsuario: _emailText.text,),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
