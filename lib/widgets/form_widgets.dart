@@ -74,7 +74,7 @@ Widget senhaOculta(
       style: TextStyle(
         fontSize: 15.0,
         color: enabled ? Colors.black : Colors.grey,
-      ), // Cor condicional)
+      ), // Cor condicional
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,

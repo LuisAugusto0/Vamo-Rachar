@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Route _homeRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const Home(),
+      pageBuilder: (context, animation, secondaryAnimation) => Home(emailUsuario: _emailController.text),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, -1.0); // De cima para baixo
         const end = Offset.zero;
@@ -94,7 +94,13 @@ class _MyHomePageState extends State<MyHomePage> {
       print(_passwordConfirmationController.value.text);
       dbHelper.createUser(_userController.text, _emailController.text, _passwordController.text);
       Navigator.of(context).push(_homeRoute());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login efetuado com sucesso')),
+      );
     } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(validateUser(_passwordController) ?? 'Erro desconhecido')),
+      );
       print("Erro - os seguintes campos estão incorretos:");
       userError != null ? print(userError) : null;
       emailError != null ? print(emailError) : null;
