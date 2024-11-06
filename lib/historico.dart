@@ -256,7 +256,7 @@ class HistoricoBody extends StatelessWidget {
 
 
 class HistoryList extends StatelessWidget {
-  const   HistoryList({required this.list, super.key});
+  const HistoryList({required this.list, super.key});
 
   final List<HistoryData> list;
 
