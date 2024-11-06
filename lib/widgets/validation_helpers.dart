@@ -1,5 +1,6 @@
 // lib/widgets/validation_helpers.dart
 import 'package:flutter/material.dart';
+import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
 
 // Variáveis globais e regex
 final RegExp specialCharacters = RegExp(r'[!@#$%^&*(),.?":{}|<>]');
@@ -54,7 +55,7 @@ String? validateLogin(TextEditingController passwordController, Map<String, Obje
   if(user == null){
     return "Usuário não encontrado";
   } else if (passwordController.text != user['senha']){
-    return "A senha não está correta";
+    return "A senha está incorreta";
   }
   return null;
 }

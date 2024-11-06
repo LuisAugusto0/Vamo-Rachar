@@ -32,6 +32,10 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _obscureText = true; // Boolean para trocar visibilidade
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _newPasswordConfirmationController = TextEditingController();
+
   final dbHelper = DatabaseHelper();
 
   @override
@@ -86,29 +90,87 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<VoidCallback?> _submit() async {
-    String? emailError = validateEmail(_emailController);
-    String? passwordError = validatePassword(_passwordController);
     print("Botão de registrar pressionado");
-    if (emailError == null &&
-        passwordError == null) {
-      print(_emailController.value.text);
-      print(_passwordController.value.text);
-      Map<String, Object?>? user = await dbHelper.findUser(_emailController.text);
-      String? loginError = validateLogin(_passwordController, user);
-      if (loginError != null){
-        print("Erro no login - ${loginError}");
-      } else {
-        print("Login efetuado");
-        Navigator.of(context).push(_homeRoute());
-      }
+
+    String? loginError = validateLogin(_passwordController, await dbHelper.findUser(_emailController.text));
+    if (loginError != null){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro no login - ${loginError}')),
+      );
+      print("Erro no login - ${loginError}");
     } else {
-      print("Erro - os seguintes campos estão incorretos:");
-      emailError != null ? print(emailError) : null;
-      passwordError != null ? print(passwordError) : null;
+      print("Login efetuado");
+      Navigator.of(context).push(_homeRoute());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login efetuado com sucesso')),
+      );
     }
+
 
     return null;
   }
+
+  void _alterarSenha() {
+    // Simule a verificação da senha antiga e a alteração para a nova senha
+    if(validatePassword(_newPasswordController) != null){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(validatePassword(_newPasswordController) ?? 'Erro desconhecido')),
+      );
+    } else if (validatePasswordConfirmation(_newPasswordController, _newPasswordConfirmationController) != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(validatePasswordConfirmation(
+            _newPasswordController, _newPasswordConfirmationController) ??
+            'Erro desconhecido')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Senha alterada com sucesso!')),
+      );
+    }
+  }
+
+  VoidCallback? _forgotPasswordPopup(){
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Alterar Senha'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _newPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Senha Antiga'),
+                ),
+                TextField(
+                  controller: _newPasswordConfirmationController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Nova Senha'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  _alterarSenha();
+                  Navigator.pop(context);
+                },
+                child: const Text('Alterar'),
+              ),
+            ],
+          );
+        },
+    );
+    return null;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -152,6 +214,15 @@ class _MyHomePageState extends State<MyHomePage> {
                           (text) => setState(() => ()), // OnChanged
                       true // Enabled?
                   ),
+                  TextButton(
+                      onPressed: _forgotPasswordPopup,
+                      child: const Text(
+                        "Esqueci a senha",
+                        style: TextStyle(
+                          color: Color(0xEEEEEEEE),
+                        ),
+                      )
+                  ),
                   ElevatedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
@@ -184,7 +255,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: TextStyle(
                               color: Color(0xEEEEEEEE),
                             ),
-                          ))
+                          )
+                      )
                     ],
                   ),
                 ],

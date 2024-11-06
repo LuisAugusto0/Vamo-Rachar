@@ -93,8 +93,15 @@ class _MyHomePageState extends State<MyHomePage> {
       print(_passwordController.value.text);
       print(_passwordConfirmationController.value.text);
       dbHelper.createUser(_userController.text, _emailController.text, _passwordController.text);
+      dbHelper.saveLogin(_emailController.text);
       Navigator.of(context).push(_homeRoute());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login efetuado com sucesso')),
+      );
     } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(validateUser(_passwordController) ?? 'Erro desconhecido')),
+      );
       print("Erro - os seguintes campos estão incorretos:");
       userError != null ? print(userError) : null;
       emailError != null ? print(emailError) : null;
