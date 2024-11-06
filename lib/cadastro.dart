@@ -5,6 +5,9 @@ import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'tela_inicial.dart';
 
+import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
+
+
 class Cadastro extends StatelessWidget {
   const Cadastro({super.key});
 
@@ -28,12 +31,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _obscureText = true; // Boolean para trocar visibilidade
-
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _passwordConfirmationController =
-      TextEditingController();
+  final TextEditingController _passwordConfirmationController = TextEditingController();
+  final dbHelper = DatabaseHelper();
 
   Route _homeRoute() {
     return PageRouteBuilder(
@@ -75,12 +77,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  VoidCallback? _submit() {
+  Future<VoidCallback?> _submit() async{
     String? userError = validateUser(_userController);
     String? emailError = validateEmail(_emailController);
     String? passwordError = validatePassword(_passwordController);
-    String? passwordConfirmationError = validatePasswordConfirmation(
-        _passwordController, _passwordConfirmationController);
+    String? passwordConfirmationError = validatePasswordConfirmation(_passwordController, _passwordConfirmationController);
 
     print("Botão de registrar pressionado");
     if (emailError == null &&
@@ -91,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print(_emailController.value.text);
       print(_passwordController.value.text);
       print(_passwordConfirmationController.value.text);
+      dbHelper.createUser(_userController.text, _emailController.text, _passwordController.text);
       Navigator.of(context).push(_homeRoute());
     } else {
       print("Erro - os seguintes campos estão incorretos:");
@@ -110,89 +112,92 @@ class _MyHomePageState extends State<MyHomePage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     return Scaffold(
       backgroundColor: const Color(verdePrimario),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(200),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 40),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/images/logo.png',
-                fit: BoxFit.contain,
-                height: 200,
-              ),
-            ],
-          ),
-        ),
-      ),
-
       body: Center(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 40, left: 60, right: 60),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                form(
-                    "Usuário", //Label do TextField
-                    Icons.account_circle_outlined, //Ícone do TextField
-                    TextInputType.text, //Tipo do Teclado
-                    _userController, // Controlador do TextField
-                    validateUser(_userController), // Verifica se há erro
-                    (text) => setState(() => ()), // OnChanged
-                    true // Enabled?
-                    ),
-                form(
-                    "E-mail", //Label do TextField
-                    Icons.email_outlined, //Ícone do TextField
-                    TextInputType.emailAddress, //Tipo do Teclado
-                    _emailController, // Controlador do TextField
-                    validateUser(_userController), // Verifica se há erro
-                    (text) => setState(() => ()), // OnChanged
-                    true // Enabled?
-                    ),
-                passwordForm(
-                    // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
-                    "Senha", //Lable do TextField
-                    Icons.key_outlined, //Ícone do TextField
-                    _passwordController, // Controlador do TextField
-                    validatePassword(
-                        _passwordController), // Verifica se há erro
-                    _obscureText, // boolean para controlar visibilidade
-                    _toggleVisibility,
-                    (text) => setState(() => ()), // OnChanged
-                    true // Enabled?
-                    ),
-                passwordForm(
-                    // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
-                    "Confirmar senha", //Lable do TextField
-                    Icons.key_outlined, //Ícone do TextField
-                    _passwordConfirmationController, // Controlador do TextField
-                    validatePasswordConfirmation(_passwordController,
-                        _passwordConfirmationController), // Verifica se há erro
-                    _obscureText, // boolean para controlar visibilidade
-                    _toggleVisibility,
-                    (text) => setState(() => ()), // OnChanged
-                    true // Enabled?
-                    ),
-                ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green, // Background color
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(20.0), // Rounded corners
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0,
-                        vertical: 12.0), // Padding inside the button
+          child: Column(
+            children: [
+              PreferredSize(
+                preferredSize: const Size.fromHeight(200),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/logo.png',
+                        fit: BoxFit.contain,
+                        height: 200,
+                      ),
+                    ],
                   ),
-                  child: const Text('Registrar',
-                      style: TextStyle(color: Colors.white)),
                 ),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 40, left: 50, right: 50),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    form(
+                        "Usuário", //Label do TextField
+                        Icons.account_circle_outlined, //Ícone do TextField
+                        TextInputType.text, //Tipo do Teclado
+                        _userController, // Controlador do TextField
+                        validateUser(_userController), // Verifica se há erro
+                        (text) => setState(() => ()), // OnChanged
+                        true // Enabled?
+                        ),
+                    form(
+                        "E-mail", //Label do TextField
+                        Icons.email_outlined, //Ícone do TextField
+                        TextInputType.emailAddress, //Tipo do Teclado
+                        _emailController, // Controlador do TextField
+                        validateUser(_userController), // Verifica se há erro
+                        (text) => setState(() => ()), // OnChanged
+                        true // Enabled?
+                        ),
+                    passwordForm(
+                        // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
+                        "Senha", //Lable do TextField
+                        Icons.key_outlined, //Ícone do TextField
+                        _passwordController, // Controlador do TextField
+                        validatePassword(
+                            _passwordController), // Verifica se há erro
+                        _obscureText, // boolean para controlar visibilidade
+                        _toggleVisibility,
+                        (text) => setState(() => ()), // OnChanged
+                        true // Enabled?
+                        ),
+                    passwordForm(
+                        // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
+                        "Confirmar senha", //Lable do TextField
+                        Icons.key_outlined, //Ícone do TextField
+                        _passwordConfirmationController, // Controlador do TextField
+                        validatePasswordConfirmation(_passwordController,
+                            _passwordConfirmationController), // Verifica se há erro
+                        _obscureText, // boolean para controlar visibilidade
+                        _toggleVisibility,
+                        (text) => setState(() => ()), // OnChanged
+                        true // Enabled?
+                        ),
+                    ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green, // Background color
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(20.0), // Rounded corners
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20.0,
+                            vertical: 12.0), // Padding inside the button
+                      ),
+                      child: const Text('Registrar',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

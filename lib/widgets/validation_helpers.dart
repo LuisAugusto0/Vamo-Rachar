@@ -40,12 +40,21 @@ String? validatePasswordConfirmation(TextEditingController passwordController,
   return null;
 }
 
-String? validateOldPassword(TextEditingController passwordController,
-    TextEditingController passwordConfirmationController) {
-  String password = passwordController.text;
-  String passwordConfirmation = passwordConfirmationController.text;
-  if (password != passwordConfirmation) {
+String? validateOldPassword(TextEditingController oldPasswordController, TextEditingController currentPasswordController) {
+  String oldPassword = oldPasswordController.text;
+  String currentPassword = currentPasswordController.text;
+
+  if (oldPassword != currentPassword) {
     return "Senha antiga incorreta";
+  }
+  return null;
+}
+
+String? validateLogin(TextEditingController passwordController, Map<String, Object?>? user){
+  if(user == null){
+    return "Usuário não encontrado";
+  } else if (passwordController.text != user['senha']){
+    return "A senha não está correta";
   }
   return null;
 }

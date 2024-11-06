@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:vamorachar_telacadastro/login_inicial.dart';
 import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
 import 'package:vamorachar_telacadastro/widgets/avatar_widget.dart';
 import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
 
 class Usuario extends StatelessWidget {
   const Usuario({super.key});
@@ -34,6 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
+  final DatabaseHelper _dbHelper = DatabaseHelper();
 
   @override
   void dispose() {
@@ -48,34 +48,69 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _emailController.text = "exemplo@email.com";
-    _passwordController.text = "senh@forte";
-    _userController.text = "Usuário";
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final userData = await _dbHelper.findUser("exemplo@email.com");
+
+    if (userData != null) {
+      setState(() {
+        _userController.text = userData['nome'] as String;
+        _emailController.text = userData['email'] as String;
+        _passwordController.text = userData['senha'] as String;
+      });
+    }
+  }
+
+  void _updateUserProfile() async {
+    final id = 1;
+    await _dbHelper.updateUser(
+      id,
+      _userController.text,
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Perfil atualizado com sucesso!')),
+    );
   }
 
   void _alterarSenha() {
-    // Simule a verificação da senha antiga e a alteração para a nova senha
-    if (validateOldPassword(_oldPasswordController, _passwordController) != null) {
+    // Verifica se a senha antiga está correta
+    String? oldPasswordError = validateOldPassword(_oldPasswordController, _passwordController);
+    if (oldPasswordError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(validateOldPassword(_oldPasswordController, _passwordController) ?? 'Erro desconhecido')),
+        SnackBar(content: Text(oldPasswordError)),
       );
-    } else if(validatePassword(_passwordController) == null){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(validatePassword(_passwordController) ?? 'Erro desconhecido')),
-      );
-    } else {
-      setState(() {
-        _passwordController.text = _newPasswordController.text;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Senha alterada com sucesso!')),
-      );
+      return;
     }
+
+    // Verifica se a nova senha é válida
+    String? newPasswordError = validatePassword(_newPasswordController);
+    if (newPasswordError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(newPasswordError)),
+      );
+      return;
+    }
+
+    // Atualiza a senha se as validações passarem
+    setState(() {
+      _passwordController.text = _newPasswordController.text;
+    });
+    _updateUserProfile(); // Salva a nova senha no banco de dados
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Senha alterada com sucesso!')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
@@ -211,6 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
               FloatingActionButton.large(
                 heroTag: 'btnSave',
                 onPressed: () {
+                  _updateUserProfile();
                   Navigator.pop(context);
                 },
                 foregroundColor: const Color(verdeSecundario),
