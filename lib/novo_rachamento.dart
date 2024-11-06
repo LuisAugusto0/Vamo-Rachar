@@ -1,4 +1,5 @@
 //import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 //import 'package:image_picker/image_picker.dart';
 //import 'package:gallery_picker/gallery_picker.dart';
@@ -7,76 +8,60 @@ import 'package:animated_custom_dropdown/custom_dropdown.dart';
 //import 'tela_inicial.dart';
 
 class Item {
+  late int id;
   late String nome;
   late int quantidade;
   late double preco;
 
   Item() {
+    id = -1;
     quantidade = -1;
     nome = "";
+    preco = -1;
   }
 
-  Item.padrao(int quantidade, String nome) {
+  Item.padrao(int id, int quantidade, String nome, double preco) {
+    this.id = id;
     this.quantidade = quantidade;
     this.nome = nome;
+    this.preco = preco;
   }
+}
+
+class InstanciaItem {
+  late Item item;
+  late List<Participante> participantes;
+  late int id;
+
+  InstaciaItem() {
+    id = -1;
+    item = new Item();
+    participantes = [];
+  }
+
+  InstanciaItem.create(int id, Item item, List<Participante> participantes){
+    this.id = id;
+    this.item = item;
+    this.participantes = participantes;
+  }
+
 }
 
 class Participante {
   late int id;
   late String nome;
-  late String CPF;
-  late List<Item> itens = [];
+  late String email;
 
-  int identificarPosItem(String nome) {
-    int pos = -1;
-    for (int i = 0; i < itens.length; i++) {
-      if (itens[i].nome.compareTo(nome) == 0) {
-        pos = i;
-        i = itens.length;
-      }
-    }
-    return pos;
-  }
-
-  bool removeItem(Item item) {
-    bool funcionou = true;
-    int aux = identificarPosItem(item.nome);
-    if(aux != -1) {
-      if(itens[aux].quantidade > 1){
-        itens[aux].quantidade--;
-      }
-      else if(itens[aux].quantidade == 1){
-        itens.removeAt(aux);
-      }
-    }
-    else{
-      funcionou = false;
-    }
-    return funcionou;
-  }
-
-  void addItem(Item item) {
-    int aux = identificarPosItem(item.nome);
-    if(aux != -1){
-      itens[aux].quantidade++;
-    }
-    else{
-      Item aux = new Item.padrao(1, item.nome);
-      itens.add(aux);
-    }
-  }
-
-  Participante.create(String nome, int id) {
+  Participante.create(String nome, int id, String email) {
     this.id = id;
     this.nome = nome;
+    this.email = email;
   }
 
   Participante() {
     id = -1;
     nome = "";
-    CPF = "";
-    itens = [];
+    email = "";
   }
 }
 
@@ -114,18 +99,17 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   ];
 
   //Lista dos participantes real
-  int ultimoIdUsado = 1;
+  int ultimoIdUsado = 0;
+  int ultimoIdInstancia = 0;
   List<Participante> participantes = [
-    Participante.create("Participante 1", 1),
+    Participante.create("Participante 1", 0, "teste@gmail.com"),
   ];
 
   //Lista de Itens
-  List<Item> itens = [
-    Item.padrao(5, "1"),
-    Item.padrao(2, "2"),
-    Item.padrao(6, "3"),
-    Item.padrao(3, "4")
-  ];
+  late List<Item> itens = [];
+
+  //
+  late List<InstanciaItem> instancias;
 
   List<String> selectedOptions = [];
 
@@ -147,7 +131,8 @@ class _NovoRachamentoState extends State<NovoRachamento> {
               onPressed: () {
                 options.add(nameController.text);
                 participantes.add(
-                    Participante.create(nameController.text, ++ultimoIdUsado));
+                  Participante.create(nameController.text, ++ultimoIdUsado, "teste@gmail.com")
+                );
                 Navigator.of(context).pop();
               },
               child: const Text('Enviar'),
@@ -207,7 +192,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   }
 
 //Função para identificar a posição de uma String num vetor
-  int indentificarParticipante(String comparativo) {
+  int identificarParticipante(String comparativo) {
     int pos = -1;
     for (int i = 0; i < this.participantes.length; i++) {
       if (participantes[i].nome.compareTo(comparativo) == 0) {
@@ -218,7 +203,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
     return pos;
   }
 
-  int indentificarItem(String comparativo) {
+  int identificarItem(String comparativo) {
     int pos = -1;
     for (int i = 0; i < itens.length; i++) {
       if (itens[i].nome.compareTo(comparativo) == 0) {
@@ -229,45 +214,66 @@ class _NovoRachamentoState extends State<NovoRachamento> {
     return pos;
   }
 
-//Função para adicionar itens
-  void addItem(String nome, String nomeItem) {
-    int posParticipante;
-
-    posParticipante = indentificarParticipante(nome);
-    print("Posicao participante: ${posParticipante} - nome do participante: ${participantes[posParticipante].nome}");
-
-    int posItem = indentificarItem(nomeItem);
-    for(int i = 0; i < participantes[posParticipante].itens.length; i++){
-      print("Item: ${participantes[posParticipante].itens[i].nome} - quantidade: ${participantes[posParticipante].itens[i].quantidade}");
-    }
-    if (itens[posItem].quantidade > 0) {
-      participantes[posParticipante].addItem(itens[posItem]);
-      itens[posItem].quantidade--;
-      for(int i = 0; i < participantes[posParticipante].itens.length; i++){
-        print("BANANA TESTE BLA BLA BLA: ${participantes[posParticipante].itens[i].nome} - quantidade: ${participantes[posParticipante].itens[i].quantidade}");
+//Função para calcular o gasto total de um usuário/participante
+  double getTotalPago(Participante participante){
+    double total = 0;
+    for(int i = 0; i < instancias.length; i++){
+      if(instancias[i].participantes.contains(participante)){
+        total += instancias[i].item.preco * instancias[i].item.quantidade;
       }
-      print("Quantidade de itens restante: ${itens[posItem].quantidade}");
+    }
+    return total;
+  }  
+  
+//Função para adicionar itens
+  void addItem(List<Participante> participantes, Item item) {
+    Item aux = new Item.padrao(item.id, 1, item.nome, item.preco/participantes.length);
+
+
+    if(instancias.length > 0){
+      for(int i = 0; i < instancias.length; i++){
+        print("INSTANCIAS.ITEM.ID: ${instancias[i].item.id} - ITEM.ID: ${item.id} ");
+        print("INSTANCIAS.ITEM.PRECO: ${instancias[i].item.preco} - ITEM.PRECO: ${item.preco}");
+        print("INSTANCIAS.PARTICIPANTES.LENGTH: ${instancias[i].participantes.length} - PARTICIPANTES.LENGTH: ${participantes.length}");
+        if(instancias[i].item.id == item.id
+            && instancias[i].item.preco == aux.preco
+            && instancias[i].participantes.length == participantes.length) {
+          print("CAI AQUI!");
+          bool diferente = true;
+          int z = 0,
+              j = 0;
+          while (diferente && j < instancias[i].participantes.length) {
+            for (j = 0; j < instancias[i].participantes.length; j++) {
+              if (instancias[i].participantes[j].nome.compareTo(
+                  participantes[z].nome) == 0) {
+                z++;
+                j = 0;
+              }
+              if (z == participantes.length) {
+                diferente = false;
+              }
+            }
+          }
+          if(!diferente){
+            instancias[i].item.quantidade++;
+          }
+        } else {
+          print("SEGUNDO ELSE");
+          instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, participantes));
+          ultimoIdInstancia++;
+          break;
+        }
+      }
+    } else {
+      print("PRIMEIRO ELSE");
+      instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, participantes));
+      ultimoIdInstancia++;
     }
   }
 
 //Função para subtrair itens
-  void subItem(nome, String nomeItem) {
-    int posParticipante;
+  void subItem(String nome, int posItem) {
 
-    posParticipante = indentificarParticipante(nome);
-
-    int posItem = indentificarItem(nomeItem);
-    for(int i = 0; i < participantes[posParticipante].itens.length; i++){
-      print("Item: ${participantes[posParticipante].itens[i].nome} - quantidade: ${participantes[posParticipante].itens[i].quantidade}");
-    }
-    if (participantes[posParticipante].removeItem(itens[posItem])) {
-      itens[posItem].quantidade++;
-      for(int i = 0; i < participantes[posParticipante].itens.length; i++){
-        print("Item: ${participantes[posParticipante].itens[i].nome} - quantidade: ${participantes[posParticipante].itens[i].quantidade}");
-      }
-    } else {
-      print("Erro ao tentar remover, item não atribuido à esse participante\n");
-    }
   }
 
   Scaffold iniciarTela() {
@@ -338,7 +344,13 @@ class _NovoRachamentoState extends State<NovoRachamento> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
+                    for(int i = 0; i < 5; i++){
+                      Item aux = new Item.padrao(i, (i + 1) * 3, (i + 1).toString(), (i + 1) * 5);
+                      itens.add(aux);
+                    }
                     estado = 1;
+                    instancias = [];
+
                   });
                 },
                 child: const Text(
@@ -431,7 +443,8 @@ class _NovoRachamentoState extends State<NovoRachamento> {
           itemBuilder: (context, index) {
             final Item item = itens[index];
             int qtd = item.quantidade;
-            late String textoPadrao = "Quantidade - ${qtd}";
+            String preco = item.preco.toStringAsFixed(2);
+            late String textoPadrao = "Quantidade - ${qtd}\nPreço - R\$${preco}";
             return Container(
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
@@ -440,15 +453,6 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.image,
-                        )
-                      ],
-                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -469,11 +473,16 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                           ),
                           onPressed: () {
                             setState(() {
+                              List<Participante> aux = [];
                               for (int i = 0; i < selectedOptions.length; i++) {
-                                addItem(selectedOptions[i], itens[index].nome);
+                                aux.add(participantes[identificarParticipante(selectedOptions[i])]);
+                              }
+                              if(selectedOptions.length >= 1 && itens[index].quantidade > 0){
+                                addItem(aux, itens[index]);
+                                itens[index].quantidade--;
                               }
                               qtd = itens[index].quantidade;
-                              textoPadrao = "Quantidade - ${qtd}";
+                              textoPadrao = "Quantidade - ${qtd}\nPreço - R\$${preco}";
                             });
                           },
                           child: const Icon(
@@ -489,10 +498,10 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                           onPressed: () {
                             setState( (){
                               for (int i = 0; i < selectedOptions.length; i++) {
-                                subItem(selectedOptions[i], itens[index].nome);
+                                subItem(selectedOptions[i], index);
                               }
                               qtd = itens[index].quantidade;
-                              textoPadrao = "Quantidade - ${qtd}";
+                              textoPadrao = "Quantidade - ${qtd}\nPreço - R\$${preco}";
                             });
                           },
                           child: const Icon(
@@ -503,9 +512,32 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                       ],
                     ),
                   ],
-                ));
+                )
+            );
           },
         ),
+      ),
+      bottomNavigationBar: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ElevatedButton(
+              onPressed: (){
+                for(int i = 0; i < participantes.length; i++){
+                  print("Nome: ${participantes[i].nome} - Preco pago: ${getTotalPago(participantes[i])}");
+                }
+                for(int i = 0; i < instancias.length; i++){
+                  print("ID: ${instancias[i].id} - Nome Item: ${instancias[i].item.nome} - Custo item: ${instancias[i].item.preco} - Quantidade de itens: ${instancias[i].item.quantidade}");
+                  for(int j = 0; j < instancias[i].participantes.length; j++){
+                    print("Nome do participante[${j}]: ${instancias[i].participantes[j].nome}");
+                  }
+                }
+              },
+              child: Text(
+                "Enviar",
+              ),
+          )
+        ],
       ),
     );
   }
