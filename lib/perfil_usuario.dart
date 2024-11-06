@@ -7,24 +7,26 @@ import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
 
 class Usuario extends StatelessWidget {
-  const Usuario({super.key});
+  final String emailUsuario;
+  const Usuario({required this.emailUsuario});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: MyHomePage(title: 'Perfil do usuário'),
+    return Scaffold(
+      body: MyHomePage(emailUsuario: emailUsuario ,title: 'Perfil do usuário'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key, required this.emailUsuario, required this.title});
 
   final String title;
+  final String emailUsuario;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState(emailUsuario);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -34,6 +36,12 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final DatabaseHelper _dbHelper = DatabaseHelper();
+
+  // Declare a variável de instância
+  final String emailUsuario;
+
+  // Inicialize a variável de instância no construtor
+  _MyHomePageState(this.emailUsuario);
 
   @override
   void dispose() {
@@ -52,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _loadUserData() async {
-    final userData = await _dbHelper.findUser("exemplo@email.com");
+    final userData = await _dbHelper.findUser(emailUsuario);
 
     if (userData != null) {
       setState(() {

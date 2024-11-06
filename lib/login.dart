@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
 import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'tela_inicial.dart';
 import 'cadastro.dart';
 import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
@@ -49,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Route _homeRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const Home(),
+      pageBuilder: (context, animation, secondaryAnimation) => Home(emailUsuario: _emailController.text),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
