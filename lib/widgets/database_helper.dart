@@ -25,35 +25,63 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'users.bd');
 
-    // // Check if the database file already exists
-    // final dbFile = File(path);
-    // if (await dbFile.exists()) {
-    //   // Delete the existing database file
-    //   await dbFile.delete();
-    //   print("Existing database file deleted.");
-    // }
+    // Excluir o banco de dados, forçando a recriação
+    final dbFile = File(path);
+    if (await dbFile.exists()) {
+      await dbFile.delete();
+      print("Banco de dados existente excluído para recriação.");
+    }
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 4,
       onCreate: (db, version) {
-        const sql = 'CREATE TABLE usuario (id INTEGER PRIMARY KEY AUTOINCREMENT, nome VARCHAR, email VARCHAR, senha VARCHAR)';
-        db.execute(sql);
+        db.execute('CREATE TABLE usuario (id INTEGER PRIMARY KEY AUTOINCREMENT, nome VARCHAR, email VARCHAR, senha VARCHAR)');
+        db.execute('CREATE TABLE usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
       },
     );
   }
+
+  Future<void> createCurrentUser(String email) async {
+    final db = await _getDatabase();
+    // Verifica se a tabela existe e cria se necessário
+    await db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
+    final dadosUsuario = findUser(email);
+    final id = await db.insert('usuarioAtual', (await dadosUsuario)!);
+    print('Salvo: $id');
+    listarUmUsuario(id);
+  }
+
+  Future<void> deleteCurrentUser() async {
+    final db = await _getDatabase();
+    // Verifica se a tabela existe e cria se necessário
+    await db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
+    final retorno = await db.delete('usuarioAtual');
+    print('Itens excluídos: $retorno');
+  }
+
+  Future<Map<String, Object?>?> getCurrentUser() async {
+    final db = await _getDatabase();
+    // Verifica se a tabela existe e cria se necessário
+    await db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
+    const sql = 'SELECT * FROM usuarioAtual';
+    final usuario = await db.rawQuery(sql);
+    return usuario.isEmpty ? null : usuario.first;
+  }
+
+  Future<void> updateCurrentUser(String email) async{
+    if (getCurrentUser() == null){
+      deleteDatabase(email);
+    }
+    createCurrentUser(email);
+  }
+
+
 
   Future<void> createUser(String nome, String email, String senha) async {
     final db = await _getDatabase();
     final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
     final id = await db.insert('usuario', dadosUsuario);
-    print('Salvo: $id');
-    listarUmUsuario(id);
-  }
-
-  Future<void> createLogin(Map<String, Object?>? newUser) async {
-    final db = await _getDatabase();
-    final id = await db.insert('usuarioAtual', newUser!);
     print('Salvo: $id');
     listarUmUsuario(id);
   }

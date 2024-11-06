@@ -15,8 +15,11 @@ String? validateUser(TextEditingController controller) {
 
 String? validateEmail(TextEditingController controller) {
   String value = controller.text;
+  final bool emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+.[a-zA-Z]+").hasMatch(value);
   if (value.isEmpty) {
     return "Escreva um email";
+  } if (!emailValid){
+    return "E-mail não é válido";
   }
   return null;
 }

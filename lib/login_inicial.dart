@@ -171,43 +171,44 @@ class _MyHomePageState extends State<MyHomePage> {
                       ))
                 ],
               ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  // Essa coluna representa a parte inferior
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // Linha horizontal
+                    Container(
+                      width: 400,
+                      height: 2,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent, // Fading start
+                            Colors.black,
+                            Colors.transparent, // Fading end
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10), // Space between the line and text
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(_homeRoute());
+                      },
+                      child: const Text(
+                        "Entrar como convidado",
+                        style: TextStyle(
+                          color: Color(0xEEEEEEEE), // Text color changed to blue
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              // Essa coluna representa a parte inferior
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // Linha horizontal
-                Container(
-                  width: 400,
-                  height: 2,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent, // Fading start
-                        Colors.black,
-                        Colors.transparent, // Fading end
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10), // Space between the line and text
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(_homeRoute());
-                  },
-                  child: const Text(
-                    "Entrar como convidado",
-                    style: TextStyle(
-                      color: Color(0xEEEEEEEE), // Text color changed to blue
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Text(""),
         ],
       ),
     );
