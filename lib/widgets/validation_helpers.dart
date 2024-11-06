@@ -30,6 +30,22 @@ String? validatePassword(TextEditingController controller) {
   return null;
 }
 
+String? validateInteiro(TextEditingController controller) {
+  String value = controller.text;
+  if(int.tryParse(value) == null){
+    return "Favor inserir apenas valores numéricos sem vírgula";
+  }
+  return null;
+}
+
+String? validadeDouble(TextEditingController controller) {
+  String value = controller.text;
+  if(double.tryParse(value) == null){
+    return "Favor inserir apenas valores numéricos (Em caso de número quebrado, usar '.')";
+  }
+  return null;
+}
+
 String? validatePasswordConfirmation(TextEditingController passwordController,
     TextEditingController passwordConfirmationController) {
   String password = passwordController.text;
