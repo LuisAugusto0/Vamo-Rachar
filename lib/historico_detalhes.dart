@@ -3,13 +3,12 @@ import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
 import 'extractor/product_purchase_history_extractor.dart';
 import 'package:intl/intl.dart';
 
-
+ProductPurchaseHistory productPurchaseHistory = defaultProductPurchaseHistory;
 
 class HistoricoDetails extends StatelessWidget {
-  HistoricoDetails({required this.id, super.key});
+  const HistoricoDetails({required this.id, super.key});
   final int id;
 
-  ProductPurchaseHistory productPurchaseHistory = defaultProductPurchaseHistory;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,7 +77,7 @@ class Body extends StatelessWidget {
 
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Expanded(child: ProductPurchasesViewer(data: data))
+        child: ProductPurchasesViewer(data: data)
     );
 
 
@@ -128,91 +127,6 @@ class ProductPurchasesViewer extends StatelessWidget {
 }
 
 
-class ProductTiles extends StatelessWidget {
-  const ProductTiles({
-    required this.product,
-    required this.totalSpendings,
-    super.key
-  });
-
-  final Product product;
-  final double totalSpendings;
-
-
-  Widget defaultImage() {
-    return const Icon (
-        Icons.image_rounded,
-        size: 100
-    );
-  }
-
-  Widget getImage(String? image) {
-    if (image == null || image == "") {
-      return defaultImage();
-    }
-
-    if (image.startsWith("http")) {
-      return Image.network(
-        image,
-        width: 100,
-        height: 100,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return defaultImage();
-        },
-      );
-    } else {
-      return Image.asset(
-        image,
-        width: 100,
-        height: 100,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return defaultImage();
-        },
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4.0,
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: SizedBox(
-        height: 120.0, // Increase height to fit the image
-        child: ListTile(
-          leading: getImage(product.image),
-          trailing: Icon(
-            Icons.expand_less,
-          ),
-          title: Text(
-            product.name,
-            style: const TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Text(
-            "Gasto total: R\$ ${totalSpendings.toStringAsFixed(2)}",
-            style: const TextStyle(
-              fontSize: 16.0,
-            ),
-          ),
-          onTap: () {
-            print("Participant ${product.name} tapped");
-          },
-        ),
-      ),
-    );
-  }
-
-}
-
-
-
-
-
 
 class ProductTile extends StatefulWidget {
   const ProductTile({
@@ -226,6 +140,7 @@ class ProductTile extends StatefulWidget {
 
 
   @override
+  // ignore: library_private_types_in_public_api
   _ProductTile createState() => _ProductTile();
 }
 
@@ -269,39 +184,39 @@ class _ProductTile extends State<ProductTile> {
 
 
   Widget buildWidgetLayout(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.only(
-            right: 8.0, left: 8.0, top: 12.0, bottom: 4.0
-        ),
-        child: ClipRRect (
-          borderRadius: BorderRadius.circular(15.0),
-          child: Material(
-            color: Colors.white,
-            child: InkWell(
-              onTap: () => {
-                _toggleExtraDetails()
-              },
+    return Material(
+      color: Colors.white,
+      child: InkWell(
+        onTap: () => {
+          _toggleExtraDetails()
+        },
 
-              child: Column(
-                children: [
+        child: Column(
+          children: [
 
-                  mainTile(context),
-                  if (_showExtraDetails)
-                    InstanceTile(
-                      instances: widget.product.instances,
-                      totalPrice: widget.product.price,
-                    )
-                ],
-            )      ,
-          ),
-        )
-      )
-    );
+            mainTile(context),
+            if (_showExtraDetails)
+              InstanceTile(
+                instances: widget.product.instances,
+                totalPrice: widget.product.price,
+              )
+          ],
+        )      ,
+      ),
+  );
   }
 
   @override
   Widget build(BuildContext context) {
-    return buildWidgetLayout(context);
+    return Padding(
+      padding: const EdgeInsets.only(
+          right: 8.0, left: 8.0, top: 12.0, bottom: 4.0
+      ),
+      child: ClipRRect (
+        borderRadius: BorderRadius.circular(15.0),
+        child: buildWidgetLayout(context)
+      )
+    );
   }
 }
 
@@ -363,73 +278,6 @@ class ProductTileImage extends StatelessWidget {
   }
 }
 
-class ProductTileDescription extends StatelessWidget {
-  const ProductTileDescription({
-    required this.product,
-    required this.totalSpendings,
-    super.key
-  });
-
-  final Product product;
-  final double totalSpendings;
-
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Text(
-                    "R\$ ${product.price.toStringAsFixed(2)}",
-                    style: textTheme.bodyMedium, // Use default body style from TextTheme
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Padding(
-              padding: EdgeInsets.only(right: 25.0),
-              child: Column(
-                children: [
-                  Text(
-                    "Quantidade: ${product.instances.length.toString()}",
-                    style: textTheme.bodyMedium
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Text(
-                      "Total: R\$ ${totalSpendings.toStringAsFixed(2)}",
-                      style: textTheme.bodySmall, // Use default body style from TextTheme
-                    ),
-                  ),
-
-                ],
-              )
-          )
-
-        ],
-      )
-    );
-  }
-}
-
 
 
 
@@ -446,54 +294,50 @@ class InstanceTile extends StatelessWidget {
 
   // The participant list rendering function
   Widget getInstanceList(List<ProductInstances> instances) {
-    return Column(
-      children: [
-        ListView(
-          shrinkWrap: true, // Prevent ListView from taking infinite space
-          physics: const NeverScrollableScrollPhysics(),  // Prevent ListView from scrolling itself
-          scrollDirection: Axis.vertical,  // Horizontal scrolling
-          children: instances.map((instance) {
-            return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5),
-                      child: Divider(
-                        color: Colors.black54,
-                        thickness: 1,
-                        height: 10, // Adjust for spacing above/below the divider
-                      )
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 5),
-                      child: getInstanceTile(instance),
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      scrollDirection: Axis.vertical,
+      children: instances.map((instance) {
+        return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding( // Horizontal divider
+                  padding: EdgeInsets.symmetric(horizontal: 5),
+                  child: Divider(
+                    color: Colors.black54,
+                    thickness: 1,
+                    height: 10,
                   )
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 5),
+                  child: getInstanceTile(instance),
+              )
 
-                ],
-            );
-          }).toList(),
-        )
-      ],
+            ],
+        );
+      }).toList(),
+
+
     );
   }
 
   Widget getInstanceTile(ProductInstances instance) {
     return SizedBox(
-        height: 40,
-        child:
-            ListView(
-              shrinkWrap: true, // Prevent ListView from taking infinite space
-              physics: const NeverScrollableScrollPhysics(),  // Prevent ListView from scrolling itself
-              scrollDirection: Axis.horizontal,  // Horizontal scrolling
-              children: instance.contributions.map((contribution) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: contributionNamePair(contribution),
-                );
-              }).toList(),
-            )
-
-
+      height: 40,
+      child:
+        ListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          children: instance.contributions.map((contribution) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: contributionNamePair(contribution),
+            );
+          }).toList(),
+        )
     );
   }
 
@@ -520,7 +364,7 @@ class InstanceTile extends StatelessWidget {
               ),
             ),
 
-            Text(contribution.contribution.toStringAsFixed(2)),
+            Text("R\$ ${contribution.contribution.toStringAsFixed(2)}"),
           ],
         )
       )
@@ -529,6 +373,80 @@ class InstanceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return getInstanceList(instances);
+    return  Column(
+        children: [
+          getInstanceList(instances)
+        ]
+    );
   }
 }
+
+
+class ProductTileDescription extends StatelessWidget {
+  const ProductTileDescription({
+    required this.product,
+    required this.totalSpendings,
+    super.key
+  });
+
+  final Product product;
+  final double totalSpendings;
+
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Text(
+                      "R\$ ${product.price.toStringAsFixed(2)}",
+                      style: textTheme.bodyMedium, // Use default body style from TextTheme
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Padding(
+                padding: const EdgeInsets.only(right: 25.0),
+                child: Column(
+                  children: [
+                    Text(
+                        "Quantidade: ${product.instances.length.toString()}",
+                        style: textTheme.bodyMedium
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Text(
+                        "Total: R\$ ${totalSpendings.toStringAsFixed(2)}",
+                        style: textTheme.bodySmall, // Use default body style from TextTheme
+                      ),
+                    ),
+
+                  ],
+                )
+            )
+
+          ],
+        )
+    );
+  }
+}
+
+
