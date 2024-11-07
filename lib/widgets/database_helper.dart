@@ -193,12 +193,12 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, '$dbName.db');
 
-    // // Excluir o banco de dados, forçando a recriação
-    // final dbFile = File(path);
-    // if (await dbFile.exists()) {
-    //   await dbFile.delete();
-    //   print("Banco de dados existente excluído para recriação.");
-    // }
+    // Excluir o banco de dados, forçando a recriação
+    final dbFile = File(path);
+    if (await dbFile.exists()) {
+      await dbFile.delete();
+      print("Banco de dados existente excluído para recriação.");
+    }
 
     print("BUILDING");
     return await openDatabase(

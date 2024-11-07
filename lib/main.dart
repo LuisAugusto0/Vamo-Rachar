@@ -37,7 +37,7 @@ Future<void> initializeDatabase() async {
       defaultTargetPlatform == TargetPlatform.iOS) {
     // Initialize database for Android or iOS
     // Use the normal sqflite setup for mobile
-    databaseFactory = databaseFactoryFfi;  // This is actually for desktop
+    databaseFactory = databaseFactory;  // This is actually for desktop
     // Do your normal sqflite database initialization here (e.g., openDatabase)
   } else if (defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.macOS ||
