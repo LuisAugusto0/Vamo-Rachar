@@ -8,13 +8,12 @@ import 'novo_rachamento.dart';
 import 'perfil_usuario.dart';
 
 class Home extends StatelessWidget {
-  final String emailUsuario;
-  Home({required this.emailUsuario});
+  Home({super.key});
   // Scaffold de scaffold??
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HomePageAppBar(emailUsuario: emailUsuario,),
+      appBar: HomePageAppBar(),
       body: const MyHomePage(),
     );
   }
@@ -52,10 +51,9 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String emailUsuario;
   final DatabaseHelper _dbHelper = DatabaseHelper();
   bool _isLoggedIn = false;
-  HomePageAppBar({required this.emailUsuario});
+  HomePageAppBar({super.key});
 
 
   Future<void> userProfileRoute(BuildContext context) async {
@@ -64,7 +62,7 @@ class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
     if (userData != null) {
       return NavigationHelper.pushNavigatorTransitionDown(
         context,
-        Usuario(emailUsuario: emailUsuario),
+        Usuario(),
       );
     } else {
       // // Remove todas as telas anteriores até a primeira

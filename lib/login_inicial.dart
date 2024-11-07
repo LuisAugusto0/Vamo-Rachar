@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> verifyLogin() async{
     Map<String, Object?>? user = await _dbHelper.getCurrentUser();
     if (user != null){
-      NavigationHelper.pushNavigatorNoTransition(context, Home(emailUsuario: "A"));
+      NavigationHelper.pushNavigatorNoTransition(context, Home());
     }
   }
 
@@ -82,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Route _homeRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => Home(emailUsuario: _emailText.text,),
+      pageBuilder: (context, animation, secondaryAnimation) => Home(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
