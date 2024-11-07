@@ -15,8 +15,11 @@ String? validateUser(TextEditingController controller) {
 
 String? validateEmail(TextEditingController controller) {
   String value = controller.text;
+  final bool emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+.[a-zA-Z]+").hasMatch(value);
   if (value.isEmpty) {
     return "Escreva um email";
+  } if (!emailValid){
+    return "E-mail não é válido";
   }
   return null;
 }
@@ -27,6 +30,22 @@ String? validatePassword(TextEditingController controller) {
     return "Mínimo 6 caracteres";
   } else if (!value.contains(specialCharacters)) {
     return "Necessita de pelo menos um caractere especial";
+  }
+  return null;
+}
+
+String? validateInteiro(TextEditingController controller) {
+  String value = controller.text;
+  if(int.tryParse(value) == null){
+    return "Favor inserir apenas valores numéricos sem vírgula";
+  }
+  return null;
+}
+
+String? validadeDouble(TextEditingController controller) {
+  String value = controller.text;
+  if(double.tryParse(value) == null){
+    return "Favor inserir apenas valores numéricos (Em caso de número quebrado, usar '.')";
   }
   return null;
 }

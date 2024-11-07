@@ -90,8 +90,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<VoidCallback?> _submit() async {
     print("Botão de registrar pressionado");
-
-    String? loginError = validateLogin(_passwordController, await dbHelper.findUser(_emailController.text));
+    Map<String, Object?>? user = await dbHelper.findUser(_emailController.text);
+    String? loginError = validateLogin(_passwordController, user);
     if (loginError != null){
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro no login - ${loginError}')),
@@ -99,7 +99,9 @@ class _MyHomePageState extends State<MyHomePage> {
       print("Erro no login - ${loginError}");
     } else {
       print("Login efetuado");
-      Navigator.of(context).push(_homeRoute());
+      // Navigator.of(context).push(_homeRoute());
+      Navigator.of(context).pushAndRemoveUntil( _homeRoute(), (Route<dynamic> route) => false);
+      dbHelper.createCurrentUser(user!['email'].toString());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Login efetuado com sucesso')),
       );

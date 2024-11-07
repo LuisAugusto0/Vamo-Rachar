@@ -189,10 +189,11 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, '$dbName.db');
 
+    // Excluir o banco de dados, forçando a recriação
     final dbFile = File(path);
     if (await dbFile.exists()) {
       await dbFile.delete();
-      print("Existing database file deleted.");
+      print("Banco de dados existente excluído para recriação.");
     }
 
     return await openDatabase(
@@ -255,8 +256,44 @@ class DatabaseHelper {
           CREATE INDEX idx_pedido_id ON usuario_pedido (pedido_id);
 
         ''');
+        db.execute('CREATE TABLE usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
       },
     );
+  }
+
+
+  Future<void> createCurrentUser(String email) async {
+    final db = await _getDatabase();
+    // Verifica se a tabela existe e cria se necessário
+    await db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
+    final dadosUsuario = findUser(email);
+    final id = await db.insert('usuarioAtual', (await dadosUsuario)!);
+    print('Salvo: $id');
+    listarUmUsuario(id);
+  }
+
+  Future<void> deleteCurrentUser() async {
+    final db = await _getDatabase();
+    // Verifica se a tabela existe e cria se necessário
+    await db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
+    final retorno = await db.delete('usuarioAtual');
+    print('Itens excluídos: $retorno');
+  }
+
+  Future<Map<String, Object?>?> getCurrentUser() async {
+    final db = await _getDatabase();
+    // Verifica se a tabela existe e cria se necessário
+    await db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
+    const sql = 'SELECT * FROM usuarioAtual';
+    final usuario = await db.rawQuery(sql);
+    return usuario.isEmpty ? null : usuario.first;
+  }
+
+  Future<void> updateCurrentUser(String email) async{
+    if (getCurrentUser() == null){
+      deleteDatabase(email);
+    }
+    createCurrentUser(email);
   }
 
 
@@ -265,13 +302,6 @@ class DatabaseHelper {
     final db = await _getDatabase();
     final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
     final id = await db.insert('usuario', dadosUsuario);
-    print('Salvo: $id');
-    listarUmUsuario(id);
-  }
-
-  Future<void> createLogin(Map<String, Object?>? newUser) async {
-    final db = await _getDatabase();
-    final id = await db.insert('usuarioAtual', newUser!);
     print('Salvo: $id');
     listarUmUsuario(id);
   }

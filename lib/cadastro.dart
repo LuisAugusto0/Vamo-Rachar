@@ -93,7 +93,9 @@ class _MyHomePageState extends State<MyHomePage> {
       print(_passwordController.value.text);
       print(_passwordConfirmationController.value.text);
       dbHelper.createUser(_userController.text, _emailController.text, _passwordController.text);
-      Navigator.of(context).push(_homeRoute());
+      dbHelper.createCurrentUser(_emailController.text);
+      // Navigator.of(context).push(_homeRoute());
+      Navigator.of(context).pushAndRemoveUntil( _homeRoute(), (Route<dynamic> route) => false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Login efetuado com sucesso')),
       );
@@ -157,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Icons.email_outlined, //Ícone do TextField
                         TextInputType.emailAddress, //Tipo do Teclado
                         _emailController, // Controlador do TextField
-                        validateUser(_userController), // Verifica se há erro
+                        validateEmail(_emailController), // Verifica se há erro
                         (text) => setState(() => ()), // OnChanged
                         true // Enabled?
                         ),

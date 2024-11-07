@@ -36,6 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final DatabaseHelper _dbHelper = DatabaseHelper();
+  int _currentUserId = 0;
 
   // Declare a variável de instância
   final String emailUsuario;
@@ -59,8 +60,21 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadUserData();
   }
 
+  // Future<void> _loadUserData() async {
+  //   final userData = await _dbHelper.findUser(emailUsuario);
+  //
+  //   if (userData != null) {
+  //     setState(() {
+  //       _userController.text = userData['nome'] as String;
+  //       _emailController.text = userData['email'] as String;
+  //       _passwordController.text = userData['senha'] as String;
+  //     });
+  //     _currentUserId = userData['id'] as int;
+  //   }
+  // }
+
   Future<void> _loadUserData() async {
-    final userData = await _dbHelper.findUser(emailUsuario);
+    final userData = await _dbHelper.getCurrentUser();
 
     if (userData != null) {
       setState(() {
@@ -68,13 +82,21 @@ class _MyHomePageState extends State<MyHomePage> {
         _emailController.text = userData['email'] as String;
         _passwordController.text = userData['senha'] as String;
       });
+      _currentUserId = userData['id'] as int;
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginInicial()),
+            (Route<dynamic> route) => false,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Não há nenhum usuário logado, faça login')),
+      );
     }
   }
 
   void _updateUserProfile() async {
-    final id = 1;
     await _dbHelper.updateUser(
-      id,
+      _currentUserId,
       _userController.text,
       _emailController.text,
       _passwordController.text,
@@ -242,6 +264,7 @@ class _MyHomePageState extends State<MyHomePage> {
               FloatingActionButton.large(
                 heroTag: 'btnLogout',
                 onPressed: () {
+                  _dbHelper.deleteCurrentUser();
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const LoginInicial()),
