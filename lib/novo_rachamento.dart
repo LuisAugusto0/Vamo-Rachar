@@ -138,37 +138,39 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Preencha o nome do Item, a quantidade consumida e seu preço'),
-          content: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              form(
-                  "Nome do Item", //Label do TextField
-                  Icons.abc, //Ícone do TextField
-                  TextInputType.text, //Tipo do Teclado
-                  nameController, // Controlador do TextField
-                  validateUser(nameController), // Verifica se há erro
-                      (text) => setState(() => ()), // OnChanged
-                  true // Enabled?
-              ),
-              form(
-                  "Quantidade de itens consumidos", //Label do TextField
-                  Icons.add_circle_outline, //Ícone do TextField
-                  TextInputType.text, //Tipo do Teclado
-                  quantidadeController, // Controlador do TextField
-                  validateInteiro(quantidadeController), // Verifica se há erro
-                      (text) => setState(() => ()), // OnChanged
-                  true // Enabled?
-              ),
-              form(
-                  "Preço do item consumidos", //Label do TextField
-                  Icons.add_circle_outline, //Ícone do TextField
-                  TextInputType.text, //Tipo do Teclado
-                  precoCrontroller, // Controlador do TextField
-                  validadeDouble(precoCrontroller), // Verifica se há erro
-                      (text) => setState(() => ()), // OnChanged
-                  true // Enabled?
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                form(
+                    "Nome do Item", //Label do TextField
+                    Icons.abc, //Ícone do TextField
+                    TextInputType.text, //Tipo do Teclado
+                    nameController, // Controlador do TextField
+                    validateUser(nameController), // Verifica se há erro
+                        (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                ),
+                form(
+                    "Quantidade de itens consumidos", //Label do TextField
+                    Icons.add_circle_outline, //Ícone do TextField
+                    TextInputType.text, //Tipo do Teclado
+                    quantidadeController, // Controlador do TextField
+                    validateInteiro(quantidadeController), // Verifica se há erro
+                        (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                ),
+                form(
+                    "Preço do item consumidos", //Label do TextField
+                    Icons.add_circle_outline, //Ícone do TextField
+                    TextInputType.text, //Tipo do Teclado
+                    precoCrontroller, // Controlador do TextField
+                    validadeDouble(precoCrontroller), // Verifica se há erro
+                        (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(

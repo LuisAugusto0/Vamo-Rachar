@@ -123,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void _alterarSenha() {
     // Verifica se a senha antiga está correta
     String? oldPasswordError =
-        validateOldPassword(_oldPasswordController, _passwordController);
+    validateOldPassword(_oldPasswordController, _passwordController);
     if (oldPasswordError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(oldPasswordError)),
@@ -162,6 +162,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
                   onPressed: () {
@@ -173,6 +174,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     color: Colors.black,
                   ),
                 ),
+                if (isKeyboardVisible)
+                  FloatingActionButton(
+                    heroTag: 'btnSaveTopRight',
+                    onPressed: () {
+                      _updateUserProfile();
+                      Navigator.pop(context);
+                    },
+                    foregroundColor: const Color(verdeSecundario),
+                    backgroundColor: const Color(verdePrimario),
+                    child: const Icon(Icons.check),
+                  ),
               ],
             ),
           ),
@@ -196,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               TextInputType.text,
               _userController,
               validateUser(_userController),
-              (text) => setState(() {}),
+                  (text) => setState(() {}),
               true,
             ),
             form(
@@ -205,7 +217,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               TextInputType.emailAddress,
               _emailController,
               validateEmail(_emailController),
-              (text) => setState(() {}),
+                  (text) => setState(() {}),
               false,
             ),
             Row(
@@ -217,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     TextInputType.text,
                     _passwordController,
                     validatePassword(_passwordController),
-                    (text) => setState(() {}),
+                        (text) => setState(() {}),
                     false,
                   ),
                 ),
@@ -276,37 +288,34 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         visible: !isKeyboardVisible,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                FloatingActionButton.large(
-                  heroTag: 'btnLogout',
-                  onPressed: () async {
-                    await _dbHelper.deleteCurrentUser();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginInicial()),
-                    );
-                  },
-                  foregroundColor: const Color(vermelhoLogOut),
-                  backgroundColor: const Color(vermelhoLogOut2),
-                  child: const Icon(Icons.logout),
-                ),
-                FloatingActionButton.large(
-                  heroTag: 'btnSave',
-                  onPressed: () {
-                    _updateUserProfile();
-                    Navigator.pop(context);
-                  },
-                  foregroundColor: const Color(verdeSecundario),
-                  backgroundColor: const Color(verdePrimario),
-                  child: const Icon(Icons.check),
-                ),
-              ],
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FloatingActionButton.large(
+                heroTag: 'btnLogout',
+                onPressed: () async {
+                  await _dbHelper.deleteCurrentUser();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const LoginInicial()),
+                  );
+                },
+                foregroundColor: const Color(vermelhoLogOut),
+                backgroundColor: const Color(vermelhoLogOut2),
+                child: const Icon(Icons.logout),
+              ),
+              FloatingActionButton.large(
+                heroTag: 'btnSave',
+                onPressed: () {
+                  _updateUserProfile();
+                  Navigator.pop(context);
+                },
+                foregroundColor: const Color(verdeSecundario),
+                backgroundColor: const Color(verdePrimario),
+                child: const Icon(Icons.check),
+              ),
+            ],
           ),
         ),
       ),
