@@ -6,6 +6,8 @@
  * A list of the participants inside the products is also available for
  * easier tracking
  */
+import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
+
 class ProductPurchaseHistory {
   const ProductPurchaseHistory({
     required this.products,
@@ -76,9 +78,18 @@ class Participant {
 }
 
 class ProductPurchaseHistoryExtractor {
-  // static ProductPurchaseHistory extract(int purchaseId) {
-  //   // Use purchaseId to obtain values
-  // }
+  final dbHelper = DatabaseHelper();
+
+  Future<void> extract(int productId) async {
+    List<ProductSqlWrapper>? products = await dbHelper.getProductsFromPurchaseId(productId);
+
+    if (products == null) return Future.error("sql request for list of products returned empty");
+    List<String> productIds = products.map((product) => product.getId().toString()).toList();
+
+    List<ContributionsSqlWrapper>? contributions = await dbHelper.getContributionsFromPurchases(productIds);
+
+  }
+
 }
 
 
@@ -87,7 +98,9 @@ class ProductPurchaseHistoryExtractor {
 
 
 
-// Example User
+
+
+// ---- Example User ----
 
 const alice = Participant(
   name: "Alice",
