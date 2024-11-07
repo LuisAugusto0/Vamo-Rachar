@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 //import 'package:image_picker/image_picker.dart';
 //import 'package:gallery_picker/gallery_picker.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:vamorachar_telacadastro/confirmar_divisao.dart';
 import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
 import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
 import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
+import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
 
 class Item {
   late int id;
@@ -50,11 +52,15 @@ class Participante {
   late int id;
   late String nome;
   late String email;
+  late List<Item> consumidos;
+  late double totalPago;
 
   Participante.create(String nome, int id, String email) {
     this.id = id;
     this.nome = nome;
     this.email = email;
+    consumidos = [];
+    totalPago = 0;
   }
 
   Participante() {
@@ -64,9 +70,6 @@ class Participante {
   }
 }
 
-void main(List<String> args) {
-  runApp(MyApp());
-}
 
 class MyApp extends StatelessWidget {
   //const MyApp({super.key});
@@ -407,7 +410,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
 //Função para adicionar itens
   void addItem(List<Participante> lista, Item item) {
     double auw = item.preco;
-    bool existe = false;
+
     Item aux = new Item.padrao(item.id, 1, item.nome, auw/lista.length);
     if(instancias.length > 0){
       for(int i = 0; i < instancias.length; i++){
@@ -430,7 +433,10 @@ class _NovoRachamentoState extends State<NovoRachamento> {
           }
           if(iguais == lista.length){
             instancias[i].item.quantidade++;
-            existe = true;
+          }
+          else{
+            instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
+            ultimoIdInstancia++;
           }
         } else {
           print("SEGUNDO ELSE");
@@ -438,10 +444,6 @@ class _NovoRachamentoState extends State<NovoRachamento> {
           ultimoIdInstancia++;
           break;
         }
-      }
-      if(!existe){
-        instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
-        ultimoIdInstancia++;
       }
     } else {
       print("PRIMEIRO ELSE");
@@ -785,15 +787,8 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         children: [
           ElevatedButton(
               onPressed: (){
-                for(int i = 0; i < participantes.length; i++){
-                  print("Nome: ${participantes[i].nome} - Preco pago: ${getTotalPago(participantes[i])}");
-                }
-               for(int i = 0; i < instancias.length; i++){
-                  print("ID: ${instancias[i].id} - Nome Item: ${instancias[i].item.nome} - Custo item: ${instancias[i].item.preco} - Quantidade de itens: ${instancias[i].item.quantidade}");
-                  for(int j = 0; j < instancias[i].participantes.length; j++){
-                    print("Nome do participante[${j}]: ${instancias[i].participantes[j].nome}");
-                  }
-                }
+                NavigationHelper.pushNavigatorNoTransition(context,
+                    ConfirmarDivisao(participantes: participantes, instancias: instancias));
               },
               child: Text(
                 "Enviar",
