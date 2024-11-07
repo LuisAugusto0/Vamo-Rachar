@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:vamorachar_telacadastro/historico.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
+import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
+import 'login_inicial.dart';
 import 'novo_rachamento.dart';
 import 'perfil_usuario.dart';
 
@@ -27,6 +29,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
@@ -50,7 +53,32 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String emailUsuario;
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  bool _isLoggedIn = false;
   HomePageAppBar({required this.emailUsuario});
+
+
+  Future<void> userProfileRoute(BuildContext context) async {
+    final userData = await _dbHelper.getCurrentUser();
+
+    if (userData != null) {
+      return NavigationHelper.pushNavigatorTransitionDown(
+        context,
+        Usuario(emailUsuario: emailUsuario),
+      );
+    } else {
+      // // Remove todas as telas anteriores até a primeira
+      // Navigator.popUntil(context, (route) => route.isFirst);
+
+      Navigator.of(context).popUntil( (Route<dynamic> route) => false );
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginInicial()));
+
+      // Exibe mensagem informando que o usuário não está logado
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não há nenhum usuário logado, faça login')),
+      );
+    }
+  }
 
   @override
   Size get preferredSize => const Size.fromHeight(80);
@@ -71,9 +99,7 @@ class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
                 color: Colors.green,
                 size: 50
             ),
-            onPressed: () {
-              NavigationHelper.pushNavigatorTransitionDown(context, Usuario(emailUsuario: emailUsuario,));
-            },
+            onPressed: () => userProfileRoute(context),
           ),
       );
   }

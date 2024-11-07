@@ -25,12 +25,12 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'users.bd');
 
-    // Excluir o banco de dados, forçando a recriação
-    final dbFile = File(path);
-    if (await dbFile.exists()) {
-      await dbFile.delete();
-      print("Banco de dados existente excluído para recriação.");
-    }
+    // // Excluir o banco de dados, forçando a recriação
+    // final dbFile = File(path);
+    // if (await dbFile.exists()) {
+    //   await dbFile.delete();
+    //   print("Banco de dados existente excluído para recriação.");
+    // }
 
     return await openDatabase(
       path,
@@ -63,15 +63,15 @@ class DatabaseHelper {
   Future<Map<String, Object?>?> getCurrentUser() async {
     final db = await _getDatabase();
     // Verifica se a tabela existe e cria se necessário
-    await db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
+    db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
     const sql = 'SELECT * FROM usuarioAtual';
     final usuario = await db.rawQuery(sql);
     return usuario.isEmpty ? null : usuario.first;
   }
 
   Future<void> updateCurrentUser(String email) async{
-    if (getCurrentUser() == null){
-      deleteDatabase(email);
+    if (await getCurrentUser() != null){
+      deleteCurrentUser();
     }
     createCurrentUser(email);
   }

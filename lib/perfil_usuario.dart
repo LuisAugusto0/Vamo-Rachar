@@ -83,15 +83,23 @@ class _MyHomePageState extends State<MyHomePage> {
         _passwordController.text = userData['senha'] as String;
       });
       _currentUserId = userData['id'] as int;
-    } else {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginInicial()),
-            (Route<dynamic> route) => false,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Não há nenhum usuário logado, faça login')),
-      );
     }
+    // else {
+      // Navigator.of(context).pushAndRemoveUntil(
+      //   MaterialPageRoute(builder: (context) => LoginInicial()),
+      //       (Route<dynamic> route) => false,
+      // );
+
+      // Navigator.of(context).popUntil( (Route<dynamic> route) => false );
+      // Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginInicial()));
+
+
+      // Navigator.popUntil(context, (route) => route.isFirst);
+      //
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Não há nenhum usuário logado, faça login')),
+      // );
+    // }
   }
 
   void _updateUserProfile() async {
@@ -101,6 +109,10 @@ class _MyHomePageState extends State<MyHomePage> {
       _emailController.text,
       _passwordController.text,
     );
+
+    await _dbHelper.updateCurrentUser(_emailController.text);
+
+
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Perfil atualizado com sucesso!')),
@@ -263,8 +275,8 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               FloatingActionButton.large(
                 heroTag: 'btnLogout',
-                onPressed: () {
-                  _dbHelper.deleteCurrentUser();
+                onPressed: () async {
+                  await _dbHelper.deleteCurrentUser();
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const LoginInicial()),
