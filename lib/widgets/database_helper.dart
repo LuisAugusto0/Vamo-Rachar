@@ -128,6 +128,10 @@ class ProductUnitSqlWrapper {
 
   int getId() => _data[id] as int;
   int getFkeyProduct() => _data[fkeyProduct] as int;
+
+  static List<ProductUnitSqlWrapper> fromList(List<Map<String, dynamic>> data) {
+    return data.map((map) => ProductUnitSqlWrapper(map)).toList();
+  }
 }
 
 class ContributionsSqlWrapper {
@@ -258,8 +262,10 @@ class DatabaseHelper {
         ''');
         db.execute('CREATE TABLE usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
       },
-    );
+    ).whenComplete(_initTestData);
   }
+
+
 
 
   Future<void> createCurrentUser(String email) async {
@@ -370,32 +376,121 @@ class DatabaseHelper {
 
 
 
-  Future<List<ProductSqlWrapper>?> getProductsFromPurchaseId(int productId) async {
+  Future<List<ProductSqlWrapper>?> productListFromPurchase(int purchaseId) async {
     final db = await _getDatabase();
 
     final result = await db.query(
       purchaseTable,
       columns: [ProductSqlWrapper.id],
       where: '${ProductSqlWrapper.id} = ?',
-      whereArgs: [productId],
+      whereArgs: [purchaseId],
     );
 
     return result.isEmpty ? null : ProductSqlWrapper.fromList(result);
   }
 
 
-  Future<List<ContributionsSqlWrapper>?> getContributionsFromPurchases(List<String> ids) async {
+  Future<List<ProductUnitSqlWrapper>?> productUnitListFromProductList(List<int> productIds) async {
+    final db = await _getDatabase();
+
+    final result = await db.query(
+      purchaseTable,
+      columns: [ProductUnitSqlWrapper.id],
+      where: '${ProductUnitSqlWrapper.id} = ?',
+      whereArgs: productIds,
+    );
+
+    return result.isEmpty ? null : ProductUnitSqlWrapper.fromList(result);
+  }
+
+
+  Future<List<ContributionsSqlWrapper>?> contributionListFromProductUnitList(List<int> contributionIds) async {
     final db = await _getDatabase();
 
     final result = await db.query(
       contributionTable,
       columns: [ContributionsSqlWrapper.id],
       where: '${ContributionsSqlWrapper.id} = ?',
-      whereArgs: ids,
+      whereArgs: contributionIds,
     );
 
     return result.isEmpty ? null : ContributionsSqlWrapper.fromList(result);
   }
+
+
+  Future<List<UserSqlWrapper>?> userListFromUserId(List<int> userIds) async {
+    final db = await _getDatabase();
+    final whereClause = '${UserSqlWrapper.id} IN (${List.filled(userIds.length, '?').join(', ')})';
+
+    final result = await db.query(
+      contributionTable,
+      columns: [UserSqlWrapper.id],
+      where: whereClause,
+      whereArgs: userIds,
+    );
+
+    return result.isEmpty ? null : UserSqlWrapper.fromList(result);
+  }
+
+
+
+  Future<void> _initTestData() async {
+    final db = await _getDatabase();
+
+    db.execute('''
+      INSERT INTO usuario (nome, email, senha, imagem) 
+      VALUES 
+      ('João Silva', 'joao.silva@email.com', 'senha123', 'imagem1.jpg'),
+      ('Maria Oliveira', 'maria.oliveira@email.com', 'senha456', 'imagem2.jpg');
+      INSERT INTO pedido (estabelecimento_nome, date_time, longitude, latitude) 
+      VALUES 
+      ('Restaurante A', 1704045020, -46.6333, -23.5505),   -- Unix timestamp for example
+      ('Restaurante B', 1704048320, -46.6335, -23.5500);
+      INSERT INTO usuario_pedido (usuario_id, pedido_id)
+      VALUES 
+      (1, 1),  -- João Silva made an order at Restaurante A
+      (1, 2),  -- João Silva made an order at Restaurante B
+      (2, 2);  -- Maria Oliveira made an order at Restaurante B
+      INSERT INTO produto (nome, preco, pedido_id) 
+      VALUES 
+      ('Pizza Margherita', 30.00, 1),
+      ('Coca-Cola', 10.00, 2),
+      ('Hamburguer', 25.00, 2);
+      INSERT INTO unidade_produto (produto_id)
+      VALUES 
+      (1),  -- Pizza Margherita
+      (2),  -- Coca-Cola
+      (3);  -- Hamburguer
+      INSERT INTO contribuicao (preco_pago, usuario_id, unidade_produto_id) 
+      VALUES 
+      (30.00, 1, 1),  -- João Silva paid for a Pizza Margherita
+      (10.00, 1, 2),  -- João Silva paid for a Coca-Cola
+      (25.00, 2, 3);  -- Maria Oliveira paid for a Hamburguer
+      (25.00, 2, 3);  -- Maria Oliveira paid for a Hamburguer
+      '''
+    );
+
+    _getDatabase();
+  }
+
+  Future<void> _displayTestData() async {
+    final db = await _getDatabase();
+
+    db.execute('''
+    SELECT 
+      u.nome AS usuario_nome, 
+      p.estabelecimento_nome, 
+      pr.nome AS produto_nome, 
+      c.preco_pago
+    FROM 
+        contribuicao c
+    JOIN usuario u ON c.usuario_id = u.id
+    JOIN unidade_produto up ON c.unidade_produto_id = up.id
+    JOIN produto pr ON up.produto_id = pr.id
+    JOIN pedido p ON pr.pedido_id = p.id;
+    ''');
+  }
+
 }
 
 
