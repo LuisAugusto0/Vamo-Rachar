@@ -11,6 +11,7 @@ class HistoricoDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: Appbar(onChanged: (String str) => {}, total: productPurchaseHistory.spendings),
       body: Body(data: productPurchaseHistory),
@@ -18,6 +19,45 @@ class HistoricoDetails extends StatelessWidget {
   }
 }
 
+/*
+ @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Historical Details'),
+      ),
+      body: FutureBuilder<ProductPurchaseHistory>(
+        future: _productPurchaseHistoryFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // While waiting for the data, show a placeholder text or loading indicator
+            return const Center(child: Text('Loading...'));
+          } else if (snapshot.hasError) {
+
+            // If an error occurred, show an error message
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            // Once the data is available, build the actual widget
+            final productPurchaseHistory = snapshot.data!;
+            return Column(
+              children: [
+                AppBar(
+                  title: Text('Total Spendings: ${productPurchaseHistory.spendings}'),
+                ),
+                Expanded(
+                  child: Body(data: productPurchaseHistory),
+                ),
+              ],
+            );
+          } else {
+            // If somehow no data was returned
+            return const Center(child: Text('No data available'));
+          }
+        },
+      ),
+    );
+  }
+ */
 
 class Appbar extends StatelessWidget implements PreferredSizeWidget {
   const Appbar({

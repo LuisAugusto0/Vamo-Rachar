@@ -214,26 +214,28 @@ class Participant {
 
 
 class ProductPurchaseHistoryExtractor {
-  final dbHelper = DatabaseHelper();
 
-  Future<ProductPurchaseHistory> extract(int productId) async {
+
+  static Future<ProductPurchaseHistory> extract(int productId) async {
+    final dbHelper = DatabaseHelper();
+
     // Get list of products
     List<ProductSqlWrapper>? productWrappers = await dbHelper.productListFromPurchase(productId);
 
-    if (productWrappers == null) return Future.error("sql request for list of products returned empty");
+    if (productWrappers == null) throw ArgumentError("sql request for list of products returned empty");
     List<int> productIds = productWrappers.map((product) => product.getId()).toList();
 
     // Get list of product units through product ids
     List<ProductUnitSqlWrapper>? productUnitWrappers = await dbHelper.productUnitListFromProductList(productIds);
 
-    if (productUnitWrappers == null) return Future.error("sql request for list of pruchases returned empty");
+    if (productUnitWrappers == null)  throw ArgumentError("sql request for list of pruchases returned empty");
     List<int> productUnitIds = productWrappers.map((product) => product.getId()).toList();
 
 
     // Get list of contributions through all product units ids
     List<ContributionsSqlWrapper>? contributionWrappers = await dbHelper.contributionListFromProductUnitList(productUnitIds);
 
-    if (contributionWrappers == null) return Future.error("sql request for list of contributions returned empty");
+    if (contributionWrappers == null)  throw ArgumentError("sql request for list of contribution returned empty");
     Set<int> userIdsHash = {};
 
     for (var contribution in contributionWrappers) {
@@ -245,7 +247,7 @@ class ProductPurchaseHistoryExtractor {
 
     // Get list of users from all contributions
     List<UserSqlWrapper>? users = await dbHelper.userListFromUserId(userIdList);
-    if (users == null) return Future.error("sql request for list of contributions returned empty");
+    if (users == null)   throw ArgumentError("sql request for list of pruchases returned empty");
     Map<int, Participant> participant = Participant.toMap(users);
     List<Contributions> contributions = Contributions.fromSqlList(contributionWrappers, participant);
 
@@ -290,7 +292,18 @@ class ProductPurchaseHistoryExtractor {
       totalPrice += product.price * product.instances.length;
     }
 
-    return ProductPurchaseHistory(products: products, participants: Participant.fromSqlList(users), spendings: totalPrice);
+    final res = ProductPurchaseHistory(
+        products: products,
+        participants: Participant.fromSqlList(users),
+        spendings: totalPrice
+    );
+
+    print(res.spendings);
+    for (var participant in res.participants) {
+      print(participant.name);
+    }
+
+    return res;
   }
 
 }
