@@ -7,29 +7,27 @@ import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
 
 class Usuario extends StatelessWidget {
-  final String emailUsuario;
-  const Usuario({required this.emailUsuario});
+  const Usuario({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MyHomePage(emailUsuario: emailUsuario ,title: 'Perfil do usuário'),
+      body: MyHomePage(title: 'Perfil do usuário'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.emailUsuario, required this.title});
+  const MyHomePage({super.key, required this.title});
 
   final String title;
-  final String emailUsuario;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState(emailUsuario);
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -37,12 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _newPasswordController = TextEditingController();
   final DatabaseHelper _dbHelper = DatabaseHelper();
   int _currentUserId = 0;
-
-  // Declare a variável de instância
-  final String emailUsuario;
-
-  // Inicialize a variável de instância no construtor
-  _MyHomePageState(this.emailUsuario);
+  bool isKeyboardVisible = false;
 
   @override
   void dispose() {
@@ -51,6 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _passwordController.dispose();
     _oldPasswordController.dispose();
     _newPasswordController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -58,6 +52,16 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _loadUserData();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final bottomInset = WidgetsBinding.instance.window.viewInsets.bottom;
+    setState(() {
+      isKeyboardVisible = bottomInset > 0;
+    });
   }
 
   // Future<void> _loadUserData() async {
@@ -83,15 +87,22 @@ class _MyHomePageState extends State<MyHomePage> {
         _passwordController.text = userData['senha'] as String;
       });
       _currentUserId = userData['id'] as int;
-    } else {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginInicial()),
-            (Route<dynamic> route) => false,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Não há nenhum usuário logado, faça login')),
-      );
     }
+    // else {
+    // Navigator.of(context).pushAndRemoveUntil(
+    //   MaterialPageRoute(builder: (context) => LoginInicial()),
+    //       (Route<dynamic> route) => false,
+    // );
+
+    // Navigator.of(context).popUntil( (Route<dynamic> route) => false );
+    // Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginInicial()));
+
+    // Navigator.popUntil(context, (route) => route.isFirst);
+    //
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text('Não há nenhum usuário logado, faça login')),
+    // );
+    // }
   }
 
   void _updateUserProfile() async {
@@ -102,6 +113,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _passwordController.text,
     );
 
+    await _dbHelper.updateCurrentUser(_emailController.text);
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Perfil atualizado com sucesso!')),
     );
@@ -109,7 +122,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _alterarSenha() {
     // Verifica se a senha antiga está correta
-    String? oldPasswordError = validateOldPassword(_oldPasswordController, _passwordController);
+    String? oldPasswordError =
+    validateOldPassword(_oldPasswordController, _passwordController);
     if (oldPasswordError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(oldPasswordError)),
@@ -148,6 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
                   onPressed: () {
@@ -159,115 +174,131 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.black,
                   ),
                 ),
+                if (isKeyboardVisible)
+                  FloatingActionButton(
+                    heroTag: 'btnSaveTopRight',
+                    onPressed: () {
+                      _updateUserProfile();
+                      Navigator.pop(context);
+                    },
+                    foregroundColor: const Color(verdeSecundario),
+                    backgroundColor: const Color(verdePrimario),
+                    child: const Icon(Icons.check),
+                  ),
               ],
             ),
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                userAvatarCustom("https://thispersondoesnotexist.com"),
-              ],
-            ),
-          ),
-          form(
-            "Usuário",
-            Icons.account_circle_outlined,
-            TextInputType.text,
-            _userController,
-            validateUser(_userController),
-                (text) => setState(() {}),
-            true,
-          ),
-          form(
-            "E-mail",
-            Icons.email_outlined,
-            TextInputType.emailAddress,
-            _emailController,
-            validateEmail(_emailController),
-                (text) => setState(() {}),
-            false,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: senhaOculta(
-                  "Senha",
-                  Icons.key_outlined,
-                  TextInputType.text,
-                  _passwordController,
-                  validatePassword(_passwordController),
-                      (text) => setState(() {}),
-                  false,
-                ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  userAvatarCustom("https://thispersondoesnotexist.com"),
+                ],
               ),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                color: const Color(verdePrimario),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Alterar Senha'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              controller: _oldPasswordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(labelText: 'Senha Antiga'),
+            ),
+            form(
+              "Usuário",
+              Icons.account_circle_outlined,
+              TextInputType.text,
+              _userController,
+              validateUser(_userController),
+                  (text) => setState(() {}),
+              true,
+            ),
+            form(
+              "E-mail",
+              Icons.email_outlined,
+              TextInputType.emailAddress,
+              _emailController,
+              validateEmail(_emailController),
+                  (text) => setState(() {}),
+              false,
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: senhaOculta(
+                    "Senha",
+                    Icons.key_outlined,
+                    TextInputType.text,
+                    _passwordController,
+                    validatePassword(_passwordController),
+                        (text) => setState(() {}),
+                    false,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  color: const Color(verdePrimario),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Alterar Senha'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextField(
+                                controller: _oldPasswordController,
+                                obscureText: true,
+                                decoration: const InputDecoration(
+                                    labelText: 'Senha Antiga'),
+                              ),
+                              TextField(
+                                controller: _newPasswordController,
+                                obscureText: true,
+                                decoration: const InputDecoration(
+                                    labelText: 'Nova Senha'),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Cancelar'),
                             ),
-                            TextField(
-                              controller: _newPasswordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(labelText: 'Nova Senha'),
+                            TextButton(
+                              onPressed: () {
+                                _alterarSenha();
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Alterar'),
                             ),
                           ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Cancelar'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              _alterarSenha();
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Alterar'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0), // Margem nas laterais
+      floatingActionButton: Visibility(
+        visible: !isKeyboardVisible,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               FloatingActionButton.large(
                 heroTag: 'btnLogout',
-                onPressed: () {
-                  _dbHelper.deleteCurrentUser();
+                onPressed: () async {
+                  await _dbHelper.deleteCurrentUser();
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const LoginInicial()),
+                    MaterialPageRoute(
+                        builder: (context) => const LoginInicial()),
                   );
                 },
                 foregroundColor: const Color(vermelhoLogOut),
@@ -288,7 +319,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat, // Ajusta a localização
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

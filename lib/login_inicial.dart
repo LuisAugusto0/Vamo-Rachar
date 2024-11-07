@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
 import 'package:vamorachar_telacadastro/sobre.dart';
+import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
 import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
 import 'tela_inicial.dart';
 import 'cadastro.dart';
@@ -34,8 +35,15 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _userText = TextEditingController();
   final TextEditingController _emailText = TextEditingController();
   final TextEditingController _passwordText = TextEditingController();
-  final TextEditingController _passwordConfirmationText =
-      TextEditingController();
+  final TextEditingController _passwordConfirmationText = TextEditingController();
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  bool isLoggedIn = false;
+
+  @override
+  void initState() {
+    verifyLogin();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -44,6 +52,13 @@ class _MyHomePageState extends State<MyHomePage> {
     _passwordText.dispose();
     _passwordConfirmationText.dispose();
     super.dispose();
+  }
+
+  Future<void> verifyLogin() async{
+    Map<String, Object?>? user = await _dbHelper.getCurrentUser();
+    if (user != null){
+      NavigationHelper.pushNavigatorNoTransition(context, Home());
+    }
   }
 
   Route _cadastroRoute() {
@@ -67,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Route _homeRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => Home(emailUsuario: _emailText.text,),
+      pageBuilder: (context, animation, secondaryAnimation) => Home(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;

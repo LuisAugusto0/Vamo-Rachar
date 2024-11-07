@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vamorachar_telacadastro/constants/colors.dart';
@@ -32,6 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final TextEditingController _emailResetController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _newPasswordConfirmationController = TextEditingController();
 
@@ -52,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Route _homeRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => Home(emailUsuario: _emailController.text),
+      pageBuilder: (context, animation, secondaryAnimation) => Home(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
@@ -111,9 +114,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return null;
   }
 
-  void _alterarSenha() {
+  Future<void> _alterarSenha() async {
     // Simule a verificação da senha antiga e a alteração para a nova senha
-    if(validatePassword(_newPasswordController) != null){
+    if (validatePassword(_newPasswordController) != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(validatePassword(_newPasswordController) ?? 'Erro desconhecido')),
       );
@@ -124,50 +127,152 @@ class _MyHomePageState extends State<MyHomePage> {
             'Erro desconhecido')),
       );
     } else {
+      Map<String, Object?>? oldUser = await dbHelper.findUser(_emailResetController.text);
+      dbHelper.updateUser(oldUser!['id'] as int, oldUser!['nome'] as String, oldUser!['email'] as String, _newPasswordController.text);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Senha alterada com sucesso!')),
       );
+      Navigator.pop(context);
     }
   }
 
-  VoidCallback? _forgotPasswordPopup(){
+  Future<void> _confirmarEmail(String email) async {
+    Map<String, Object?>? user = await dbHelper.findUser(email);
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('E-mail incorreto')),
+      );
+    } else {
+      _enviarCodigoDeVerificacao();  // Simula o envio de um código
+    }
+  }
+
+  void _enviarCodigoDeVerificacao() {
+    // Gera um código aleatório de 6 dígitos
+    int codigoVerificacao = Random().nextInt(900000) + 100000;
+    print("Código de verificação enviado: $codigoVerificacao");
+
+    // Mostra o dialog para o usuário inserir o código
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Alterar Senha'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _newPasswordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Senha Antiga'),
-                ),
-                TextField(
-                  controller: _newPasswordConfirmationController,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Nova Senha'),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  _alterarSenha();
-                  Navigator.pop(context);
-                },
-                child: const Text('Alterar'),
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController _codigoController = TextEditingController();
+
+        return AlertDialog(
+          title: const Text('Código de Verificação'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _codigoController,
+                decoration: const InputDecoration(labelText: 'Digite o código de verificação'),
+                keyboardType: TextInputType.number,
               ),
             ],
-          );
-        },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                int codigoDigitado = int.tryParse(_codigoController.text) ?? 0;
+                if (codigoDigitado == codigoVerificacao) {
+                  // Se o código estiver correto, permite a alteração da senha
+                  Navigator.pop(context);
+                  _mostrarAlteracaoDeSenhaDialog();
+                } else {
+                  // Se o código estiver incorreto, mostra uma mensagem de erro
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Código de verificação incorreto')),
+                  );
+                  Navigator.pop(context);  // Fecha o dialog de código
+                }
+              },
+              child: const Text('Verificar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _mostrarAlteracaoDeSenhaDialog() {
+    // Mostra o dialog para alteração de senha
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Alterar Senha'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _newPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Nova senha'),
+              ),
+              TextField(
+                controller: _newPasswordConfirmationController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Confirmar senha'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                _alterarSenha();
+              },
+              child: const Text('Alterar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  VoidCallback? _forgotPasswordPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('E-mail de confirmação'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _emailResetController,
+                decoration: const InputDecoration(labelText: 'E-mail de confirmação'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _confirmarEmail(_emailResetController.text);
+              },
+              child: const Text('Alterar'),
+            ),
+          ],
+        );
+      },
     );
     return null;
   }
