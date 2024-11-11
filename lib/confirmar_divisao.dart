@@ -1,6 +1,6 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
-import 'package:vamorachar_telacadastro/novo_rachamento.dart';
-import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
+import 'novo_rachamento.dart';
+import 'package:vamorachar/widgets/navigation_helper.dart';
 import 'package:flutter/material.dart';
 
 class ConfirmarDivisao extends StatelessWidget {

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 //import 'package:image_picker/image_picker.dart';
 //import 'package:gallery_picker/gallery_picker.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
-import 'package:vamorachar_telacadastro/confirmar_divisao.dart';
-import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
-import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
-import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
-import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
+import 'confirmar_divisao.dart';
+import 'tela_inicial.dart';
+import 'widgets/validation_helpers.dart';
+import 'widgets/form_widgets.dart';
+import 'database/database_helper.dart';
+import 'widgets/navigation_helper.dart';
 
 class Item {
   late int id;
@@ -503,7 +504,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       appBar: AppBar(
           leading: IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              NavigationHelper.pushNavigatorNoTransition(context, Home());
             },
             icon: const Icon(
               Icons.arrow_back_outlined,

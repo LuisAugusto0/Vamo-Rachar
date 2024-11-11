@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:vamorachar_telacadastro/historico.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart';
-import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
-import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
+import 'historico.dart';
+import 'constants/colors.dart';
+import 'widgets/navigation_helper.dart';
+import 'database/database_helper.dart';
 import 'login_inicial.dart';
 import 'novo_rachamento.dart';
 import 'perfil_usuario.dart';
@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  bool _isLoggedIn = false;
+  final bool _isLoggedIn = false;
   HomePageAppBar({super.key});
 
 

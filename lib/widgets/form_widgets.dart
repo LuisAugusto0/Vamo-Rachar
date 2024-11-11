@@ -1,6 +1,6 @@
 // lib/widgets/form_widgets.dart
 import 'package:flutter/material.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart'; // Importa as cores
+import 'package:vamorachar/constants/colors.dart'; // Importa as cores
 
 // Widget de campo de formulário genérico
 Widget form(

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
-import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart';
+import 'package:vamorachar/widgets/form_widgets.dart';
+import 'package:vamorachar/widgets/validation_helpers.dart';
+import 'package:vamorachar/constants/colors.dart';
 import 'tela_inicial.dart';
 
-import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
+import 'package:vamorachar/database/database_helper.dart';
 
 
 class Cadastro extends StatelessWidget {

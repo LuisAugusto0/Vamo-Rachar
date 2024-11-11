@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:vamorachar_telacadastro/login_inicial.dart';
-import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
-import 'package:vamorachar_telacadastro/widgets/avatar_widget.dart';
-import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart';
-import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
+import 'login_inicial.dart';
+import 'widgets/form_widgets.dart';
+import 'widgets/avatar_widget.dart';
+import 'widgets/validation_helpers.dart';
+import 'constants/colors.dart';
+import 'database/database_helper.dart';
 
 class Usuario extends StatelessWidget {
   const Usuario({super.key});

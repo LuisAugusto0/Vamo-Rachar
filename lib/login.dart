@@ -2,12 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart';
-import 'package:vamorachar_telacadastro/widgets/form_widgets.dart';
-import 'package:vamorachar_telacadastro/widgets/validation_helpers.dart';
+import 'constants/colors.dart';
+import 'widgets/form_widgets.dart';
+import 'widgets/validation_helpers.dart';
 import 'tela_inicial.dart';
 import 'cadastro.dart';
-import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
+import 'database/database_helper.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
         const curve = Curves.ease;
 
         var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
         const curve = Curves.ease;
 
         var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -283,129 +283,129 @@ class _MyHomePageState extends State<MyHomePage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
     return Scaffold(
-      backgroundColor: const Color(verdePrimario),
-      body:
-      SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Spread content between top and bottom
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20, left: 40, right: 40),
-              child: Column(
-                // Essa coluna representa a parte centralizada
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    fit: BoxFit.contain,
-                    height: 200,
-                  ),
-                  form(
-                      "E-mail", //Label do TextField
-                      Icons.account_circle_outlined, //Ícone do TextField
-                      TextInputType.text, //Tipo do Teclado
-                      _emailController, // Controlador do TextField
-                      validateEmail(_emailController), // Verifica se há erro
-                          (text) => setState(() => ()), // OnChanged
-                      true // Enabled?
-                  ),
-                  passwordForm(
-                    // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
-                      "Senha", //Lable do TextField
-                      Icons.key_outlined, //Ícone do TextField
-                      _passwordController, // Controlador do TextField
-                      validatePassword(_passwordController), // Verifica se há erro
-                      _obscureText, // boolean para controlar visibilidade
-                      _toggleVisibility,
-                          (text) => setState(() => ()), // OnChanged
-                      true // Enabled?
-                  ),
-                  TextButton(
-                      onPressed: _forgotPasswordPopup,
+        backgroundColor: const Color(verdePrimario),
+        body:
+        SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Spread content between top and bottom
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 20, left: 40, right: 40),
+                child: Column(
+                  // Essa coluna representa a parte centralizada
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/logo.png',
+                      fit: BoxFit.contain,
+                      height: 200,
+                    ),
+                    form(
+                        "E-mail", //Label do TextField
+                        Icons.account_circle_outlined, //Ícone do TextField
+                        TextInputType.text, //Tipo do Teclado
+                        _emailController, // Controlador do TextField
+                        validateEmail(_emailController), // Verifica se há erro
+                            (text) => setState(() => ()), // OnChanged
+                        true // Enabled?
+                    ),
+                    passwordForm(
+                      // hint, ico, controller, error, obscureText, toggleVisibility, onChanged, enabled
+                        "Senha", //Lable do TextField
+                        Icons.key_outlined, //Ícone do TextField
+                        _passwordController, // Controlador do TextField
+                        validatePassword(_passwordController), // Verifica se há erro
+                        _obscureText, // boolean para controlar visibilidade
+                        _toggleVisibility,
+                            (text) => setState(() => ()), // OnChanged
+                        true // Enabled?
+                    ),
+                    TextButton(
+                        onPressed: _forgotPasswordPopup,
+                        child: const Text(
+                          "Esqueci a senha",
+                          style: TextStyle(
+                            color: Color(0xEEEEEEEE),
+                          ),
+                        )
+                    ),
+                    ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green, // Background color
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                          BorderRadius.circular(25.0), // Rounded corners
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 100.0, vertical: 12.0),
+                      ),
+                      child: const Text('Login',
+                          style: TextStyle(color: Color(0xEEEEEEEE))),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Não possui conta ?",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(_cadastroRoute());
+                            },
+                            child: const Text(
+                              "Registre-se",
+                              style: TextStyle(
+                                color: Color(0xEEEEEEEE),
+                              ),
+                            )
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, top:20, bottom: 20),
+                child: Column(
+                  // Essa coluna representa a parte inferior
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // Linha horizontal
+                    Container(
+                      width: 400,
+                      height: 2,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent, // Fading start
+                            Colors.black,
+                            Colors.transparent, // Fading end
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10), // Space between the line and text
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(_homeRoute());
+                      },
                       child: const Text(
-                        "Esqueci a senha",
+                        "Entrar como convidado",
                         style: TextStyle(
-                          color: Color(0xEEEEEEEE),
-                        ),
-                      )
-                  ),
-                  ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Background color
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                        BorderRadius.circular(25.0), // Rounded corners
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 100.0, vertical: 12.0),
-                    ),
-                    child: const Text('Login',
-                        style: TextStyle(color: Color(0xEEEEEEEE))),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Não possui conta ?",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                          color: Color(0xEEEEEEEE), // Text color changed to blue
                         ),
                       ),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(_cadastroRoute());
-                          },
-                          child: const Text(
-                            "Registre-se",
-                            style: TextStyle(
-                              color: Color(0xEEEEEEEE),
-                            ),
-                          )
-                      )
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, top:20, bottom: 20),
-              child: Column(
-                // Essa coluna representa a parte inferior
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  // Linha horizontal
-                  Container(
-                    width: 400,
-                    height: 2,
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent, // Fading start
-                          Colors.black,
-                          Colors.transparent, // Fading end
-                        ],
-                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10), // Space between the line and text
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(_homeRoute());
-                    },
-                    child: const Text(
-                      "Entrar como convidado",
-                      style: TextStyle(
-                        color: Color(0xEEEEEEEE), // Text color changed to blue
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      )
+            ],
+          ),
+        )
     );
   }
 }

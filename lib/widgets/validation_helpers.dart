@@ -1,6 +1,9 @@
 // lib/widgets/validation_helpers.dart
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
+import 'package:vamorachar/database/database_helper.dart';
+import 'package:vamorachar/database/sql_tables.dart';
 
 // Variáveis globais e regex
 final RegExp specialCharacters = RegExp(r'[!@#$%^&*(),.?":{}|<>]');
@@ -70,6 +73,7 @@ String? validateOldPassword(TextEditingController oldPasswordController, TextEdi
   return null;
 }
 
+
 String? validateLogin(TextEditingController passwordController, Map<String, Object?>? user){
   if(user == null){
     return "Usuário não encontrado";
@@ -78,4 +82,18 @@ String? validateLogin(TextEditingController passwordController, Map<String, Obje
   }
   return null;
 }
+
+// String? validateLogin(TextEditingController passwordController, LoginSql? login){
+//   if(login == null){
+//     return "Usuário não encontrado";
+//   } else if (passwordController.text != login.password){
+//     return "A senha está incorreta";
+//   }
+//   return null;
+// }
+
+// bool validateLogin(TextEditingController passwordController, LoginSql login) {
+//   return (passwordController.text != login.password);
+//
+// }
 

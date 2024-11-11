@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:vamorachar_telacadastro/historico_detalhes.dart';
-import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
+import 'package:vamorachar/historico_detalhes.dart';
+import 'package:vamorachar/widgets/navigation_helper.dart';
 
 class Participants {
   const Participants({

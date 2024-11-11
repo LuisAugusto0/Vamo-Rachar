@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart';
-import 'package:vamorachar_telacadastro/sobre.dart';
-import 'package:vamorachar_telacadastro/widgets/database_helper.dart';
-import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
+import 'constants/colors.dart';
+import 'sobre.dart';
+import 'database/database_helper.dart';
+import 'widgets/navigation_helper.dart';
 import 'tela_inicial.dart';
 import 'cadastro.dart';
 import 'login.dart';

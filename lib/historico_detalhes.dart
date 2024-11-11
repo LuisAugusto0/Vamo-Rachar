@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
-import 'extractor/product_purchase_history_extractor.dart';
+import 'package:vamorachar/widgets/navigation_helper.dart';
+import 'database/history_page_wrapper_converter.dart';
 import 'package:intl/intl.dart';
 
 ProductPurchaseHistory productPurchaseHistory = defaultProductPurchaseHistory;
