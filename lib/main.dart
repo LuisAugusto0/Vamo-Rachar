@@ -35,18 +35,36 @@ void main() async {
   db.assertAllTablesExists();
 
 
-  LoginProvider loginProvider = LoginProvider(db);
-  final res =  await loginProvider.getById(1);
-  debugPrint(res.toString());
+  // LoginProvider loginProvider = LoginProvider(db);
+  // final res =  await loginProvider.getById(1);
+  // debugPrint(res.toString());
+  //
+  // ContributionProvider contributionProvider = ContributionProvider(db);
+  // final res2 = await contributionProvider.getByIdList([1,2,3,4], limit: 10);
+  // debugPrint(res2.toString());
 
-  ContributionProvider contributionProvider = ContributionProvider(db);
-  final res2 = await contributionProvider.getByIdList([1,2,3,4], limit: 10);
-  debugPrint(res2.toString());
-
-  final newLogin = const LoginSql(name: 'jose', email: 'josisas@gmail.com', password: 'password123#');
-
-  loginProvider.insert(newLogin);
+  testProviders();
 }
+
+
+void testProviders() async {
+  LoginProvider loginProvider = LoginProvider(DatabaseHelper());
+
+  loginProvider.insert(const LoginSql(name: "name", email: "email@email.com", password: "password1#"));
+  LoginSql? query = await loginProvider.getLastAddedId();
+  debugPrint(query.toString());
+  if (query == null) throw AssertionError('Result was expected to be added');
+
+  int id = query.id!;
+  LoginSql updateSql = LoginSql(name: "name2", email: "email2@email.com", password: "password2#");
+
+  loginProvider.updateById(updateSql, id);
+  query = await loginProvider.getById(id);
+  debugPrint('after update ${query.toString()}');
+
+  loginProvider.removeById(id);
+}
+
 
 
 Future<void> initializeDatabase() async {

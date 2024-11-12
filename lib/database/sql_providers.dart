@@ -43,9 +43,9 @@ abstract class SqlProvider<T extends SqlTable> {
     Database db = await helper.getDatabase();
 
     final map = wrapper.toMap();
-    for (String column in wrapper.getColumns()) {
-      if (map.containsKey(column)) throw Exception("Contraint Violation: Insert is not allowed to have primary keys");
-    }
+    // for (String column in wrapper.getColumns()) {
+    //   if (map.containsKey(column)) throw Exception("Contraint Violation: Insert is not allowed to have primary keys");
+    // }
 
     db.insert(this.table, wrapper.toMap());
   }
@@ -56,9 +56,9 @@ abstract class SqlProvider<T extends SqlTable> {
     Database db = await helper.getDatabase();
 
     final map = wrapper.toMap();
-    for (String column in wrapper.getColumns()) {
-      if (map.containsKey(column)) throw Exception("Contraint Violation: Update is not allowed to have primary keys");
-    }
+    // for (String column in wrapper.getColumns()) {
+    //   if (map.containsKey(column)) throw Exception("Contraint Violation: Update is not allowed to have primary keys");
+    // }
 
     final retorno = await db.update(
       table,
@@ -87,7 +87,25 @@ abstract class SqlProvider<T extends SqlTable> {
   /// Query Definitions
 
   // Helper methods for one column search
-  Future<List<Map<String, Object?>>> _singleValueQuery(Object id, String column) async {
+  Future<List<Map<String, Object?>>> _queryAll(String column, int limit,
+      {String? orderBy}) async {
+
+    Database db = await helper.getDatabase();
+
+    final result = db.query(
+        table,
+        columns: columns,
+        orderBy: orderBy,
+        limit: limit
+    );
+
+    return result;
+  }
+
+
+  Future<List<Map<String, Object?>>> _idQuery(Object id, String column,
+      {String? orderBy, int? limit}) async {
+
     Database db = await helper.getDatabase();
 
     final result = db.query(
@@ -95,19 +113,16 @@ abstract class SqlProvider<T extends SqlTable> {
         columns: columns,
         where: '$column = ?',
         whereArgs: [id],
-        limit: 2
+        orderBy: orderBy,
+        limit: limit
     );
 
     return result;
   }
 
 
-  Future<List<Map<String, Object?>>>  _listOfValuesQuery(
-      String column,
-      List<Object> ids,
-      int? limit,
-      String? orderBy
-    ) async {
+  Future<List<Map<String, Object?>>>  _listOfIdsQuery(String column, List<Object> ids,
+      {int? limit, String? orderBy}) async {
 
     Database db = await helper.getDatabase();
 
@@ -128,7 +143,7 @@ abstract class SqlProvider<T extends SqlTable> {
 
   // Applications
   Future<T?> _getByPrimaryKey(Object id, String column) async {
-    final result = await _singleValueQuery(id, column);
+    final result = await _idQuery(id, column);
 
     if (result.length > 1) throw Exception("not UID");
     return result.isNotEmpty ? fromMap(result.first) : null;
@@ -136,7 +151,7 @@ abstract class SqlProvider<T extends SqlTable> {
 
 
   Future<List<T>> _getByKey(Object id, String column) async {
-    final result = await _singleValueQuery(id, column);
+    final result = await _idQuery(id, column);
     return result.isNotEmpty ? fromMapList(result) : [];
   }
 
@@ -148,12 +163,12 @@ abstract class SqlProvider<T extends SqlTable> {
       String? orderBy
       ) async {
 
-    final result = await _listOfValuesQuery(column, ids, limit, orderBy);
+    final result = await _listOfIdsQuery(column, ids, limit: limit, orderBy: orderBy);
     return result.isNotEmpty ? fromMapList(result) : [];
   }
 
   Future<List<K>>  _getSingleColumnByKey<K>(Object id, String column) async {
-    final result = await _singleValueQuery(id, column);
+    final result = await _idQuery(id, column);
     List<K> list = [];
 
     for (final map in result) {
@@ -193,7 +208,7 @@ class UserPurchaseProvider extends SqlProvider<UserPurchaseSql> {
 
 
 // Sql Provider for SqlTables that contains a numeric autoincrement primary key
-abstract class EntityProvider<T extends SqlTable> extends SqlProvider<T> {
+abstract class EntityProvider<T extends EntityTable> extends SqlProvider<T> {
   const EntityProvider(super.db);
 
   String get idColumnName;
@@ -201,13 +216,19 @@ abstract class EntityProvider<T extends SqlTable> extends SqlProvider<T> {
 
   Future<void> removeById(int id) async => _remove(id, idColumnName);
 
-  Future<void> updateById(T wrapper, int id) async => _updateByKey(wrapper, idColumnName, id);
+
+  Future<void> updateById(T wrapper, Object id) => _updateByKey(wrapper, idColumnName, id);
 
   Future<T?> getById(int id) async => _getByPrimaryKey(id, idColumnName);
 
   Future<List<T>?> getByIdList(List<int> ids, {int? limit, String? orderBy}) async
     => _getByKeyList(idColumnName, ids, limit, orderBy);
 
+  Future<T?> getLastAddedId() async {
+    final res = await _queryAll(idColumnName, 1, orderBy: '$idColumnName DESC');
+
+    return res.isNotEmpty ? fromMap(res.first) : null;
+  }
 }
 
 

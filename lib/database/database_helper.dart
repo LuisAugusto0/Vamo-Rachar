@@ -222,7 +222,7 @@ class DatabaseHelper {
     final db = await getDatabase();
 
     final usuario = await db.query(
-      'usuario',
+      'login',
       columns: ['id', 'nome', 'email', 'senha'],
       where: 'email = ?',
       whereArgs: [email],
@@ -245,7 +245,7 @@ class DatabaseHelper {
   Future<void> listarUmUsuario(int id) async {
     final db = await getDatabase();
     final usuario = await db.query(
-      'usuario',
+      'login',
       columns: ['id', 'nome', 'email', 'senha'],
       where: 'id = ?',
       whereArgs: [id],
@@ -270,7 +270,7 @@ class DatabaseHelper {
     final db = await getDatabase();
     final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
     final retorno = await db.update(
-      'usuario',
+      'login',
       dadosUsuario,
       where: 'id = ?',
       whereArgs: [id],

@@ -36,9 +36,11 @@ abstract class SqlTable {
   List<String> getPrimaryKeys();
 }
 
+abstract class EntityTable extends SqlTable {
+  int? getId();
+}
 
-
-class LoginSql implements SqlTable {
+class LoginSql implements EntityTable {
   static const String table = 'login';
 
   static const List<String> columns = [idString, nameString, emailString, passwordString, imageUrlString];
@@ -76,6 +78,9 @@ class LoginSql implements SqlTable {
 
   @override
   List<String> getPrimaryKeys() => primaryKeys;
+
+  @override
+  int? getId() => id;
 
   @override
   Map<String, Object?> toMap() {
@@ -141,7 +146,7 @@ class LoginSql implements SqlTable {
 
 
 
-class UserSql implements SqlTable {
+class UserSql implements EntityTable {
   static const String table = 'usuario';
 
   static const List<String> columns = [idString, nameString, fkeyLoginString];
@@ -169,6 +174,10 @@ class UserSql implements SqlTable {
 
   @override
   List<String> getPrimaryKeys() => primaryKeys;
+
+  @override
+  int? getId() => id;
+
 
   // id can be nullable here
   @override
@@ -238,12 +247,10 @@ class UserPurchaseSql implements SqlTable {
   static const String fkeyUserString = 'usuario_id';
   static const String fkeyPurchaseString = 'pedido_id';
 
-  final int? id;
   final int fkeyUser;
   final int fkeyPurchase;
 
   UserPurchaseSql({
-    this.id,
     required this.fkeyUser,
     required this.fkeyPurchase
   });
@@ -306,7 +313,7 @@ class UserPurchaseSql implements SqlTable {
 
 
 
-class PurchaseSql implements SqlTable {
+class PurchaseSql implements EntityTable {
   static const String table = 'pedido';
 
   static const List<String> columns = [
@@ -348,6 +355,8 @@ class PurchaseSql implements SqlTable {
   @override
   List<String> getPrimaryKeys() => primaryKeys;
 
+  @override
+  int? getId() => id;
 
   @override
   Map<String, Object?> toMap() {
@@ -421,7 +430,7 @@ class PurchaseSql implements SqlTable {
 
 
 
-class ProductSql implements SqlTable {
+class ProductSql implements EntityTable {
   static const String table = 'produto';
 
   static const List<String> columns = [idString, nameString, priceString, fkeyPurchaseString];
@@ -453,6 +462,9 @@ class ProductSql implements SqlTable {
 
   @override
   List<String> getPrimaryKeys() => primaryKeys;
+
+  @override
+  int? getId() => id;
 
   // id can be nullable here
   @override
@@ -517,7 +529,7 @@ class ProductSql implements SqlTable {
 
 
 
-class ProductUnitSql implements SqlTable {
+class ProductUnitSql implements EntityTable {
   static const String table = 'unidade_produto';
 
   static const List<String> columns = [idString, fkeyProductString];
@@ -542,6 +554,9 @@ class ProductUnitSql implements SqlTable {
 
   @override
   List<String> getPrimaryKeys() => primaryKeys;
+
+  @override
+  int? getId() => id;
 
   // id can be nullable here
   @override
@@ -593,7 +608,7 @@ class ProductUnitSql implements SqlTable {
 
 
 
-class ContributionSql implements SqlTable {
+class ContributionSql implements EntityTable {
   static const String table = 'contribuicao';
 
   static const List<String> columns = [idString, paidString, fkeyProductUnitString, fkeyUserString];
@@ -625,6 +640,9 @@ class ContributionSql implements SqlTable {
 
   @override
   List<String> getPrimaryKeys() => primaryKeys;
+
+  @override
+  int? getId() => id;
 
   @override
   Map<String, Object?> toMap() {
