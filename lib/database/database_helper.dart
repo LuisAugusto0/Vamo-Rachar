@@ -151,13 +151,13 @@ class DatabaseHelper {
   }
 
   Future<void> assertAllTableWrappers(Database db) async {
-    await assertTableWrapper(db, loginTable, LoginSql.fromMap);
-    await assertTableWrapper(db, userTable, UserSql.fromMap);
-    await assertTableWrapper(db, userPurchaseTable, UserPurchaseSql.fromMap);
-    await assertTableWrapper(db, purchaseTable, PurchaseSql.fromMap);
-    await assertTableWrapper(db, productTable, ProductSql.fromMap);
-    await assertTableWrapper(db, productUnitTable, ProductUnitSql.fromMap);
-    await assertTableWrapper(db, contributionTable, ContributionSql.fromMap);
+    await assertTableWrapper(db, loginTable, LoginSql.fromQueryMap);
+    await assertTableWrapper(db, userTable, UserSql.fromQueryMap);
+    await assertTableWrapper(db, userPurchaseTable, UserPurchaseSql.fromQueryMap);
+    await assertTableWrapper(db, purchaseTable, PurchaseSql.fromQueryMap);
+    await assertTableWrapper(db, productTable, ProductSql.fromQueryMap);
+    await assertTableWrapper(db, productUnitTable, ProductUnitSql.fromQueryMap);
+    await assertTableWrapper(db, contributionTable, ContributionSql.fromQueryMap);
   }
 
 

@@ -13,7 +13,6 @@ abstract class SqlProvider<T extends SqlTable> {
 
   String get table;
   List<String> get columns;
-  String get idColumnName;
   T Function(Map<String, Object?>) get fromMap;
   List<T> Function(List<Map<String, Object?>>) get fromMapList;
 
@@ -43,31 +42,37 @@ abstract class SqlProvider<T extends SqlTable> {
   Future<void> insert(T wrapper) async {
     Database db = await helper.getDatabase();
 
-    int? id = wrapper.getId();
-    if (id != null) throw Exception('Table on insert must not contain id value');
+    final map = wrapper.toMap();
+    for (String column in wrapper.getColumns()) {
+      if (map.containsKey(column)) throw Exception("Contraint Violation: Insert is not allowed to have primary keys");
+    }
 
     db.insert(this.table, wrapper.toMap());
   }
 
 
   /// Update
-  Future<void> update(T wrapper) async {
+  Future<void> _updateByKey(T wrapper, String primaryKeyColumn, Object key) async {
     Database db = await helper.getDatabase();
 
-    int? id = wrapper.getId();
-    if (id == null) throw Exception('Table on insert needs id to know which row to update');
+    final map = wrapper.toMap();
+    for (String column in wrapper.getColumns()) {
+      if (map.containsKey(column)) throw Exception("Contraint Violation: Update is not allowed to have primary keys");
+    }
 
     final retorno = await db.update(
       table,
-      wrapper.toMap(),
-      where: '$idColumnName = ?',
-      whereArgs: [wrapper.getId()],
+      map,
+      where: '$primaryKeyColumn = ?',
+      whereArgs: [key],
     );
   }
 
 
+
+
   /// Remove
-  Future<void> _removeByUID(Object id, String column) async {
+  Future<void> _remove(Object id, String column) async {
     Database db = await helper.getDatabase();
 
     await db.delete(
@@ -77,15 +82,15 @@ abstract class SqlProvider<T extends SqlTable> {
     );
   }
 
-  Future<void> removeById(int id) async => _removeByUID(id, idColumnName);
 
 
+  /// Query Definitions
 
-  /// Query Methods
-  Future<T?> _getByUID(Object id, String column) async {
+  // Helper methods for one column search
+  Future<List<Map<String, Object?>>> _singleValueQuery(Object id, String column) async {
     Database db = await helper.getDatabase();
 
-    final result = await db.query(
+    final result = db.query(
         table,
         columns: columns,
         where: '$column = ?',
@@ -93,19 +98,16 @@ abstract class SqlProvider<T extends SqlTable> {
         limit: 2
     );
 
-    if (result.length > 1) throw Exception("not UID");
-    return result.isNotEmpty ? fromMap(result.first) : null;
+    return result;
   }
 
-  Future<T?> getById(int id) async => _getByUID(id, idColumnName);
 
-
-  Future<List<T>?> _getByIdList(
+  Future<List<Map<String, Object?>>>  _listOfValuesQuery(
       String column,
       List<Object> ids,
       int? limit,
       String? orderBy
-      ) async {
+    ) async {
 
     Database db = await helper.getDatabase();
 
@@ -120,11 +122,69 @@ abstract class SqlProvider<T extends SqlTable> {
       orderBy: orderBy,
     );
 
-    return result.isEmpty ? null : fromMapList(result);
+    return result;
   }
 
-  Future<List<T>?> getByIdList(List<int> ids, {int? limit, String? orderBy}) async
-  => _getByIdList(idColumnName, ids, limit, orderBy);
+
+  // Applications
+  Future<T?> _getByPrimaryKey(Object id, String column) async {
+    final result = await _singleValueQuery(id, column);
+
+    if (result.length > 1) throw Exception("not UID");
+    return result.isNotEmpty ? fromMap(result.first) : null;
+  }
+
+
+  Future<List<T>> _getByKey(Object id, String column) async {
+    final result = await _singleValueQuery(id, column);
+    return result.isNotEmpty ? fromMapList(result) : [];
+  }
+
+
+  Future<List<T>> _getByKeyList(
+      String column,
+      List<Object> ids,
+      int? limit,
+      String? orderBy
+      ) async {
+
+    final result = await _listOfValuesQuery(column, ids, limit, orderBy);
+    return result.isNotEmpty ? fromMapList(result) : [];
+  }
+
+  Future<List<K>>  _getSingleColumnByKey<K>(Object id, String column) async {
+    final result = await _singleValueQuery(id, column);
+    List<K> list = [];
+
+    for (final map in result) {
+      assert(map[column] is K, 'Element obtained must be of type K');
+      list.add(map[column] as K);
+    }
+
+    return list;
+  }
+
+
+}
+
+class UserPurchaseProvider extends SqlProvider<UserPurchaseSql> {
+  const UserPurchaseProvider(super.db);
+
+  @override
+  String get table => UserPurchaseSql.table;
+
+  @override
+  List<String> get columns => UserPurchaseSql.columns;
+
+  @override
+  UserPurchaseSql Function(Map<String, Object?> p1) get fromMap => UserPurchaseSql.fromQueryMap;
+
+  @override
+  List<UserPurchaseSql> Function(List<Map<String, Object?>> p1) get fromMapList => UserPurchaseSql.fromQueryMapList;
+
+
+  Future<List<int>> getFromUserKey(int id) => _getSingleColumnByKey<int>(id, UserPurchaseSql.fkeyUserString);
+  Future<List<int>> getFromPurchaseKey(int id) => _getSingleColumnByKey<int>(id, UserPurchaseSql.fkeyPurchaseString);
 }
 
 
@@ -132,8 +192,27 @@ abstract class SqlProvider<T extends SqlTable> {
 
 
 
+// Sql Provider for SqlTables that contains a numeric autoincrement primary key
+abstract class EntityProvider<T extends SqlTable> extends SqlProvider<T> {
+  const EntityProvider(super.db);
 
-class LoginProvider extends SqlProvider<LoginSql> {
+  String get idColumnName;
+
+
+  Future<void> removeById(int id) async => _remove(id, idColumnName);
+
+  Future<void> updateById(T wrapper, int id) async => _updateByKey(wrapper, idColumnName, id);
+
+  Future<T?> getById(int id) async => _getByPrimaryKey(id, idColumnName);
+
+  Future<List<T>?> getByIdList(List<int> ids, {int? limit, String? orderBy}) async
+    => _getByKeyList(idColumnName, ids, limit, orderBy);
+
+}
+
+
+
+class LoginProvider extends EntityProvider<LoginSql> {
   const LoginProvider(super.db);
 
 
@@ -147,19 +226,19 @@ class LoginProvider extends SqlProvider<LoginSql> {
   String get idColumnName => LoginSql.idString;
 
   @override
-  LoginSql Function(Map<String, Object?> p1) get fromMap => LoginSql.fromMap;
+  LoginSql Function(Map<String, Object?> p1) get fromMap => LoginSql.fromQueryMap;
 
   @override
-  List<LoginSql> Function(List<Map<String, Object?>> p1) get fromMapList => LoginSql.fromMapList;
+  List<LoginSql> Function(List<Map<String, Object?>> p1) get fromMapList => LoginSql.fromQueryMapList;
 
 
-  Future<LoginSql?> getByEmail(String id) async => _getByUID(id, LoginSql.emailString);
+  Future<LoginSql?> getByEmail(String id) async => _getByPrimaryKey(id, LoginSql.emailString);
 }
 
 
 
 
-class UserProvider extends SqlProvider<UserSql> {
+class UserProvider extends EntityProvider<UserSql> {
   const UserProvider(super.db);
 
 
@@ -173,7 +252,7 @@ class UserProvider extends SqlProvider<UserSql> {
   String get idColumnName => UserSql.idString;
 
   @override
-  UserSql Function(Map<String, Object?> p1) get fromMap => UserSql.fromMap;
+  UserSql Function(Map<String, Object?> p1) get fromMap => UserSql.fromQueryMap;
 
   @override
   List<UserSql> Function(List<Map<String, Object?>> p1) get fromMapList => UserSql.fromMapList;
@@ -183,7 +262,7 @@ class UserProvider extends SqlProvider<UserSql> {
 
 
 
-class PurchaseProvider extends SqlProvider<PurchaseSql> {
+class PurchaseProvider extends EntityProvider<PurchaseSql> {
   const PurchaseProvider(super.db);
 
 
@@ -197,17 +276,17 @@ class PurchaseProvider extends SqlProvider<PurchaseSql> {
   String get idColumnName => PurchaseSql.idString;
 
   @override
-  PurchaseSql Function(Map<String, Object?> p1) get fromMap => PurchaseSql.fromMap;
+  PurchaseSql Function(Map<String, Object?> p1) get fromMap => PurchaseSql.fromQueryMap;
 
   @override
-  List<PurchaseSql> Function(List<Map<String, Object?>> p1) get fromMapList => PurchaseSql.fromMapList;
+  List<PurchaseSql> Function(List<Map<String, Object?>> p1) get fromMapList => PurchaseSql.fromQueryMapList;
 }
 
 
 
 
 
-class ProductProvider extends SqlProvider<ProductSql> {
+class ProductProvider extends EntityProvider<ProductSql> {
   const ProductProvider(super.db);
 
 
@@ -221,17 +300,17 @@ class ProductProvider extends SqlProvider<ProductSql> {
   String get idColumnName => ProductSql.idString;
 
   @override
-  ProductSql Function(Map<String, Object?> p1) get fromMap => ProductSql.fromMap;
+  ProductSql Function(Map<String, Object?> p1) get fromMap => ProductSql.fromQueryMap;
 
   @override
-  List<ProductSql> Function(List<Map<String, Object?>> p1) get fromMapList => ProductSql.fromMapList;
+  List<ProductSql> Function(List<Map<String, Object?>> p1) get fromMapList => ProductSql.fromQueryMapList;
 }
 
 
 
 
 
-class ProductUnitProvider extends SqlProvider<ProductUnitSql> {
+class ProductUnitProvider extends EntityProvider<ProductUnitSql> {
   const ProductUnitProvider(super.db);
 
 
@@ -245,10 +324,10 @@ class ProductUnitProvider extends SqlProvider<ProductUnitSql> {
   String get idColumnName => ProductUnitSql.idString;
 
   @override
-  ProductUnitSql Function(Map<String, Object?> p1) get fromMap => ProductUnitSql.fromMap;
+  ProductUnitSql Function(Map<String, Object?> p1) get fromMap => ProductUnitSql.fromQueryMap;
 
   @override
-  List<ProductUnitSql> Function(List<Map<String, Object?>> p1) get fromMapList => ProductUnitSql.fromMapList;
+  List<ProductUnitSql> Function(List<Map<String, Object?>> p1) get fromMapList => ProductUnitSql.fromQueryMapList;
 }
 
 
@@ -256,7 +335,7 @@ class ProductUnitProvider extends SqlProvider<ProductUnitSql> {
 
 
 
-class ContributionProvider extends SqlProvider<ContributionSql> {
+class ContributionProvider extends EntityProvider<ContributionSql> {
   const ContributionProvider(super.db);
 
 
@@ -270,8 +349,8 @@ class ContributionProvider extends SqlProvider<ContributionSql> {
   String get idColumnName => ContributionSql.idString;
 
   @override
-  ContributionSql Function(Map<String, Object?> p1) get fromMap => ContributionSql.fromMap;
+  ContributionSql Function(Map<String, Object?> p1) get fromMap => ContributionSql.fromQueryMap;
 
   @override
-  List<ContributionSql> Function(List<Map<String, Object?>> p1) get fromMapList => ContributionSql.fromMapList;
+  List<ContributionSql> Function(List<Map<String, Object?>> p1) get fromMapList => ContributionSql.fromQueryMapList;
 }

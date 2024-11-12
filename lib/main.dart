@@ -1,6 +1,7 @@
 // import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:vamorachar/database/sql_tables.dart';
 import 'package:vamorachar/historico.dart';
 import 'package:vamorachar/novo_rachamento.dart';
 import 'database/database_helper.dart';
@@ -25,23 +26,26 @@ void main() async {
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       useMaterial3: true,
     ),
-    home: Text('test')//LoginInicial()
+    home: LoginInicial()
   ));
 
 
 
   final db = DatabaseHelper();
   db.assertAllTablesExists();
-  //
-  //
-  // LoginProvider loginProvider = LoginProvider(db);
-  // final res =  await loginProvider.getById(1);
-  // debugPrint(res.toString());
-  //
-  // ContributionProvider contributionProvider = ContributionProvider(db);
-  // final res2 = await contributionProvider.getByIdList([1,2,3,4], limit: 10);
-  // debugPrint(res2.toString());
 
+
+  LoginProvider loginProvider = LoginProvider(db);
+  final res =  await loginProvider.getById(1);
+  debugPrint(res.toString());
+
+  ContributionProvider contributionProvider = ContributionProvider(db);
+  final res2 = await contributionProvider.getByIdList([1,2,3,4], limit: 10);
+  debugPrint(res2.toString());
+
+  final newLogin = const LoginSql(name: 'jose', email: 'josisas@gmail.com', password: 'password123#');
+
+  loginProvider.insert(newLogin);
 }
 
 

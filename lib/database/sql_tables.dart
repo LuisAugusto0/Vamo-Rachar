@@ -26,21 +26,24 @@ import 'package:vamorachar/constants/pair.dart';
 typedef TableFromMapFunction = StringFunctionPair<SqlTable Function(Map<String, dynamic>)>;
 typedef TableFromMapListFunction = StringFunctionPair<List<SqlTable> Function(List<Map<String, dynamic>>)>;
 
+
+
+// Contains a unique identifier
 abstract class SqlTable {
   Map<String, Object?> toMap();
   String getTableName();
   List<String> getColumns();
-  int? getId();
+  List<String> getPrimaryKeys();
 }
 
 
-class LoginSql implements SqlTable {
-  static TableFromMapFunction fromMapPair = const StringFunctionPair(table, fromMap);
-  static TableFromMapListFunction fromMapListPair = const StringFunctionPair(table, fromMapList);
 
+class LoginSql implements SqlTable {
   static const String table = 'login';
 
   static const List<String> columns = [idString, nameString, emailString, passwordString, imageUrlString];
+  static const List<String> primaryKeys = [idString, emailString];
+
   static const String idString = 'id';
   static const String nameString = 'nome';
   static const String emailString = 'email';
@@ -72,21 +75,22 @@ class LoginSql implements SqlTable {
   List<String> getColumns() => columns;
 
   @override
-  int? getId() => id;
+  List<String> getPrimaryKeys() => primaryKeys;
 
-  // id can be nullable here
   @override
   Map<String, Object?> toMap() {
-    return {
-      idString : id,
+    Map<String, Object?> map =  {
       nameString : name,
       emailString : email,
       passwordString : password,
       imageUrlString : imageUrl
     };
+
+    if (id != null) map[idString] = id!;
+    return map;
   }
 
-  static void assertIsValidmap(Map<String, Object?> data) {
+  static void assertIsValidQueryMap(Map<String, Object?> data) {
     assert (data.containsKey(idString) && data[idString] is int,
     'Map is missing the correct $idString field');
 
@@ -104,8 +108,8 @@ class LoginSql implements SqlTable {
   }
 
   // From sql queries. Therefore id must non nullable
-  static LoginSql fromMap(Map<String, Object?> data) {
-    assertIsValidmap(data);
+  static LoginSql fromQueryMap(Map<String, Object?> data) {
+    assertIsValidQueryMap(data);
 
     return LoginSql(
       id: data[idString] as int,
@@ -116,10 +120,9 @@ class LoginSql implements SqlTable {
     );
   }
 
-  static List<LoginSql> fromMapList(List<Map<String, dynamic>> data) {
-    return data.map((map) => fromMap(map)).toList();
+  static List<LoginSql> fromQueryMapList(List<Map<String, dynamic>> data) {
+    return data.map((map) => fromQueryMap(map)).toList();
   }
-
 
 
 
@@ -139,12 +142,11 @@ class LoginSql implements SqlTable {
 
 
 class UserSql implements SqlTable {
-  static TableFromMapFunction fromMapPair = const StringFunctionPair(table, fromMap);
-  static TableFromMapListFunction fromMapListPair = const StringFunctionPair(table, fromMapList);
-
   static const String table = 'usuario';
 
   static const List<String> columns = [idString, nameString, fkeyLoginString];
+  static const List<String> primaryKeys = [idString];
+
   static const String idString = 'id';
   static const String nameString = 'nome';
   static const String fkeyLoginString = 'login_id';
@@ -166,7 +168,7 @@ class UserSql implements SqlTable {
   List<String> getColumns() => columns;
 
   @override
-  int? getId() => id;
+  List<String> getPrimaryKeys() => primaryKeys;
 
   // id can be nullable here
   @override
@@ -182,7 +184,7 @@ class UserSql implements SqlTable {
     return map;
   }
 
-  static void assertIsValidMap(Map<String, Object?> data) {
+  static void assertIsValidQueryMap(Map<String, Object?> data) {
     assert (data.containsKey(idString) && data[idString] is int,
     'Map is missing the correct $idString field');
 
@@ -196,8 +198,8 @@ class UserSql implements SqlTable {
 
 
   // From sql UserSqlResponse. Therefore id must non nullable
-  static UserSql fromMap(Map<String, Object?> data) {
-    assertIsValidMap(data);
+  static UserSql fromQueryMap(Map<String, Object?> data) {
+    assertIsValidQueryMap(data);
 
     return UserSql(
       id: data[idString] as int,
@@ -207,7 +209,7 @@ class UserSql implements SqlTable {
   }
 
   static List<UserSql> fromMapList(List<Map<String, dynamic>> data) {
-    return data.map((map) => fromMap(map)).toList();
+    return data.map((map) => fromQueryMap(map)).toList();
   }
 
 
@@ -225,13 +227,14 @@ class UserSql implements SqlTable {
 
 
 
-class UserPurchaseSql implements SqlTable {
-  static TableFromMapFunction fromMapPair = const StringFunctionPair(table, fromMap);
-  static TableFromMapListFunction fromMapListPair = const StringFunctionPair(table, fromMapList);
 
+
+class UserPurchaseSql implements SqlTable {
   static const String table = 'usuario_pedido';
 
   static const List<String> columns = [fkeyUserString, fkeyPurchaseString];
+  static const List<String> primaryKeys = [];
+
   static const String fkeyUserString = 'usuario_id';
   static const String fkeyPurchaseString = 'pedido_id';
 
@@ -252,20 +255,21 @@ class UserPurchaseSql implements SqlTable {
   List<String> getColumns() => columns;
 
   @override
-  int? getId() => id;
+  List<String> getPrimaryKeys() => primaryKeys;
 
 
-  // id can be nullable here
+
   @override
   Map<String, Object?> toMap() {
     return {
       fkeyUserString : fkeyUser,
       fkeyPurchaseString : fkeyPurchase
     };
+
   }
 
 
-  static void assertIsValidMap(Map<String, Object?> data) {
+  static void assertIsValidQueryMap(Map<String, Object?> data) {
 
     assert (data.containsKey(fkeyUserString) && data[fkeyUserString] is int,
     'Map is missing the correct $fkeyUserString field for: ');
@@ -275,8 +279,8 @@ class UserPurchaseSql implements SqlTable {
   }
 
   // From sql UserSqlResponse. Therefore id must non nullable
-  static UserPurchaseSql fromMap(Map<String, Object?> data) {
-    assertIsValidMap(data);
+  static UserPurchaseSql fromQueryMap(Map<String, Object?> data) {
+    assertIsValidQueryMap(data);
 
     return UserPurchaseSql(
       fkeyUser: data[fkeyUserString] as int,
@@ -284,8 +288,8 @@ class UserPurchaseSql implements SqlTable {
     );
   }
 
-  static List<UserPurchaseSql> fromMapList(List<Map<String, dynamic>> data) {
-    return data.map((map) => fromMap(map)).toList();
+  static List<UserPurchaseSql> fromQueryMapList(List<Map<String, dynamic>> data) {
+    return data.map((map) => fromQueryMap(map)).toList();
   }
 
 
@@ -303,15 +307,14 @@ class UserPurchaseSql implements SqlTable {
 
 
 class PurchaseSql implements SqlTable {
-  static TableFromMapFunction fromMapPair = const StringFunctionPair(table, fromMap);
-  static TableFromMapListFunction fromMapListPair = const StringFunctionPair(table, fromMapList);
-
   static const String table = 'pedido';
 
   static const List<String> columns = [
     idString, establishmentNameString, dateTimeInUnixString,
     longitudeString, latitudeString, fkeyLoginString
   ];
+  static const List<String> primaryKeys = [idString];
+
   static const String idString = 'id';
   static const String establishmentNameString = 'estabelecimento_nome';
   static const String dateTimeInUnixString = 'date_time';
@@ -343,24 +346,25 @@ class PurchaseSql implements SqlTable {
   List<String> getColumns() => columns;
 
   @override
-  int? getId() => id;
+  List<String> getPrimaryKeys() => primaryKeys;
 
 
-  // id can be nullable here
   @override
   Map<String, Object?> toMap() {
-    return {
-      idString : id,
+    Map<String, Object?> map =  {
       establishmentNameString : establishmentName,
       dateTimeInUnixString : dateTimeInUnix,
       longitudeString : longitude,
       latitudeString : latitude,
       fkeyLoginString : fkeyLogin
     };
+
+    if (id != null) map[idString] = id!;
+    return map;
   }
 
 
-  static void assertIsValidMap(Map<String, Object?> data) {
+  static void assertIsValidQueryMap(Map<String, Object?> data) {
     assert (data.containsKey(idString) && data[idString] is int,
     'Map is missing the correct $idString field');
 
@@ -382,8 +386,8 @@ class PurchaseSql implements SqlTable {
 
 
   // From sql UserSqlResponse. Therefore id must non nullable
-  static PurchaseSql fromMap(Map<String, Object?> data) {
-    assertIsValidMap(data);
+  static PurchaseSql fromQueryMap(Map<String, Object?> data) {
+    assertIsValidQueryMap(data);
 
     return PurchaseSql(
       id: data[idString] as int,
@@ -395,8 +399,8 @@ class PurchaseSql implements SqlTable {
     );
   }
 
-  static List<PurchaseSql> fromMapList(List<Map<String, dynamic>> data) {
-    return data.map((map) => fromMap(map)).toList();
+  static List<PurchaseSql> fromQueryMapList(List<Map<String, dynamic>> data) {
+    return data.map((map) => fromQueryMap(map)).toList();
   }
 
 
@@ -418,12 +422,11 @@ class PurchaseSql implements SqlTable {
 
 
 class ProductSql implements SqlTable {
-  static TableFromMapFunction fromMapPair = const StringFunctionPair(table, fromMap);
-  static TableFromMapListFunction fromMapListPair = const StringFunctionPair(table, fromMapList);
-
   static const String table = 'produto';
 
   static const List<String> columns = [idString, nameString, priceString, fkeyPurchaseString];
+  static const List<String> primaryKeys = [idString];
+
   static const String idString = 'id';
   static const String nameString = 'nome';
   static const String priceString = 'preco';
@@ -449,21 +452,23 @@ class ProductSql implements SqlTable {
   List<String> getColumns() => columns;
 
   @override
-  int? getId() => id;
+  List<String> getPrimaryKeys() => primaryKeys;
 
   // id can be nullable here
   @override
   Map<String, Object?> toMap() {
-    return {
-      idString : id,
+    Map<String, Object?> map =  {
       nameString : name,
       priceString : price,
       fkeyPurchaseString : fkeyPurchase,
     };
+
+    if (id != null) map[idString] = id!;
+    return map;
   }
 
 
-  static assertIsValidMap(Map<String, Object?> data) {
+  static assertIsValidQueryMap(Map<String, Object?> data) {
     assert (data.containsKey(idString) && data[idString] is int,
     'Map is missing the correct $idString field');
 
@@ -479,8 +484,8 @@ class ProductSql implements SqlTable {
 
 
   // From sql UserSqlResponse. Therefore id must non nullable
-  static ProductSql fromMap(Map<String, Object?> data) {
-    assertIsValidMap(data);
+  static ProductSql fromQueryMap(Map<String, Object?> data) {
+    assertIsValidQueryMap(data);
 
     return ProductSql(
         id: data[idString] as int,
@@ -490,8 +495,8 @@ class ProductSql implements SqlTable {
     );
   }
 
-  static List<ProductSql > fromMapList(List<Map<String, dynamic>> data) {
-    return data.map((map) => fromMap(map)).toList();
+  static List<ProductSql > fromQueryMapList(List<Map<String, dynamic>> data) {
+    return data.map((map) => fromQueryMap(map)).toList();
   }
 
 
@@ -513,12 +518,11 @@ class ProductSql implements SqlTable {
 
 
 class ProductUnitSql implements SqlTable {
-  static TableFromMapFunction fromMapPair = const StringFunctionPair(table, fromMap);
-  static TableFromMapListFunction fromMapListPair = const StringFunctionPair(table, fromMapList);
-
   static const String table = 'unidade_produto';
 
   static const List<String> columns = [idString, fkeyProductString];
+  static const List<String> primaryKeys = [idString];
+
   static const String idString = 'id';
   static const String fkeyProductString = 'produto_id';
 
@@ -537,19 +541,22 @@ class ProductUnitSql implements SqlTable {
   List<String> getColumns() => columns;
 
   @override
-  int? getId() => id;
+  List<String> getPrimaryKeys() => primaryKeys;
 
   // id can be nullable here
   @override
   Map<String, Object?> toMap() {
-    return {
-      idString : id,
+    Map<String, Object?> map =  {
       fkeyProductString : fkeyProduct,
     };
+
+    if (id != null) map[idString] = id!;
+    return map;
   }
 
 
-  static void assertIsValidMap(Map<String, Object?> data) {
+
+  static void assertIsValidQueryMap(Map<String, Object?> data) {
     assert (data.containsKey(idString) && data[idString] is int,
     'Map is missing the correct $idString field');
 
@@ -558,8 +565,8 @@ class ProductUnitSql implements SqlTable {
   }
 
   // From sql UserSqlResponse. Therefore id must non nullable
-  static ProductUnitSql fromMap(Map<String, Object?> data) {
-    assertIsValidMap(data);
+  static ProductUnitSql fromQueryMap(Map<String, Object?> data) {
+    assertIsValidQueryMap(data);
 
     return ProductUnitSql(
       id: data[idString] as int,
@@ -567,8 +574,8 @@ class ProductUnitSql implements SqlTable {
     );
   }
 
-  static List<ProductUnitSql> fromMapList(List<Map<String, dynamic>> data) {
-    return data.map((map) => fromMap(map)).toList();
+  static List<ProductUnitSql> fromQueryMapList(List<Map<String, dynamic>> data) {
+    return data.map((map) => fromQueryMap(map)).toList();
   }
 
 
@@ -587,12 +594,11 @@ class ProductUnitSql implements SqlTable {
 
 
 class ContributionSql implements SqlTable {
-  static TableFromMapFunction fromMapPair = const StringFunctionPair(table, fromMap);
-  static TableFromMapListFunction fromMapListPair = const StringFunctionPair(table, fromMapList);
-
   static const String table = 'contribuicao';
 
   static const List<String> columns = [idString, paidString, fkeyProductUnitString, fkeyUserString];
+  static const List<String> primaryKeys = [idString];
+
   static const String idString = 'id';
   static const String paidString = 'preco_pago';
   static const String fkeyProductUnitString = 'unidade_produto_id';
@@ -618,21 +624,22 @@ class ContributionSql implements SqlTable {
   List<String> getColumns() => columns;
 
   @override
-  int? getId() => id;
+  List<String> getPrimaryKeys() => primaryKeys;
 
-  // id can be nullable here
   @override
   Map<String, Object?> toMap() {
-    return {
-      idString : id,
+    Map<String, Object?> map = {
       paidString : paid,
       fkeyProductUnitString : fkeyProductUnit,
       fkeyUserString : fkeyUser,
     };
+
+    if (id != null) map[idString] = id;
+    return map;
   }
 
 
-  static assertIsValidMap(Map<String, Object?> data) {
+  static assertIsValidQueryMap(Map<String, Object?> data) {
     assert (data.containsKey(idString) && data[idString] is int,
     'Map is missing the correct $idString field');
 
@@ -647,8 +654,8 @@ class ContributionSql implements SqlTable {
   }
 
   // From sql UserSqlResponse. Therefore id must non nullable
-  static ContributionSql fromMap(Map<String, Object?> data) {
-    assertIsValidMap(data);
+  static ContributionSql fromQueryMap(Map<String, Object?> data) {
+    assertIsValidQueryMap(data);
 
     return ContributionSql(
       id: data[idString] as int,
@@ -658,8 +665,8 @@ class ContributionSql implements SqlTable {
     );
   }
 
-  static List<ContributionSql> fromMapList(List<Map<String, dynamic>> data) {
-    return data.map((map) => fromMap(map)).toList();
+  static List<ContributionSql> fromQueryMapList(List<Map<String, dynamic>> data) {
+    return data.map((map) => fromQueryMap(map)).toList();
   }
 
 
