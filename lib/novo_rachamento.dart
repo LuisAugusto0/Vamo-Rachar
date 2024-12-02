@@ -41,12 +41,11 @@ class InstanciaItem {
     participantes = [];
   }
 
-  InstanciaItem.create(int id, Item item, List<Participante> participantes){
+  InstanciaItem.create(int id, Item item, List<Participante> participantes) {
     this.id = id;
     this.item = item;
     this.participantes = participantes;
   }
-
 }
 
 class Participante {
@@ -71,7 +70,6 @@ class Participante {
   }
 }
 
-
 class MyApp extends StatelessWidget {
   //const MyApp({super.key});
 
@@ -91,7 +89,6 @@ class NovoRachamento extends StatefulWidget {
 }
 
 class _NovoRachamentoState extends State<NovoRachamento> {
-
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
   //Indicador do estado da tela/ indicador de qual tela estamos
@@ -115,12 +112,13 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   //Lista de Participantes da Lista de options selecionados
   List<String> selectedOptions = [];
 
-  void _scanner(BuildContext){
+  void _scanner(BuildContext) {
     showDialog(
         context: context,
-        builder: (context){
+        builder: (context) {
           return AlertDialog(
-            title: const Text("Ainda não implementado, favor aguardar atualizações futuras"),
+            title: const Text(
+                "Ainda não implementado, favor aguardar atualizações futuras"),
             content: FloatingActionButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -128,12 +126,11 @@ class _NovoRachamentoState extends State<NovoRachamento> {
               child: Text("Voltar"),
             ),
           );
-        }
-    );
+        });
   }
 
   //Função criada para adicionar itens à lista
-  void _adicionarItens(BuildContext context){
+  void _adicionarItens(BuildContext context) {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController quantidadeController = TextEditingController();
     final TextEditingController precoCrontroller = TextEditingController();
@@ -141,7 +138,8 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Preencha o nome do Item, a quantidade consumida e seu preço'),
+          title: const Text(
+              'Preencha o nome do Item, a quantidade consumida e seu preço'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -152,27 +150,28 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                     TextInputType.text, //Tipo do Teclado
                     nameController, // Controlador do TextField
                     validateUser(nameController), // Verifica se há erro
-                        (text) => setState(() => ()), // OnChanged
+                    (text) => setState(() => ()), // OnChanged
                     true // Enabled?
-                ),
+                    ),
                 form(
                     "Quantidade de itens consumidos", //Label do TextField
                     Icons.add_circle_outline, //Ícone do TextField
                     TextInputType.text, //Tipo do Teclado
                     quantidadeController, // Controlador do TextField
-                    validateInteiro(quantidadeController), // Verifica se há erro
-                        (text) => setState(() => ()), // OnChanged
+                    validateInteiro(
+                        quantidadeController), // Verifica se há erro
+                    (text) => setState(() => ()), // OnChanged
                     true // Enabled?
-                ),
+                    ),
                 form(
                     "Preço do item consumidos", //Label do TextField
                     Icons.add_circle_outline, //Ícone do TextField
                     TextInputType.text, //Tipo do Teclado
                     precoCrontroller, // Controlador do TextField
                     validadeDouble(precoCrontroller), // Verifica se há erro
-                        (text) => setState(() => ()), // OnChanged
+                    (text) => setState(() => ()), // OnChanged
                     true // Enabled?
-                ),
+                    ),
               ],
             ),
           ),
@@ -180,9 +179,11 @@ class _NovoRachamentoState extends State<NovoRachamento> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  itens.add(
-                      new Item.padrao(ultimoIdItem, int.parse(quantidadeController.text), nameController.text, double.parse(precoCrontroller.text))
-                  );
+                  itens.add(new Item.padrao(
+                      ultimoIdItem,
+                      int.parse(quantidadeController.text),
+                      nameController.text,
+                      double.parse(precoCrontroller.text)));
                   ultimoIdItem++;
                 });
                 Navigator.of(context).pop();
@@ -209,7 +210,8 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Preencha seu nome e seu email, para adicionar um novo participante à lista'),
+          title: const Text(
+              'Preencha seu nome e seu email, para adicionar um novo participante à lista'),
           content: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -219,27 +221,26 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                   TextInputType.text, //Tipo do Teclado
                   nameController, // Controlador do TextField
                   validateUser(nameController), // Verifica se há erro
-                      (text) => setState(() => ()), // OnChanged
+                  (text) => setState(() => ()), // OnChanged
                   true // Enabled?
-              ),
+                  ),
               form(
                   "Seu endereço de email", //Label do TextField
                   Icons.account_circle_outlined, //Ícone do TextField
                   TextInputType.text, //Tipo do Teclado
                   emailController, // Controlador do TextField
                   validateEmail(emailController), // Verifica se há erro
-                      (text) => setState(() => ()), // OnChanged
+                  (text) => setState(() => ()), // OnChanged
                   true // Enabled?
-              ),
+                  ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () {
                 options.add(nameController.text);
-                participantes.add(
-                    Participante.create(nameController.text, ++ultimoIdUsado, emailController.text)
-                );
+                participantes.add(Participante.create(nameController.text,
+                    ++ultimoIdUsado, emailController.text));
                 Navigator.of(context).pop();
               },
               child: const Text('Enviar'),
@@ -298,51 +299,98 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         });
   }
 
+//Função auxiliar à função _removerDivisor
+  /*void _teste() {
+    List<Participante> lista = [];
+    for (int i = 0; i < selectedOptions.length; i++) {
+      Participante auy =
+          participantes[identificarParticipante(selectedOptions[i])];
+      lista.add(auy);
+    }
+    for (int i = 0; i < selectedOptions.length; i++) {
+      print("LISTA[${i}]: ${lista[i].nome}");
+    }
+    InstanciaItem? instancia = identificarInstancia(itens[index], lista);
+    if (instancia != null) {
+      _removerDivisor(context, instancia);
+      //lista.removeRange(0, lista.length);
+      qtd = itens[index].quantidade;
+      textoPadrao = "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
+    } else {
+      print("INSTÂNCIA NÃO ENCONTRADA");
+    }
+  }*/
+
+//Alert Dialog para instância não encontrada
+  void _instanciaNaoEncontrada(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Instância não encontrada"),
+            content:
+                const Text("Favor verificar os participantes selecionados"),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Ok"),
+              ),
+            ],
+          );
+        });
+  }
+
 //Função criada para identificar quem vai deixar de pagar um determinado item
-  void _removerDivisor(BuildContext context, InstanciaItem instancia){
+  void _removerDivisor(BuildContext context, int index) {
     List<Participante> aux = [];
     showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text("Selecione o Participante a Ser Removido do Rachamento"),
-        content: CustomDropdown<String>.multiSelectSearch(
-            hintText: "Participantes",
-            items: selectedOptions,
-            onListChanged: (value) {
-              for(int i = 0; i < value.length; i++){
-                print("VALUE[${i}]: ${value.elementAt(i)}");
-              }
-              for(int i = 0; i < value.length; i++){
-                Participante auy = participantes[identificarParticipante(value[i])];
-                if(!aux.contains(auy)){
-                  aux.add(auy);
-                }
-              }
-            }),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              subItem(aux, instancia);
-              setState(() {
-
-              });
-              Navigator.of(context).pop();
-            },
-            child: const Text("Aceitar"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text("Cancelar"),
-          ),
-        ],
-      );
-    });
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text(
+                "Selecione o Participante a Ser Removido do Rachamento"),
+            content: CustomDropdown<String>.multiSelectSearch(
+                hintText: "Participantes",
+                items: options,
+                onListChanged: (value) {
+                  for (int i = 0; i < value.length; i++) {
+                    print("VALUE[${i}]: ${value.elementAt(i)}");
+                  }
+                  for (int i = 0; i < value.length; i++) {
+                    Participante auy =
+                        participantes[identificarParticipante(value[i])];
+                    if (!aux.contains(auy)) {
+                      aux.add(auy);
+                    }
+                  }
+                  InstanciaItem? instancia =
+                      identificarInstancia(itens[index], aux);
+                  if (instancia == null) {
+                    print("INSTÂNCIA NÃO ENCONTRADA");
+                    _instanciaNaoEncontrada(context);
+                  }
+                }),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  //subItem(aux, instancia);
+                  setState(() {});
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Aceitar"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancelar"),
+              ),
+            ],
+          );
+        });
   }
-  
-
 
 //Função para identificar a posição de uma String num vetor
   int identificarParticipante(String comparativo) {
@@ -368,27 +416,31 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   }
 
 //Função para identificar uma instância específica, baseando-se nos participantes e no item
-  InstanciaItem ? identificarInstancia(Item item, List<Participante> lista){
-    InstanciaItem ? instancia;
-    Item aux = new Item.padrao(item.id, 1, item.nome, item.preco/lista.length);
-    for(int i = 0; i < instancias.length; i++){
-      print("INSTANCIAS.ITEM.ID: ${instancias[i].item.id} - ITEM.ID: ${aux.id} ");
-      print("INSTANCIAS.ITEM.PRECO: ${instancias[i].item.preco} - ITEM.PRECO: ${aux.preco}");
-      print("INSTANCIAS.PARTICIPANTES.LENGTH: ${instancias[i].participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
-      if(instancias[i].item.id == aux.id
-          && instancias[i].item.preco == aux.preco
-          && instancias[i].participantes.length == lista.length) {
+  InstanciaItem? identificarInstancia(Item item, List<Participante> lista) {
+    InstanciaItem? instancia;
+    Item aux =
+        new Item.padrao(item.id, 1, item.nome, item.preco / lista.length);
+    for (int i = 0; i < instancias.length; i++) {
+      print(
+          "INSTANCIAS.ITEM.ID: ${instancias[i].item.id} - ITEM.ID: ${aux.id} ");
+      print(
+          "INSTANCIAS.ITEM.PRECO: ${instancias[i].item.preco} - ITEM.PRECO: ${aux.preco}");
+      print(
+          "INSTANCIAS.PARTICIPANTES.LENGTH: ${instancias[i].participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
+      if (instancias[i].item.id == aux.id &&
+          instancias[i].item.preco == aux.preco &&
+          instancias[i].participantes.length == lista.length) {
         int iguais = 0;
-        int z = 0,
-            j = 0;
-        for(j = 0; j < instancias[i].participantes.length; j++){
-          for(z = 0; z < lista.length; z++){
-            if(instancias[i].participantes[j].nome.compareTo(lista[z].nome) == 0){
+        int z = 0, j = 0;
+        for (j = 0; j < instancias[i].participantes.length; j++) {
+          for (z = 0; z < lista.length; z++) {
+            if (instancias[i].participantes[j].nome.compareTo(lista[z].nome) ==
+                0) {
               iguais++;
             }
           }
         }
-        if(iguais == lista.length){
+        if (iguais == lista.length) {
           instancia = instancias[i];
           i = instancias.length;
         }
@@ -398,10 +450,10 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   }
 
 //Função para calcular o gasto total de um usuário/participante
-  double getTotalPago(Participante participante){
+  double getTotalPago(Participante participante) {
     double total = 0;
-    for(int i = 0; i < instancias.length; i++){
-      if(instancias[i].participantes.contains(participante)){
+    for (int i = 0; i < instancias.length; i++) {
+      if (instancias[i].participantes.contains(participante)) {
         total += instancias[i].item.preco * instancias[i].item.quantidade;
       }
     }
@@ -412,36 +464,43 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   void addItem(List<Participante> lista, Item item) {
     double auw = item.preco;
 
-    Item aux = new Item.padrao(item.id, 1, item.nome, auw/lista.length);
-    if(instancias.length > 0){
-      for(int i = 0; i < instancias.length; i++){
-        print("INSTANCIAS.ITEM.ID: ${instancias[i].item.id} - ITEM.ID: ${aux.id} ");
-        print("INSTANCIAS.ITEM.PRECO: ${instancias[i].item.preco} - ITEM.PRECO: ${aux.preco}");
-        print("INSTANCIAS.PARTICIPANTES.LENGTH: ${instancias[i].participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
-        if(instancias[i].item.id == aux.id
-            && instancias[i].item.preco == aux.preco
-            && instancias[i].participantes.length == lista.length) {
+    Item aux = new Item.padrao(item.id, 1, item.nome, auw / lista.length);
+    if (instancias.length > 0) {
+      for (int i = 0; i < instancias.length; i++) {
+        print(
+            "INSTANCIAS.ITEM.ID: ${instancias[i].item.id} - ITEM.ID: ${aux.id} ");
+        print(
+            "INSTANCIAS.ITEM.PRECO: ${instancias[i].item.preco} - ITEM.PRECO: ${aux.preco}");
+        print(
+            "INSTANCIAS.PARTICIPANTES.LENGTH: ${instancias[i].participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
+        if (instancias[i].item.id == aux.id &&
+            instancias[i].item.preco == aux.preco &&
+            instancias[i].participantes.length == lista.length) {
           print("CAI AQUI!");
           int iguais = 0;
-          int z = 0,
-              j = 0;
-          for(j = 0; j < instancias[i].participantes.length; j++){
-            for(z = 0; z < lista.length; z++){
-              if(instancias[i].participantes[j].nome.compareTo(lista[z].nome) == 0){
+          int z = 0, j = 0;
+          for (j = 0; j < instancias[i].participantes.length; j++) {
+            for (z = 0; z < lista.length; z++) {
+              if (instancias[i]
+                      .participantes[j]
+                      .nome
+                      .compareTo(lista[z].nome) ==
+                  0) {
                 iguais++;
               }
             }
           }
-          if(iguais == lista.length){
+          if (iguais == lista.length) {
             instancias[i].item.quantidade++;
-          }
-          else{
-            instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
+          } else {
+            instancias
+                .add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
             ultimoIdInstancia++;
           }
         } else {
           print("SEGUNDO ELSE");
-          instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
+          instancias
+              .add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
           ultimoIdInstancia++;
           break;
         }
@@ -455,41 +514,37 @@ class _NovoRachamentoState extends State<NovoRachamento> {
 
 //Função para subtrair itens
   void subItem(List<Participante> lista, InstanciaItem instancia) {
-    print("INSTANCIAS.LENGTH: ${instancia.participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
-    if(instancia.participantes.length == lista.length){
-      if(instancia.item.quantidade > 1){
+    print(
+        "INSTANCIAS.LENGTH: ${instancia.participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
+    if (instancia.participantes.length == lista.length) {
+      if (instancia.item.quantidade > 1) {
         instancia.item.quantidade--;
         itens[instancia.item.id].quantidade++;
         print("1");
-      }
-      else{
+      } else {
         instancias.remove(instancia);
         itens[instancia.item.id].quantidade++;
         print("2");
       }
-    }
-    else{
+    } else {
       Set<Participante> aux = lista.toSet();
       Set<Participante> auy = instancia.participantes.toSet();
       aux = auy.intersection(aux);
       auy = auy.difference(aux);
-      if(instancia.item.quantidade > 1){
+      if (instancia.item.quantidade > 1) {
         instancia.item.quantidade--;
-        Item auz = new Item.padrao(instancia.item.id,
-            1,
-            instancia.item.nome,
-            (instancia.item.preco + (instancia.item.preco/auy.length)));
-        instancias.add(new InstanciaItem.create(ultimoIdInstancia, auz, auy.toList()));
+        Item auz = new Item.padrao(instancia.item.id, 1, instancia.item.nome,
+            (instancia.item.preco + (instancia.item.preco / auy.length)));
+        instancias.add(
+            new InstanciaItem.create(ultimoIdInstancia, auz, auy.toList()));
         ultimoIdInstancia++;
         print("3");
-      }
-      else{
+      } else {
         instancias.remove(instancia);
-        Item auz = new Item.padrao(instancia.item.id,
-            1,
-            instancia.item.nome,
-            (instancia.item.preco + (instancia.item.preco/lista.length)));
-        instancias.add(new InstanciaItem.create(ultimoIdInstancia, auz, auy.toList()));
+        Item auz = new Item.padrao(instancia.item.id, 1, instancia.item.nome,
+            (instancia.item.preco + (instancia.item.preco / lista.length)));
+        instancias.add(
+            new InstanciaItem.create(ultimoIdInstancia, auz, auy.toList()));
         ultimoIdInstancia++;
         print("4");
       }
@@ -499,7 +554,6 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   Scaffold iniciarTela() {
     String dropdownText = "Participantes Selecionados";
     return Scaffold(
-
       backgroundColor: const Color(0xFF64C278),
       appBar: AppBar(
           leading: IconButton(
@@ -515,7 +569,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomDropdown<String>.multiSelectSearch(
+              /*CustomDropdown<String>.multiSelectSearch(
                   hintText: dropdownText,
                   items: options,
                   onListChanged: (value) {
@@ -524,7 +578,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                       aux.add(value[i]);
                     }
                     selectedOptions = aux;
-                  }),
+                  }),*/
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -553,8 +607,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                 ],
               )
             ],
-          )
-      ),
+          )),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -638,7 +691,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomDropdown<String>.multiSelectSearch(
+              /*CustomDropdown<String>.multiSelectSearch(
                   hintText: dropdownText,
                   items: options,
                   onListChanged: (value) {
@@ -647,7 +700,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                       aux.add(value[i]);
                     }
                     selectedOptions = aux;
-                  }),
+                  }),*/
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -693,7 +746,8 @@ class _NovoRachamentoState extends State<NovoRachamento> {
             final Item item = itens[index];
             int qtd = item.quantidade;
             String preco = item.preco.toStringAsFixed(2);
-            late String textoPadrao = "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
+            late String textoPadrao =
+                "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
             return Container(
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
@@ -725,16 +779,18 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                             setState(() {
                               List<Participante> aux = [];
                               for (int i = 0; i < selectedOptions.length; i++) {
-                                aux.add(participantes[identificarParticipante(selectedOptions[i])]);
+                                aux.add(participantes[identificarParticipante(
+                                    selectedOptions[i])]);
                               }
-                              if(selectedOptions.length >= 1 && itens[index].quantidade > 0){
+                              if (selectedOptions.length >= 1 &&
+                                  itens[index].quantidade > 0) {
                                 addItem(aux, itens[index]);
                                 itens[index].quantidade--;
-
                               }
                               //aux.removeRange(0, aux.length);
                               qtd = itens[index].quantidade;
-                              textoPadrao = "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
+                              textoPadrao =
+                                  "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
                             });
                           },
                           child: const Icon(
@@ -748,25 +804,8 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                             backgroundColor: Colors.transparent,
                           ),
                           onPressed: () {
-                            setState( (){
-                              List<Participante> lista = [];
-                              for(int i = 0; i < selectedOptions.length; i++){
-                                Participante auy = participantes[identificarParticipante(selectedOptions[i])];
-                                lista.add(auy);
-                              }
-                              for(int i = 0; i < selectedOptions.length; i++) {
-                                print("LISTA[${i}]: ${lista[i].nome}");
-                              }
-                              InstanciaItem ? instancia = identificarInstancia(itens[index], lista);
-                              if(instancia != null) {
-                                _removerDivisor(context, instancia);
-                                //lista.removeRange(0, lista.length);
-                                qtd = itens[index].quantidade;
-                                textoPadrao = "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
-                              }
-                              else{
-                                print("INSTÂNCIA NÃO ENCONTRADA");
-                              }
+                            setState(() {
+                              _removerDivisor(context, index);
                             });
                           },
                           child: const Icon(
@@ -777,8 +816,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                       ],
                     ),
                   ],
-                )
-            );
+                ));
           },
         ),
       ),
@@ -787,13 +825,15 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ElevatedButton(
-              onPressed: (){
-                NavigationHelper.pushNavigatorNoTransition(context,
-                    ConfirmarDivisao(participantes: participantes, instancias: instancias));
-              },
-              child: Text(
-                "Enviar",
-              ),
+            onPressed: () {
+              NavigationHelper.pushNavigatorNoTransition(
+                  context,
+                  ConfirmarDivisao(
+                      participantes: participantes, instancias: instancias));
+            },
+            child: Text(
+              "Enviar",
+            ),
           )
         ],
       ),
