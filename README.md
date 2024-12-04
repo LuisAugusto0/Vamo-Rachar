@@ -1,6 +1,6 @@
-# vamorachar_telacadastro
+# vamorachar
 
-Cadastro.
+A new Flutter project.
 
 ## Getting Started
 

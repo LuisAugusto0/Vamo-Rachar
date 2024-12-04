@@ -187,7 +187,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                 });
                 Navigator.of(context).pop();
               },
-              child: const Text('Enviar'),
+              child: const Text('ENVIAR'),
             ),
             TextButton(
               onPressed: () {
@@ -242,7 +242,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                 );
                 Navigator.of(context).pop();
               },
-              child: const Text('Enviar'),
+              child: const Text('ENVIAR'),
             ),
             TextButton(
               onPressed: () {
@@ -792,7 +792,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                     ConfirmarDivisao(participantes: participantes, instancias: instancias));
               },
               child: Text(
-                "Enviar",
+                "ENVIAR",
               ),
           )
         ],
