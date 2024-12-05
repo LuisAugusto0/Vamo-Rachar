@@ -12,7 +12,7 @@ class ConfirmarDivisao extends StatelessWidget {
       for(int j = 0; j < participantes.length; j++){
         if(instancias[i].participantes.contains(participantes[j])){
           participantes[j].consumidos.add(instancias[i].item);
-          participantes[j].totalPago += instancias[i].item.preco;
+          participantes[j].totalPago += (instancias[i].item.preco * instancias[i].item.quantidade);
         }
       }
     }

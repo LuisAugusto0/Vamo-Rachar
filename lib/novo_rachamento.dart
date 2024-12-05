@@ -311,7 +311,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       lista.add(auy);
     }
     for (int i = 0; i < selectedOptions.length; i++) {
-      print("LISTA[${i}]: ${lista[i].nome}");
+      debugPrint("LISTA[${i}]: ${lista[i].nome}");
     }
     InstanciaItem? instancia = identificarInstancia(itens[index], lista);
     if (instancia != null) {
@@ -320,7 +320,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       qtd = itens[index].quantidade;
       textoPadrao = "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
     } else {
-      print("INSTÂNCIA NÃO ENCONTRADA");
+      debugPrint("INSTÂNCIA NÃO ENCONTRADA");
     }
   }*/
 
@@ -354,7 +354,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
     setState(() {
       quemPodeSerRemovido.removeRange(0, quemPodeSerRemovido.length);
     });
-    print(instancias);
+    debugPrint("${instancias}");
     if (instancias.length > 0) {
       for (int i = 0; i < instancias.length; i++) {
         String temp = "";
@@ -384,19 +384,23 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                         _instanciaNaoEncontrada(context);
                       }
                       aux.removeRange(0, aux.length);
-                      print(value);
+                      debugPrint(value);
                       String? temp = "";
                       if (value != null) {
                         temp += value.characters.elementAt(0);
                       }
                       identificadorDeInstancia = int.parse(temp) - 1;
-                      for(int i = 0; i < instancias[identificadorDeInstancia].participantes.length; i++){
-                        Participante auy =
-                            instancias[identificadorDeInstancia].participantes[i];
+                      for (int i = 0;
+                          i <
+                              instancias[identificadorDeInstancia]
+                                  .participantes
+                                  .length;
+                          i++) {
+                        Participante auy = instancias[identificadorDeInstancia]
+                            .participantes[i];
                         if (!aux.contains(auy)) {
                           aux.add(auy);
                         }
-                        
                       }
                       if (quemPodeSerRemovido.length > 0) {
                         setState(() {
@@ -416,11 +420,18 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                     onListChanged: (value) {
                       aux.removeRange(0, aux.length);
                       for (int i = 0; i < value.length; i++) {
-                        print("VALUE[${i}]: ${value.elementAt(i)}");
+                        debugPrint("VALUE[${i}]: ${value.elementAt(i)}");
                       }
-                      print("Tam instância: ${instancias[identificadorDeInstancia].participantes.length}");
-                      for(int i = 0; i < instancias[identificadorDeInstancia].participantes.length; i++){
-                        print("Participantes da instância: ${instancias[identificadorDeInstancia].participantes[i].nome}");
+                      debugPrint(
+                          "Tam instância: ${instancias[identificadorDeInstancia].participantes.length}");
+                      for (int i = 0;
+                          i <
+                              instancias[identificadorDeInstancia]
+                                  .participantes
+                                  .length;
+                          i++) {
+                        debugPrint(
+                            "Participantes da instância: ${instancias[identificadorDeInstancia].participantes[i].nome}");
                       }
                       for (int i = 0; i < value.length; i++) {
                         Participante auy =
@@ -430,12 +441,18 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                         }
                       }
                       for (int i = 0; i < aux.length; i++) {
-                        print("Participantes[${i}]: ${aux.elementAt(i).nome}");
+                        debugPrint(
+                            "Participantes[${i}]: ${aux.elementAt(i).nome}");
                       }
-                      for(int i = 0; i < instancias[identificadorDeInstancia].participantes.length; i++){
-                        print("Participantes da instância: ${instancias[identificadorDeInstancia].participantes[i].nome}");
+                      for (int i = 0;
+                          i <
+                              instancias[identificadorDeInstancia]
+                                  .participantes
+                                  .length;
+                          i++) {
+                        debugPrint(
+                            "Participantes da instância: ${instancias[identificadorDeInstancia].participantes[i].nome}");
                       }
-                      
                     }),
               ],
             ),
@@ -476,10 +493,10 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                       items: options,
                       onListChanged: (value) {
                         for (int i = 0; i < value.length; i++) {
-                          print("VALUE[${i}]: ${value.elementAt(i)}");
+                          debugPrint("VALUE[${i}]: ${value.elementAt(i)}");
                         }
                         aux.removeRange(0, aux.length);
-                        print(value);
+                        debugPrint("${value}");
                         for (int i = 0; i < value.length; i++) {
                           Participante auy =
                               participantes[identificarParticipante(value[i])];
@@ -494,7 +511,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                 ElevatedButton(
                   onPressed: () {
                     for (int i = 0; i < aux.length; i++) {
-                      print("AUX[${i}]: ${aux[i].nome}");
+                      debugPrint("AUX[${i}]: ${aux[i].nome}");
                     }
                     addItem(aux, itens[index]);
                     setState(() {
@@ -543,11 +560,11 @@ class _NovoRachamentoState extends State<NovoRachamento> {
     Item aux =
         new Item.padrao(item.id, 1, item.nome, item.preco / lista.length);
     for (int i = 0; i < instancias.length; i++) {
-      print(
+      debugPrint(
           "INSTANCIAS.ITEM.ID: ${instancias[i].item.id} - ITEM.ID: ${aux.id} ");
-      print(
+      debugPrint(
           "INSTANCIAS.ITEM.PRECO: ${instancias[i].item.preco} - ITEM.PRECO: ${aux.preco}");
-      print(
+      debugPrint(
           "INSTANCIAS.PARTICIPANTES.LENGTH: ${instancias[i].participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
       if (instancias[i].item.id == aux.id &&
           instancias[i].item.preco == aux.preco &&
@@ -590,26 +607,31 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         total += instancias[i].item.preco * instancias[i].item.quantidade;
       }
     }
+    debugPrint("Quanto o participante: ${participante.nome} pagou?");
+    debugPrint("Total: ${total}");
     return total;
   }
 
 //Função para adicionar itens
   void addItem(List<Participante> lista, Item item) {
     double auw = item.preco;
-
+    bool achou = false;
     Item aux = new Item.padrao(item.id, 1, item.nome, auw / lista.length);
     if (instancias.length > 0) {
+      for (int i = 0; i < lista.length; i++) {
+        debugPrint("LISTA[${i}]: ${lista[i].nome}");
+      }
       for (int i = 0; i < instancias.length; i++) {
-        print(
+        debugPrint(
             "INSTANCIAS.ITEM.ID: ${instancias[i].item.id} - ITEM.ID: ${aux.id} ");
-        print(
+        debugPrint(
             "INSTANCIAS.ITEM.PRECO: ${instancias[i].item.preco} - ITEM.PRECO: ${aux.preco}");
-        print(
+        debugPrint(
             "INSTANCIAS.PARTICIPANTES.LENGTH: ${instancias[i].participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
         if (instancias[i].item.id == aux.id &&
             instancias[i].item.preco == aux.preco &&
             instancias[i].participantes.length == lista.length) {
-          print("CAI AQUI!");
+          debugPrint("CAI AQUI!");
           int iguais = 0;
           int z = 0, j = 0;
           for (j = 0; j < instancias[i].participantes.length; j++) {
@@ -625,21 +647,24 @@ class _NovoRachamentoState extends State<NovoRachamento> {
           }
           if (iguais == lista.length) {
             instancias[i].item.quantidade++;
-          } else {
-            instancias
-                .add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
-            ultimoIdInstancia++;
+            debugPrint("Lista tem os mesmos integrantes da instância");
+            achou = true;
           }
-        } else {
-          print("SEGUNDO ELSE");
+        } /*else {
+          debugPrint("SEGUNDO ELSE");
           instancias
               .add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
           ultimoIdInstancia++;
           break;
-        }
+        }*/
+      }
+      if (!achou) {
+        instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
+        ultimoIdInstancia++;
+        debugPrint("Lista não tem os mesmos integrantes");
       }
     } else {
-      print("PRIMEIRO ELSE");
+      debugPrint("PRIMEIRO ELSE");
       instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
       ultimoIdInstancia++;
     }
@@ -647,17 +672,17 @@ class _NovoRachamentoState extends State<NovoRachamento> {
 
 //Função para subtrair itens
   void subItem(List<Participante> lista, InstanciaItem instancia) {
-    print(
+    debugPrint(
         "INSTANCIAS.LENGTH: ${instancia.participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
     if (instancia.participantes.length == lista.length) {
       if (instancia.item.quantidade > 1) {
         instancia.item.quantidade--;
         itens[instancia.item.id].quantidade++;
-        print("1");
+        debugPrint("1");
       } else {
         instancias.remove(instancia);
         itens[instancia.item.id].quantidade++;
-        print("2");
+        debugPrint("2");
       }
     } else {
       Set<Participante> aux = lista.toSet();
@@ -671,7 +696,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         instancias.add(
             new InstanciaItem.create(ultimoIdInstancia, auz, auy.toList()));
         ultimoIdInstancia++;
-        print("3");
+        debugPrint("3");
       } else {
         instancias.remove(instancia);
         Item auz = new Item.padrao(instancia.item.id, 1, instancia.item.nome,
@@ -679,7 +704,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         instancias.add(
             new InstanciaItem.create(ultimoIdInstancia, auz, auy.toList()));
         ultimoIdInstancia++;
-        print("4");
+        debugPrint("4");
       }
     }
   }
@@ -952,6 +977,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         children: [
           ElevatedButton(
             onPressed: () {
+              
               NavigationHelper.pushNavigatorNoTransition(
                   context,
                   ConfirmarDivisao(
