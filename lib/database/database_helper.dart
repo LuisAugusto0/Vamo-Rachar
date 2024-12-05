@@ -204,20 +204,23 @@ class DatabaseHelper {
     createCurrentUser(email);
   }
 
+  // UNUSED
+  // @Deprecated('old version that does not support providers as type safety')
+  // Future<void> createUser(String nome, String email, String senha) async {
+  //   debugPrint('here');
+  //   final db = await getDatabase();
+  //   debugPrint('here2');
+  //   final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
+  //   final id = await db.insert('usuario', dadosUsuario);
+  //   debugPrint('Salvo: $id');
+  //   listarUmUsuario(id);
+  //
+  //
+  // }
 
-  @Deprecated('old version that does not support providers as type safety')
-  Future<void> createUser(String nome, String email, String senha) async {
-    debugPrint('here');
-    final db = await getDatabase();
-    debugPrint('here2');
-    final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
-    final id = await db.insert('usuario', dadosUsuario);
-    debugPrint('Salvo: $id');
-    listarUmUsuario(id);
-  }
 
 
-  @Deprecated('old version that does not support providers as type safety')
+    @Deprecated('old version that does not support providers as type safety')
   Future<Map<String, Object?>?> findUser(String email) async {
     final db = await getDatabase();
 

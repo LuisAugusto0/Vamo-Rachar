@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:vamorachar/database/sql_providers.dart';
+import 'package:vamorachar/database/sql_tables.dart';
 import 'package:vamorachar/widgets/form_widgets.dart';
 import 'package:vamorachar/widgets/validation_helpers.dart';
 import 'package:vamorachar/constants/colors.dart';
@@ -92,8 +94,13 @@ class _MyHomePageState extends State<MyHomePage> {
       print(_emailController.value.text);
       print(_passwordController.value.text);
       print(_passwordConfirmationController.value.text);
-      dbHelper.createUser(_userController.text, _emailController.text, _passwordController.text);
+
+      LoginProvider provider = LoginProvider(dbHelper);
+      provider.insert(LoginSql(name: _userController.text, email: _emailController.text, password: _passwordController.text));
+
       dbHelper.createCurrentUser(_emailController.text);
+
+
       // Navigator.of(context).push(_homeRoute());
       Navigator.of(context).pushAndRemoveUntil( _homeRoute(), (Route<dynamic> route) => false);
       ScaffoldMessenger.of(context).showSnackBar(

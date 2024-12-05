@@ -254,6 +254,7 @@ class LoginProvider extends EntityProvider<LoginSql> {
 
 
   Future<LoginSql?> getByEmail(String id) async => _getByPrimaryKey(id, LoginSql.emailString);
+
 }
 
 

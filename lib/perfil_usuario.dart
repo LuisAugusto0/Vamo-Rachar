@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vamorachar/database/sql_providers.dart';
+import 'package:vamorachar/database/sql_tables.dart';
 import 'login_inicial.dart';
 import 'widgets/form_widgets.dart';
 import 'widgets/avatar_widget.dart';
@@ -107,12 +109,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void _updateUserProfile() async {
-    await _dbHelper.updateUser(
-      _currentUserId,
-      _userController.text,
-      _emailController.text,
-      _passwordController.text,
+    LoginProvider provider = new LoginProvider(_dbHelper);
+
+    await provider.updateById(
+        LoginSql(name: _userController.text, email: _emailController.text, password: _passwordController.text),
+        _currentUserId
     );
+
 
     await _dbHelper.updateCurrentUser(_emailController.text);
 
