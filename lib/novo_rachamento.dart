@@ -112,6 +112,9 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   //Lista de Participantes da Lista de options selecionados
   List<String> selectedOptions = [];
 
+  //Lista de Participantes que podem ser removidos
+  List<String> quemPodeSerRemovido = [];
+
   void _scanner(BuildContext) {
     showDialog(
         context: context,
@@ -344,38 +347,104 @@ class _NovoRachamentoState extends State<NovoRachamento> {
 
 //Função criada para identificar quem vai deixar de pagar um determinado item
   void _removerDivisor(BuildContext context, int index) {
+    int identificadorDeInstancia = -1;
     List<Participante> aux = [];
+    List<InstanciaItem> instancias = identificarInstanciaItem(itens[index]);
+    List<String> participantesElegiveis = [];
+    setState(() {
+      quemPodeSerRemovido.removeRange(0, quemPodeSerRemovido.length);
+    });
+    print(instancias);
+    if (instancias.length > 0) {
+      for (int i = 0; i < instancias.length; i++) {
+        String temp = "";
+        temp += (i + 1).toString() + " - ";
+        for (int j = 0; j < instancias[i].participantes.length - 1; j++) {
+          temp += instancias[i].participantes[j].nome + ", ";
+        }
+        temp += instancias[i]
+            .participantes[instancias[i].participantes.length - 1]
+            .nome;
+        participantesElegiveis.add(temp);
+      }
+    }
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: const Text(
                 "Selecione o Participante a Ser Removido do Rachamento"),
-            content: CustomDropdown<String>.multiSelectSearch(
-                hintText: "Participantes",
-                items: options,
-                onListChanged: (value) {
-                  for (int i = 0; i < value.length; i++) {
-                    print("VALUE[${i}]: ${value.elementAt(i)}");
-                  }
-                  for (int i = 0; i < value.length; i++) {
-                    Participante auy =
-                        participantes[identificarParticipante(value[i])];
-                    if (!aux.contains(auy)) {
-                      aux.add(auy);
-                    }
-                  }
-                  InstanciaItem? instancia =
-                      identificarInstancia(itens[index], aux);
-                  if (instancia == null) {
-                    print("INSTÂNCIA NÃO ENCONTRADA");
-                    _instanciaNaoEncontrada(context);
-                  }
-                }),
+            content: Column(
+              children: [
+                CustomDropdown<String>.search(
+                    hintText: "Quem rachou esse item?",
+                    items: participantesElegiveis,
+                    onChanged: (value) {
+                      if (instancias.length == 0) {
+                        _instanciaNaoEncontrada(context);
+                      }
+                      aux.removeRange(0, aux.length);
+                      print(value);
+                      String? temp = "";
+                      if (value != null) {
+                        temp += value.characters.elementAt(0);
+                      }
+                      identificadorDeInstancia = int.parse(temp) - 1;
+                      for(int i = 0; i < instancias[identificadorDeInstancia].participantes.length; i++){
+                        Participante auy =
+                            instancias[identificadorDeInstancia].participantes[i];
+                        if (!aux.contains(auy)) {
+                          aux.add(auy);
+                        }
+                        
+                      }
+                      if (quemPodeSerRemovido.length > 0) {
+                        setState(() {
+                          quemPodeSerRemovido.removeRange(
+                              0, quemPodeSerRemovido.length);
+                        });
+                      }
+                      setState(() {
+                        for (int i = 0; i < aux.length; i++) {
+                          quemPodeSerRemovido.add(aux[i].nome);
+                        }
+                      });
+                    }),
+                CustomDropdown<String>.multiSelectSearch(
+                    hintText: "Quem será removido?",
+                    items: quemPodeSerRemovido,
+                    onListChanged: (value) {
+                      aux.removeRange(0, aux.length);
+                      for (int i = 0; i < value.length; i++) {
+                        print("VALUE[${i}]: ${value.elementAt(i)}");
+                      }
+                      print("Tam instância: ${instancias[identificadorDeInstancia].participantes.length}");
+                      for(int i = 0; i < instancias[identificadorDeInstancia].participantes.length; i++){
+                        print("Participantes da instância: ${instancias[identificadorDeInstancia].participantes[i].nome}");
+                      }
+                      for (int i = 0; i < value.length; i++) {
+                        Participante auy =
+                            participantes[identificarParticipante(value[i])];
+                        if (!aux.contains(auy)) {
+                          aux.add(auy);
+                        }
+                      }
+                      for (int i = 0; i < aux.length; i++) {
+                        print("Participantes[${i}]: ${aux.elementAt(i).nome}");
+                      }
+                      for(int i = 0; i < instancias[identificadorDeInstancia].participantes.length; i++){
+                        print("Participantes da instância: ${instancias[identificadorDeInstancia].participantes[i].nome}");
+                      }
+                      
+                    }),
+              ],
+            ),
             actions: [
               ElevatedButton(
                 onPressed: () {
-                  //subItem(aux, instancia);
+                  if (instancias.length > 0) {
+                    subItem(aux, instancias[identificadorDeInstancia]);
+                  }
                   setState(() {});
                   Navigator.of(context).pop();
                 },
@@ -390,6 +459,59 @@ class _NovoRachamentoState extends State<NovoRachamento> {
             ],
           );
         });
+  }
+
+//Função criada para identificar os participantes/divisores para, em fim, criar ou atualizar uma instância
+  void _adicionarDivisor(BuildContext context, int index) {
+    List<Participante> aux = [];
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text(
+                  "Selecione os Participantes que Vão Rachar esse Item"),
+              content: Column(
+                children: [
+                  CustomDropdown<String>.multiSelectSearch(
+                      hintText: "Quem rachou esse item?",
+                      items: options,
+                      onListChanged: (value) {
+                        for (int i = 0; i < value.length; i++) {
+                          print("VALUE[${i}]: ${value.elementAt(i)}");
+                        }
+                        aux.removeRange(0, aux.length);
+                        print(value);
+                        for (int i = 0; i < value.length; i++) {
+                          Participante auy =
+                              participantes[identificarParticipante(value[i])];
+                          if (!aux.contains(auy)) {
+                            aux.add(auy);
+                          }
+                        }
+                      }),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    for (int i = 0; i < aux.length; i++) {
+                      print("AUX[${i}]: ${aux[i].nome}");
+                    }
+                    addItem(aux, itens[index]);
+                    setState(() {
+                      itens[index].quantidade--;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Aceitar"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Cancelar"),
+                ),
+              ],
+            ));
   }
 
 //Função para identificar a posição de uma String num vetor
@@ -447,6 +569,17 @@ class _NovoRachamentoState extends State<NovoRachamento> {
       }
     }
     return instancia;
+  }
+
+//Função para identificar uma instância específica, baseando-se apenas no item
+  List<InstanciaItem> identificarInstanciaItem(Item item) {
+    List<InstanciaItem> listinstancias = [];
+    for (int i = 0; i < instancias.length; i++) {
+      if (instancias[i].item.id == item.id) {
+        listinstancias.add(instancias[i]);
+      }
+    }
+    return listinstancias;
   }
 
 //Função para calcular o gasto total de um usuário/participante
@@ -672,7 +805,6 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   }
 
   Scaffold scanedScream() {
-    String dropdownText = "Participantes Selecionados";
     return Scaffold(
       backgroundColor: const Color(0xFF64C278),
       appBar: AppBar(
@@ -777,16 +909,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                           ),
                           onPressed: () {
                             setState(() {
-                              List<Participante> aux = [];
-                              for (int i = 0; i < selectedOptions.length; i++) {
-                                aux.add(participantes[identificarParticipante(
-                                    selectedOptions[i])]);
-                              }
-                              if (selectedOptions.length >= 1 &&
-                                  itens[index].quantidade > 0) {
-                                addItem(aux, itens[index]);
-                                itens[index].quantidade--;
-                              }
+                              _adicionarDivisor(context, index);
                               //aux.removeRange(0, aux.length);
                               qtd = itens[index].quantidade;
                               textoPadrao =
@@ -806,6 +929,9 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                           onPressed: () {
                             setState(() {
                               _removerDivisor(context, index);
+                              qtd = itens[index].quantidade;
+                              textoPadrao =
+                                  "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
                             });
                           },
                           child: const Icon(
