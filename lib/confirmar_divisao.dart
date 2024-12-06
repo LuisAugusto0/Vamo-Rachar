@@ -7,12 +7,14 @@ class ConfirmarDivisao extends StatelessWidget {
   final List<Participante> participantes;
   final List<InstanciaItem> instancias;
 
-  ConfirmarDivisao({Key ? key, required this.participantes, required this.instancias}){
-    for(int i = 0; i < instancias.length; i++){
-      for(int j = 0; j < participantes.length; j++){
-        if(instancias[i].participantes.contains(participantes[j])){
+  ConfirmarDivisao(
+      {Key? key, required this.participantes, required this.instancias}) {
+    for (int i = 0; i < instancias.length; i++) {
+      for (int j = 0; j < participantes.length; j++) {
+        if (instancias[i].participantes.contains(participantes[j])) {
           participantes[j].consumidos.add(instancias[i].item);
-          participantes[j].totalPago += instancias[i].item.preco;
+          participantes[j].totalPago +=
+              (instancias[i].item.preco * instancias[i].item.quantidade);
         }
       }
     }
@@ -34,7 +36,7 @@ class UserExpensesPage extends StatelessWidget {
   final List<Participante> participantes;
   final NavigationHelper _navigationHelper = NavigationHelper();
 
-  UserExpensesPage({Key ? key, required this.participantes});
+  UserExpensesPage({Key? key, required this.participantes});
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +56,11 @@ class UserExpensesPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ElevatedButton(
-              onPressed:(){
-                NavigationHelper.pushNavigatorNoTransition(context, NovoRachamento());
-              },
-              child: Text("cancelar"),
+            onPressed: () {
+              NavigationHelper.pushNavigatorNoTransition(
+                  context, NovoRachamento());
+            },
+            child: Text("cancelar"),
           ),
         ],
       ),
@@ -70,9 +73,9 @@ class UserCard extends StatefulWidget {
   List<String> itensConsumidos = [];
 
   UserCard({Key? key, required this.participante}) {
-    for(int i = 0; i < participante.consumidos.length; i++){
-      itensConsumidos.add(participante.consumidos[i].nome
-          + " - " +
+    for (int i = 0; i < participante.consumidos.length; i++) {
+      itensConsumidos.add(participante.consumidos[i].nome +
+          " - " +
           participante.consumidos[i].quantidade.toString());
     }
   }
@@ -104,10 +107,7 @@ class _UserCardState extends State<UserCard> {
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             SizedBox(height: 16),
-            CustomDropdown(
-                items: widget.itensConsumidos,
-                onChanged: (value){}
-            )
+            CustomDropdown(items: widget.itensConsumidos, onChanged: (value) {})
           ],
         ),
       ),
