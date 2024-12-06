@@ -106,11 +106,11 @@ class _MyHomePageState extends State<MyHomePage> {
       // Navigator.of(context).push(_homeRoute());
       Navigator.of(context).pushAndRemoveUntil( _homeRoute(), (Route<dynamic> route) => false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login efetuado com sucesso')),
+        SnackBar(content: Text((await dbHelper.login(_userController.text, _passwordController.text)) ?? "Login efetuado com sucesso")),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(validateUser(_passwordController) ?? 'Erro desconhecido')),
+        SnackBar(content: Text(passwordError ?? emailError ?? passwordError ?? passwordConfirmationError ?? 'Erro desconhecido')),
       );
       print("Erro - os seguintes campos estão incorretos:");
       userError != null ? print(userError) : null;

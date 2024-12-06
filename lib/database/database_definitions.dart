@@ -84,7 +84,17 @@ Future<void> createTables(Database db) async {
   await db.execute("CREATE INDEX idx_pedido_id ON usuario_pedido (pedido_id)");
 }
 
-
+Future<void> dropTables(Database db) async {
+  await db.execute("DROP INDEX IF EXISTS idx_usuario_id");
+  await db.execute("DROP INDEX IF EXISTS idx_pedido_id");
+  await db.execute("DROP TABLE IF EXISTS contribuicao");
+  await db.execute("DROP TABLE IF EXISTS unidade_produto");
+  await db.execute("DROP TABLE IF EXISTS produto");
+  await db.execute("DROP TABLE IF EXISTS usuario_pedido");
+  await db.execute("DROP TABLE IF EXISTS pedido");
+  await db.execute("DROP TABLE IF EXISTS usuario");
+  await db.execute("DROP TABLE IF EXISTS login");
+}
 
 // Example data
 Future<void> initTestData(Database db) async {

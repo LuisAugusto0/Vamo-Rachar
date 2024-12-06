@@ -149,13 +149,15 @@ class _MyHomePageState extends State<MyHomePage> {
     // Map<String, Object?>? user = await dbHelper.findUser(email);
 
     // if (user == null) {
-    if (await dbHelper.findEmail(email) == false){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('E-mail incorreto')),
-      );
-    } else {
-      _enviarCodigoDeVerificacao();  // Simula o envio de um código
-    }
+    // if (await dbHelper.findEmail(email) == false){
+    //
+    // } else {
+    //   await dbHelper.resetPassword(email);
+    //   // _enviarCodigoDeVerificacao();  // Simula o envio de um código
+    // }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(await dbHelper.resetPassword(email) ?? "Instruções para recuperação de senha enviada por e-mail")),
+    );
   }
 
   void _enviarCodigoDeVerificacao() {
@@ -257,13 +259,13 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('E-mail de confirmação'),
+          title: const Text('E-mail de recuperação'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: _emailResetController,
-                decoration: const InputDecoration(labelText: 'E-mail de confirmação'),
+                decoration: const InputDecoration(labelText: 'E-mail de recuperação'),
               ),
             ],
           ),
@@ -279,7 +281,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pop(context);
                 _confirmarEmail(_emailResetController.text);
               },
-              child: const Text('Alterar'),
+              child: const Text('Confirmar'),
             ),
           ],
         );
