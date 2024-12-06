@@ -51,18 +51,18 @@ void testProviders() async {
   LoginProvider loginProvider = LoginProvider(DatabaseHelper());
 
   loginProvider.insert(const LoginSql(name: "name", email: "email@email.com", password: "password1#"));
-  LoginSql? query = await loginProvider.getLastAddedId();
+  LoginSql? query = await loginProvider.getLastAddedAutoIncrementId();
   debugPrint(query.toString());
   if (query == null) throw AssertionError('Result was expected to be added');
 
   int id = query.id!;
   LoginSql updateSql = LoginSql(name: "name2", email: "email2@email.com", password: "password2#");
 
-  loginProvider.updateById(updateSql, id);
-  query = await loginProvider.getById(id);
+  loginProvider.updateByAutoIncrementId(updateSql, id);
+  query = await loginProvider.getByAutoIncrementId(id);
   debugPrint('after update ${query.toString()}');
 
-  loginProvider.removeById(id);
+  loginProvider.removeByAutoIncrementId(id);
 }
 
 

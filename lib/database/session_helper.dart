@@ -138,7 +138,7 @@ class SessionHelper {
 
   Future<LoginSql?> getLogin() async {
     int? id = await getId();
-    return id == null ? null : loginProvider.getById(id);
+    return id == null ? null : loginProvider.getByAutoIncrementId(id);
   }
 
 

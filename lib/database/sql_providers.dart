@@ -52,7 +52,7 @@ abstract class SqlProvider<T extends SqlTable> {
 
 
   /// Update
-  Future<void> _updateByKey(T wrapper, String primaryKeyColumn, Object key) async {
+  Future<void> updateByKey(T wrapper, String primaryKeyColumn, Object key) async {
     Database db = await helper.getDatabase();
 
     final map = wrapper.toMap();
@@ -72,7 +72,7 @@ abstract class SqlProvider<T extends SqlTable> {
 
 
   /// Remove
-  Future<void> _remove(Object id, String column) async {
+  Future<void> remove(Object id, String column) async {
     Database db = await helper.getDatabase();
 
     await db.delete(
@@ -87,7 +87,7 @@ abstract class SqlProvider<T extends SqlTable> {
   /// Query Definitions
 
   // Helper methods for one column search
-  Future<List<Map<String, Object?>>> _queryAll(String column, int limit,
+  Future<List<Map<String, Object?>>> queryAll(String column, int limit,
       {String? orderBy}) async {
 
     Database db = await helper.getDatabase();
@@ -103,81 +103,99 @@ abstract class SqlProvider<T extends SqlTable> {
   }
 
 
-  Future<List<Map<String, Object?>>> _idQuery(Object id, String column,
-      {String? orderBy, int? limit}) async {
 
-    Database db = await helper.getDatabase();
-
-    final result = db.query(
-        table,
-        columns: columns,
-        where: '$column = ?',
-        whereArgs: [id],
-        orderBy: orderBy,
-        limit: limit
-    );
-
-    return result;
-  }
-
-
-  Future<List<Map<String, Object?>>>  _listOfIdsQuery(String column, List<Object> ids,
-      {int? limit, String? orderBy}) async {
-
-    Database db = await helper.getDatabase();
-
-    final whereClause = '$column IN (${List.filled(ids.length, '?').join(', ')})';
-    final result = await db.query(
-      table,
-      columns: columns,
-      where: whereClause,
-      whereArgs: ids,
-
-      limit: limit,
-      orderBy: orderBy,
-    );
-
-    return result;
-  }
 
 
   // Applications
-  Future<T?> _getByPrimaryKey(Object id, String column) async {
-    final result = await _idQuery(id, column);
+  Future<T?> getByPrimaryKey(Object id, String column) async {
+    Database db = await helper.getDatabase();
+
+    final result = await db.query(
+        table,
+        columns: columns,
+        where: '$column = ?',
+        whereArgs: [id]
+    );
+
 
     if (result.length > 1) throw Exception("not UID");
     return result.isNotEmpty ? fromMap(result.first) : null;
   }
 
 
-  Future<List<T>> _getByKey(Object id, String column) async {
-    final result = await _idQuery(id, column);
-    return result.isNotEmpty ? fromMapList(result) : [];
+  Future<List<T>?> getByKey(Object id, String column) async {
+    Database db = await helper.getDatabase();
+
+    final result = await db.query(
+        table,
+        columns: columns,
+        where: '$column = ?',
+        whereArgs: [id]
+    );
+
+    return result.isNotEmpty ? fromMapList(result) : null;
   }
 
 
-  Future<List<T>> _getByKeyList(
-      String column,
-      List<Object> ids,
+  Future<List<T>> getByKeyList(
+    String column,
+    List<Object> ids,
+    {
       int? limit,
-      String? orderBy
-      ) async {
-
-    final result = await _listOfIdsQuery(column, ids, limit: limit, orderBy: orderBy);
-    return result.isNotEmpty ? fromMapList(result) : [];
-  }
-
-  Future<List<K>>  _getSingleColumnByKey<K>(Object id, String column) async {
-    final result = await _idQuery(id, column);
-    List<K> list = [];
-
-    for (final map in result) {
-      assert(map[column] is K, 'Element obtained must be of type K');
-      list.add(map[column] as K);
+      String? orderBy,
+      int? offset
     }
+  ) async {
 
-    return list;
+    Database db = await helper.getDatabase();
+
+    //WHERE $column IN (1, 2, 3);
+    final whereClause = '$column IN (${List.filled(ids.length, '?').join(', ')})';
+
+    final result = await db.query(
+        table,
+        columns: columns,
+        where: whereClause,
+        whereArgs: ids,
+
+        limit: limit,
+        orderBy: orderBy,
+        offset: offset
+    );
+
+    return fromMapList(result);
   }
+
+
+
+  static String getSimpleOrderBy(String column, bool ascending) {
+    if (ascending) return column;
+    return "$column DESC";
+  }
+
+  Future<List<T>> getFirstResults(
+    String column,
+    int limit,
+    {
+      String? orderBy,
+      int? offset
+    }
+  ) async {
+    Database db = await helper.getDatabase();
+
+    final result = await db.query(
+        table,
+        columns: columns,
+        limit: limit,
+        orderBy: orderBy,
+        offset: offset
+    );
+
+    return fromMapList(result);
+
+  }
+
+
 
 
 }
@@ -198,8 +216,19 @@ class UserPurchaseProvider extends SqlProvider<UserPurchaseSql> {
   List<UserPurchaseSql> Function(List<Map<String, Object?>> p1) get fromMapList => UserPurchaseSql.fromQueryMapList;
 
 
-  Future<List<int>> getFromUserKey(int id) => _getSingleColumnByKey<int>(id, UserPurchaseSql.fkeyUserString);
-  Future<List<int>> getFromPurchaseKey(int id) => _getSingleColumnByKey<int>(id, UserPurchaseSql.fkeyPurchaseString);
+  Future<List<int>?> getFromUserKey(int id) async {
+    final users = await getByKey(id, UserPurchaseSql.fkeyUserString);
+
+    if (users == null) return null;
+    return users.map((user) => user.fkeyUser).toList();
+  }
+
+  Future<List<int>?> getFromPurchaseKey(int id) async {
+    final users = await getByKey(id, UserPurchaseSql.fkeyPurchaseString);
+
+    if (users == null) return null;
+    return users.map((user) => user.fkeyPurchase).toList();
+  }
 }
 
 
@@ -214,18 +243,17 @@ abstract class EntityProvider<T extends EntityTable> extends SqlProvider<T> {
   String get idColumnName;
 
 
-  Future<void> removeById(int id) async => _remove(id, idColumnName);
+  Future<void> removeByAutoIncrementId(int id) async => remove(id, idColumnName);
 
+  Future<void> updateByAutoIncrementId(T wrapper, Object id) => updateByKey(wrapper, idColumnName, id);
 
-  Future<void> updateById(T wrapper, Object id) => _updateByKey(wrapper, idColumnName, id);
+  Future<T?> getByAutoIncrementId(int id) async => getByPrimaryKey(id, idColumnName);
 
-  Future<T?> getById(int id) async => _getByPrimaryKey(id, idColumnName);
+  Future<List<T>?> getByAutoIncrementIdList(List<int> ids, {int? limit, String? orderBy}) async
+    => getByKeyList(idColumnName, ids, limit: limit, orderBy: orderBy);
 
-  Future<List<T>?> getByIdList(List<int> ids, {int? limit, String? orderBy}) async
-    => _getByKeyList(idColumnName, ids, limit, orderBy);
-
-  Future<T?> getLastAddedId() async {
-    final res = await _queryAll(idColumnName, 1, orderBy: '$idColumnName DESC');
+  Future<T?> getLastAddedAutoIncrementId() async {
+    final res = await queryAll(idColumnName, 1, orderBy: '$idColumnName DESC');
 
     return res.isNotEmpty ? fromMap(res.first) : null;
   }
@@ -253,7 +281,7 @@ class LoginProvider extends EntityProvider<LoginSql> {
   List<LoginSql> Function(List<Map<String, Object?>> p1) get fromMapList => LoginSql.fromQueryMapList;
 
 
-  Future<LoginSql?> getByEmail(String id) async => _getByPrimaryKey(id, LoginSql.emailString);
+  Future<LoginSql?> getByEmail(String id) async => getByPrimaryKey(id, LoginSql.emailString);
 
 }
 
