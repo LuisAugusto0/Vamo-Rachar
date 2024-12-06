@@ -55,8 +55,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> verifyLogin() async{
-    Map<String, Object?>? user = await _dbHelper.getCurrentUser();
-    if (user != null){
+    // OLD IMPLEMENTATION
+    // Map<String, Object?>? user = await _dbHelper.getCurrentUser();
+    
+    // if (user != null){
+    if (await _dbHelper.isLoggedIn()){
       NavigationHelper.pushNavigatorNoTransition(context, Home());
     }
   }

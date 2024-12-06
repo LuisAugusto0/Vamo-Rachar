@@ -81,15 +81,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   // }
 
   Future<void> _loadUserData() async {
-    final userData = await _dbHelper.getCurrentUser();
+    //OLD IMPLEMENTATION
+    // final userData = await _dbHelper.getCurrentUser();
 
-    if (userData != null) {
-      setState(() {
-        _userController.text = userData['nome'] as String;
-        _emailController.text = userData['email'] as String;
-        _passwordController.text = userData['senha'] as String;
+    // if (userData != null) {
+    if (await _dbHelper.isLoggedIn()){
+      setState(await () async {
+        // _userController.text = userData['nome'] as String;
+        // _emailController.text = userData['email'] as String;
+        // _passwordController.text = userData['senha'] as String;
+        _userController.text = await _dbHelper.getCurrentUserName() as String;
+        _emailController.text = await _dbHelper.getCurrentUserEmail() as String;
+        _passwordController.text = "TemplateTemplate";
       });
-      _currentUserId = userData['id'] as int;
+      // _currentUserId = userData['id'] as int;
     }
     // else {
     // Navigator.of(context).pushAndRemoveUntil(
@@ -116,8 +121,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         _currentUserId
     );
 
-
-    await _dbHelper.updateCurrentUser(_emailController.text);
+    //REFAZER UPDATEEE
+    // await _dbHelper.updateCurrentUser(_emailController.text);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Perfil atualizado com sucesso!')),
@@ -298,7 +303,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               FloatingActionButton.large(
                 heroTag: 'btnLogout',
                 onPressed: () async {
-                  await _dbHelper.deleteCurrentUser();
+                  await _dbHelper.logOut();
                   Navigator.push(
                     context,
                     MaterialPageRoute(

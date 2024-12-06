@@ -93,8 +93,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<VoidCallback?> _submit() async {
     print("Botão de registrar pressionado");
-    Map<String, Object?>? user = await dbHelper.findUser(_emailController.text);
-    String? loginError = validateLogin(_passwordController, user);
+
+    // OLD IMPLEMENTATION
+    // Map<String, Object?>? user = await dbHelper.findUser(_emailController.text);
+    // String? loginError = validateLogin(_passwordController, user);
+
+    String? loginError = await dbHelper.login(_emailController.text, _passwordController.text);
     if (loginError != null){
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro no login - ${loginError}')),
@@ -104,7 +108,10 @@ class _MyHomePageState extends State<MyHomePage> {
       print("Login efetuado");
       // Navigator.of(context).push(_homeRoute());
       Navigator.of(context).pushAndRemoveUntil( _homeRoute(), (Route<dynamic> route) => false);
-      dbHelper.createCurrentUser(user!['email'].toString());
+
+      //OLD IMPLEMENTATION
+      // dbHelper.createCurrentUser(user!['email'].toString());
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Login efetuado com sucesso')),
       );
@@ -127,8 +134,9 @@ class _MyHomePageState extends State<MyHomePage> {
             'Erro desconhecido')),
       );
     } else {
-      Map<String, Object?>? oldUser = await dbHelper.findUser(_emailResetController.text);
-      dbHelper.updateUser(oldUser!['id'] as int, oldUser!['nome'] as String, oldUser!['email'] as String, _newPasswordController.text);
+      //OLD IMPLEMENTATION
+      // Map<String, Object?>? oldUser = await dbHelper.findUser(_emailResetController.text);
+      // dbHelper.updateUser(oldUser!['id'] as int, oldUser!['nome'] as String, oldUser!['email'] as String, _newPasswordController.text);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Senha alterada com sucesso!')),
       );
@@ -137,8 +145,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _confirmarEmail(String email) async {
-    Map<String, Object?>? user = await dbHelper.findUser(email);
-    if (user == null) {
+    // OLD IMPLEMENTATION
+    // Map<String, Object?>? user = await dbHelper.findUser(email);
+
+    // if (user == null) {
+    if (await dbHelper.findEmail(email) == false){
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('E-mail incorreto')),
       );

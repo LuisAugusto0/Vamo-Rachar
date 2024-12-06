@@ -96,9 +96,11 @@ class _MyHomePageState extends State<MyHomePage> {
       print(_passwordConfirmationController.value.text);
 
       LoginProvider provider = LoginProvider(dbHelper);
-      provider.insert(LoginSql(name: _userController.text, email: _emailController.text, password: _passwordController.text));
+      dbHelper.createUser(_userController.text,_emailController.text, _passwordController.text, null);
+      // provider.insert(LoginSql(name: _userController.text, email: _emailController.text, password: _passwordController.text));
 
-      dbHelper.createCurrentUser(_emailController.text);
+      // OLD IMPLEMENTATION
+      // dbHelper.createCurrentUser(_emailController.text);
 
 
       // Navigator.of(context).push(_homeRoute());

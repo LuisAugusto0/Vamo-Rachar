@@ -52,14 +52,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final DatabaseHelper _dbHelper = DatabaseHelper();
+  // final bool _isLoggedIn = false;
   final bool _isLoggedIn = false;
   HomePageAppBar({super.key});
 
-
   Future<void> userProfileRoute(BuildContext context) async {
-    final userData = await _dbHelper.getCurrentUser();
-
-    if (userData != null) {
+    //OLD IMPLEMENTATION
+    // final userData = await _dbHelper.getCurrentUser();
+    //
+    // if (userData != null) {
+    if(await _dbHelper.isLoggedIn()){
       return NavigationHelper.pushNavigatorTransitionDown(
         context,
         Usuario(),
