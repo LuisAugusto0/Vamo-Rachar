@@ -116,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void _updateUserProfile() async {
     LoginProvider provider = new LoginProvider(_dbHelper);
 
-    await provider.updateById(
+    await provider.updateByAutoIncrementId(
         LoginSql(name: _userController.text, email: _emailController.text, password: _passwordController.text),
         _currentUserId
     );

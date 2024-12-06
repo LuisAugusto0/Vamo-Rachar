@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:vamorachar/database/database_helper.dart';
+import 'package:vamorachar/database/sql_providers.dart';
+import 'package:vamorachar/database/sql_tables.dart';
 import 'package:vamorachar/historico_detalhes.dart';
 import 'package:vamorachar/widgets/navigation_helper.dart';
-
-class Participants {
-  const Participants({
-    required this.name,
-    required this.email,
-  });
-
-  final String name;
-  final String email; //Usado para buscar mais dados depois
-}
 
 class HistoryData {
   const HistoryData({
     required this.location,
     required this.dateTime,
-    required this.participants,
+    required this.users,
+    required this.id,
     this.establishment,
     this.image,
   });
@@ -26,108 +21,182 @@ class HistoryData {
   final String? image;
   final String location;
   final DateTime dateTime;
-  final List<Participants> participants;
-  final int id = 0;
+  final List<UserSql> users;
+  final int id;
+
+  static Future<HistoryData> buildFromSql (DatabaseHelper dbHelper, PurchaseSql purchase) async {
+    // Need a new structure where id is never null... this is getting too unsafe
+    int? purchaseId = purchase.id;
+    if (purchaseId == null) throw Exception("Expected not null");
+
+    ProductProvider productProvider = ProductProvider(dbHelper);
+    List<ProductSql>? products = await productProvider.getByKey(purchaseId, ProductSql.fkeyPurchaseString);
+    if (products == null) throw Exception("Product not expected to be empty");
+    List<int> productIds = products.map((product) => product.id!).toList();
+
+    ProductUnitProvider productUnitProvider = ProductUnitProvider(dbHelper);
+    List<ProductUnitSql> productUnits = await productUnitProvider.getByKeyList(
+        ProductUnitSql.fkeyProductString, productIds
+    );
+    if (productUnits.isEmpty) throw Exception("Products not found");
+    List<int> productUnitsIds = productUnits.map((productUnit) => productUnit.id!).toList();
+
+    ContributionProvider contributionProvider = ContributionProvider(dbHelper);
+    List<ContributionSql> contributions = await contributionProvider.getByKeyList(
+        ContributionSql.fkeyProductUnitString, productUnitsIds
+    );
+    if (contributions.isEmpty) throw Exception("Contributions not found");
+
+    // Get only unique instances
+    Set<int> userIdsSet = {};
+    for (var contribution in contributions) {
+      userIdsSet.add(contribution.fkeyUser);
+    }
+    List<int> userIds = userIdsSet.toList();
+    
+    UserProvider userProvider = UserProvider(dbHelper);
+    List<UserSql>? users = await userProvider.getByAutoIncrementIdList(userIds);
+    if (users == null) throw Exception("Users not found");
+
+    String? locationName = "LOCATION NOT IMPLEMENTED";
+
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(purchase.dateTimeInUnix);
+    print(purchase.dateTimeInUnix);
+    return HistoryData(
+      id: purchaseId,
+      location: locationName,
+      dateTime: dateTime,
+      users: users,
+      establishment: purchase.establishmentName,
+      //image: NOT IMPLEMENTED
+    );
+  }
+
+  static const int displayCount = 10;
+  static Future<List<HistoryData>> getAllOnRange(DatabaseHelper dbHelper, int offset) async {
+    PurchaseProvider purchaseProvider = PurchaseProvider(dbHelper);
+
+    // id is autoincrement, so you want to get descending order for history
+    String orderby = SqlProvider.getSimpleOrderBy(PurchaseSql.dateTimeInUnixString, false);
+    List<PurchaseSql> purchases = await purchaseProvider.getFirstResults(PurchaseSql.idString, displayCount, orderBy: orderby, offset: offset);
+
+    List<HistoryData> list = [];
+    for(int i = 0; i < purchases.length; i++) {
+      try {list.add(await buildFromSql(dbHelper, purchases[i]));}
+      catch(e) {
+        //ignore poorly connected widgets instead of breaking
+        debugPrint("ERROR ON PURCHASE ${purchases[i].id}. NOT FULLY CONNECTED");
+      }
+    }
+    return list;
+  }
 }
 
-final List<HistoryData> fallbackList = [
-  HistoryData(
-    location: "Central Park, NYC",
-    dateTime: DateTime(2024, 10, 2, 15, 30),
-    participants: [
-      const Participants(
-          name: "Alice Smith",
-          email: "alice@example.com",
-      ),
-      const Participants(
-          name: "Bob Johnson",
-          email: "bob@example.com",
-      )
-    ],
-    establishment: "Park Cafe",
-    image: "",
-  ),
-  HistoryData(
-    location: "The Louvre, Paris",
-    dateTime: DateTime(2023, 6, 15, 10, 0),
-    participants: [
-      const Participants(
-          name: "Chloe Brown",
-          email: "chloe@example.com",
-      ),
-      const Participants(
-          name: "David Wilson",
-          email: "david@example.com",
-      ),
-    ],
-    establishment: "Cafe Marly",
-    image: "https://picsum.photos/200",
-  ),
-  HistoryData(
-    location: "Tokyo Tower, Tokyo",
-    dateTime: DateTime(2023, 7, 5, 18, 45),
-    participants: [
-      const Participants(
-          name: "Emily Davis",
-          email: "emily@example.com",
-      ),
-      const Participants(
-          name: "Frank Martinez",
-          email: "frank@example.com",
-      ),
-    ],
-    establishment: null,
-    image: "https://picsum.photos/200",
-  ),
-  HistoryData(
-    location: "Eiffel Tower, Paris",
-    dateTime: DateTime(2023, 8, 10, 12, 0),
-    participants: [
-      const Participants(
-          name: "Grace Lee",
-          email: "grace@example.com",
-      ),
-      const Participants(
-          name: "Henry Taylor",
-          email: "henry@example.com",
-      ),
-    ],
-    establishment: "Le Café de l'Homme",
-    image: "https://picsum.photos/200",
-  ),
-  HistoryData(
-    location: "Sydney Opera House, Sydney",
-    dateTime: DateTime(2023, 9, 20, 14, 30),
-    participants: [
-      const Participants(
-          name: "Isabella Martinez",
-          email: "isabella@example.com",
-      ),
-      const Participants(
-          name: "Jack White",
-          email: "jack@example.com",
-       ),
-    ],
-    establishment: "Opera Bar",
-    image: "https://picsum.photos/200",
-  ),
-  HistoryData(
-    location: "Colosseum, Rome",
-    dateTime: DateTime(2023, 10, 5, 16, 15),
-    participants: [
-      const Participants(
-          name: "Liam Wilson",
-          email: "liam@example.com",
-     ),
-      const Participants(
-          name: "Mia Brown",
-          email: "mia@example.com",
-       ),
-    ],
-    establishment: "Ristorante Aroma",
-    image: "https://picsum.photos/200",
-  ),
-];
+//
+//
+// final List<HistoryData> fallbackList = [
+//   HistoryData(
+//     location: "Central Park, NYC",
+//     dateTime: DateTime(2024, 10, 2, 15, 30),
+//     participants: [
+//       const Participants(
+//           name: "Alice Smith",
+//           id: 0,
+//       ),
+//       const Participants(
+//           name: "Bob Johnson",
+//           id: 1,
+//       )
+//     ],
+//     establishment: "Park Cafe",
+//     image: "",
+//   ),
+//   HistoryData(
+//     location: "The Louvre, Paris",
+//     dateTime: DateTime(2023, 6, 15, 10, 0),
+//     participants: [
+//       const Participants(
+//           name: "Chloe Brown",
+//           id: 2,
+//       ),
+//       const Participants(
+//           name: "David Wilson",
+//           id: 3,
+//       ),
+//     ],
+//     establishment: "Cafe Marly",
+//     image: "https://picsum.photos/200",
+//   ),
+//   HistoryData(
+//     location: "Tokyo Tower, Tokyo",
+//     dateTime: DateTime(2023, 7, 5, 18, 45),
+//     participants: [
+//       const Participants(
+//           name: "Emily Davis",
+//           id: 4,
+//       ),
+//       const Participants(
+//           name: "Frank Martinez",
+//           id: 5,
+//       ),
+//     ],
+//     establishment: null,
+//     image: "https://picsum.photos/200",
+//   ),
+//   HistoryData(
+//     location: "Eiffel Tower, Paris",
+//     dateTime: DateTime(2023, 8, 10, 12, 0),
+//     participants: [
+//       const Participants(
+//           name: "Grace Lee",
+//           id: 6,
+//       ),
+//       const Participants(
+//           name: "Henry Taylor",
+//           id: 7,
+//       ),
+//     ],
+//     establishment: "Le Café de l'Homme",
+//     image: "https://picsum.photos/200",
+//   ),
+//   HistoryData(
+//     location: "Sydney Opera House, Sydney",
+//     dateTime: DateTime(2023, 9, 20, 14, 30),
+//     participants: [
+//       const Participants(
+//           name: "Isabella Martinez",
+//           id: 8,
+//       ),
+//       const Participants(
+//           name: "Jack White",
+//           id: 9,
+//        ),
+//     ],
+//     establishment: "Opera Bar",
+//     image: "https://picsum.photos/200",
+//   ),
+//   HistoryData(
+//     location: "Colosseum, Rome",
+//     dateTime: DateTime(2023, 10, 5, 16, 15),
+//     participants: [
+//       const Participants(
+//           name: "Liam Wilson",
+//           id: 10,
+//      ),
+//       const Participants(
+//           name: "Mia Brown",
+//           id: 11,
+//        ),
+//     ],
+//     establishment: "Ristorante Aroma",
+//     image: "https://picsum.photos/200",
+//   ),
+// ];
+
+
+
+
+
 
 class Historico extends StatefulWidget {
   const Historico({super.key});
@@ -137,25 +206,27 @@ class Historico extends StatefulWidget {
 }
 
 class _HistoricoState extends State<Historico> {
-  List<HistoryData> currentList = fallbackList; // Initial list
-  List<HistoryData> filteredList = []; // List to hold filtered results
+  late Future<List<HistoryData>> _futureList; // Holds the async result
 
   @override
   void initState() {
     super.initState();
-    filteredList = currentList;
+    _futureList = HistoryData.getAllOnRange(DatabaseHelper(), 0); // Adjust offset and limit as needed
   }
 
-  // Update here to back-end conversion function to get top n matches
   void onSearchBarChanged(String input) {
+    // You can't directly modify a Future-based list; this would apply filtering
+    // only after the list has been loaded
     setState(() {
-      if (input.isEmpty) {
-        filteredList = currentList;
-      } else {
-        filteredList = currentList.where((item) {
-          return item.location.toLowerCase().contains(input.toLowerCase());
-        }).toList();
-      }
+      _futureList = _futureList.then((currentList) {
+        if (input.isEmpty) {
+          return currentList;
+        } else {
+          return currentList
+              .where((item) => item.location.toLowerCase().contains(input.toLowerCase()))
+              .toList();
+        }
+      });
     });
   }
 
@@ -163,9 +234,53 @@ class _HistoricoState extends State<Historico> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: HistoricoAppbar(onChanged: onSearchBarChanged),
-      body: HistoricoBody(list: filteredList),
+      body: FutureBuilder<List<HistoryData>>(
+        future: _futureList,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator()); // Loading spinner
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}')); // Error message
+          } else if (snapshot.hasData) {
+            final list = snapshot.data!;
+            return HistoricoBody(list: list); // Render your list
+          } else {
+            return const Center(child: Text('No data available')); // Empty state
+          }
+        },
+      ),
     );
   }
+
+  // List<HistoryData> currentList = fallbackList; // Initial list
+  // List<HistoryData> filteredList = []; // List to hold filtered results
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   filteredList = currentList;
+  // }
+  //
+  // // Update here to back-end conversion function to get top n matches
+  // void onSearchBarChanged(String input) {
+  //   setState(() {
+  //     if (input.isEmpty) {
+  //       filteredList = currentList;
+  //     } else {
+  //       filteredList = currentList.where((item) {
+  //         return item.location.toLowerCase().contains(input.toLowerCase());
+  //       }).toList();
+  //     }
+  //   });
+  // }
+  //
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     appBar: HistoricoAppbar(onChanged: onSearchBarChanged),
+  //     body: HistoricoBody(list: filteredList),
+  //   );
+  // }
 }
 
 class HistoricoAppbar extends StatelessWidget implements PreferredSizeWidget {

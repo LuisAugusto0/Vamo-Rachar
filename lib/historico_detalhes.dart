@@ -1,23 +1,116 @@
 import 'package:flutter/material.dart';
 import 'package:vamorachar/widgets/navigation_helper.dart';
-import 'database/history_page_wrapper_converter.dart';
+import 'database/database_helper.dart';
+import 'database/historico_detalhes_classes.dart';
 import 'package:intl/intl.dart';
 
-ProductPurchaseHistory productPurchaseHistory = defaultProductPurchaseHistory;
+import 'database/sql_providers.dart';
+import 'database/sql_tables.dart';
 
-class HistoricoDetails extends StatelessWidget {
-  const HistoricoDetails({required this.id, super.key});
+
+
+
+
+
+
+
+PurchaseHistory productPurchaseHistory = defaultProductPurchaseHistory;
+
+
+class HistoricoDetails extends StatefulWidget {
   final int id;
+
+  HistoricoDetails({required this.id, super.key});
+
+  @override
+  _HistoricoDetailsState createState() => _HistoricoDetailsState();
+}
+
+class _HistoricoDetailsState extends State<HistoricoDetails> {
+  late Future<PurchaseHistory> purchaseHistory;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the data asynchronously
+    purchaseHistory = _initializePurchaseHistory();
+  }
+
+  Future<PurchaseHistory> _initializePurchaseHistory() async {
+    DatabaseHelper dbHelper = DatabaseHelper();
+    PurchaseProvider provider = PurchaseProvider(dbHelper);
+    final purchase = await provider.getByAutoIncrementId(widget.id);
+    if (purchase == null) throw Exception("Id ${widget.id} is invalid");
+
+    return await PurchaseHistory.buildFromSql(dbHelper, purchase);
+  }
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<PurchaseHistory>(
+      future: purchaseHistory,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Loading...")),
+            body: Center(child: CircularProgressIndicator()),  // Show loading indicator
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Error")),
+            body: Center(child: Text('Error: ${snapshot.error}')),  // Show error message
+          );
+        } else if (snapshot.hasData) {
+          // If the data is loaded successfully
+          PurchaseHistory purchaseHistoryData = snapshot.data!;
 
-    return Scaffold(
-      appBar: Appbar(onChanged: (String str) => {}, total: productPurchaseHistory.spendings),
-      body: Body(data: productPurchaseHistory),
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Historico Details"),
+              actions: [
+                // You can use purchaseHistoryData here
+                // Example: Appbar(onChanged: (String str) => {}, total: purchaseHistoryData.spendings)
+              ],
+            ),
+            body: Body(data: purchaseHistoryData),  // Pass the loaded data to the body
+          );
+        } else {
+          return Scaffold(
+            appBar: AppBar(title: Text("No Data")),
+            body: Center(child: Text("No data available")),  // In case no data is found
+          );
+        }
+      },
     );
   }
 }
+
+
+// class HistoricoDetails extends StatelessWidget {
+//   HistoricoDetails({required this.id, super.key}) : {
+//   initializePurchaseHistory();
+//   }
+//   final int id;
+//
+//   late PurchaseHistory purchaseHistory;
+//
+//   Future<void> initializePurchaseHistory() async {
+//     DatabaseHelper dbHelper = DatabaseHelper();
+//     PurchaseProvider provider = PurchaseProvider(dbHelper);
+//     final purchase = await provider.getByAutoIncrementId(id);
+//
+//     purchaseHistory = await PurchaseHistory.buildFromSql(dbHelper, purchase);
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//
+//     return Scaffold(
+//       appBar: Appbar(onChanged: (String str) => {}, total: productPurchaseHistory.spendings),
+//       body: Body(data: productPurchaseHistory),
+//     );
+//   }
+// }
 
 /*
  @override
@@ -110,7 +203,7 @@ class Appbar extends StatelessWidget implements PreferredSizeWidget {
 
 class Body extends StatelessWidget {
   const Body({required this.data, super.key});
-  final ProductPurchaseHistory data;
+  final PurchaseHistory data;
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +220,7 @@ class Body extends StatelessWidget {
 
 class ProductPurchasesViewer extends StatelessWidget {
   const ProductPurchasesViewer({required this.data, super.key});
-  final ProductPurchaseHistory data;
+  final PurchaseHistory data;
 
   @override
   Widget build(BuildContext context) {
@@ -404,7 +497,7 @@ class InstanceTile extends StatelessWidget {
               ),
             ),
 
-            Text("R\$ ${contribution.contribution.toStringAsFixed(2)}"),
+            Text("R\$ ${contribution.paid.toStringAsFixed(2)}"),
           ],
         )
       )

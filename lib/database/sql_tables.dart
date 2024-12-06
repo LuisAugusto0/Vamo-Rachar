@@ -158,12 +158,12 @@ class UserSql implements EntityTable {
 
   final int? id;
   final String name;
-  final int fkeyLogin;
+  final int? fkeyLogin;
 
   const UserSql({
     this.id,
     required this.name,
-    required this.fkeyLogin,
+    this.fkeyLogin,
   });
 
   @override
@@ -200,8 +200,8 @@ class UserSql implements EntityTable {
     assert (data.containsKey(nameString) && data[nameString] is String,
     'Map is missing the correct $nameString field');
 
-    assert (data.containsKey(fkeyLoginString) && data[fkeyLoginString] is int,
-    'Map is missing the correct $fkeyLoginString field');
+    // assert (!data.containsKey(fkeyLoginString) || data[fkeyLoginString] is int,
+    // 'Map is missing the correct $fkeyLoginString field');
 
   }
 
@@ -213,7 +213,7 @@ class UserSql implements EntityTable {
     return UserSql(
       id: data[idString] as int,
       name: data[nameString] as String,
-      fkeyLogin: data[fkeyLoginString] as int,
+      fkeyLogin: data.containsKey(fkeyLoginString) ? data[fkeyLoginString] as int? : null,
     );
   }
 
