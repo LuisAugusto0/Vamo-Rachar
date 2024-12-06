@@ -82,7 +82,11 @@ class HistoryData {
 
     List<HistoryData> list = [];
     for(int i = 0; i < purchases.length; i++) {
-      list.add(await buildFromSql(dbHelper, purchases[i]));
+      try {list.add(await buildFromSql(dbHelper, purchases[i]));}
+      catch(e) {
+        //ignore poorly connected widgets instead of breaking
+        debugPrint("ERROR ON PURCHASE ${purchases[i].id}. NOT FULLY CONNECTED");
+      }
     }
     return list;
   }
@@ -188,6 +192,11 @@ class HistoryData {
 //     image: "https://picsum.photos/200",
 //   ),
 // ];
+
+
+
+
+
 
 class Historico extends StatefulWidget {
   const Historico({super.key});
