@@ -75,9 +75,14 @@ void testProviders() async {
 Future<void> initializeDatabase() async {
   WidgetsFlutterBinding.ensureInitialized();
   //initialize firebse
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print("Firebase initiated with success");
+  } catch (e){
+    print("An error ocurred in the firebase initialization: $e");
+  }
 
   FirebaseAuth.instance.authStateChanges().listen((User? user) {
     if (user == null) {
