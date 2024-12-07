@@ -163,18 +163,35 @@ class DatabaseHelper extends FirebaseHelper {
   }
 
 
-  // Firestore backups
+  // Firestore backup functions //
 
+  Future<void> removeLocalDatabase() async {
+    Database db = await getDatabase();
+    await dropTables(db);
+    await createTables(db);
+    print("db removed");
+  }
 
-  Future<void> createFirestoreBackup() async {
+  Future<void> resetLocalDatabase() async {
+    Database db = await getDatabase();
+    await dropTables(db);
+    await createTables(db);
+    await initTestData(db);
+    print("db reseted");
+  }
+
+  Future<String?> createFirestoreBackup() async {
+    String? error;
     try {
       if (await isLoggedIn() == false) {
         throw Exception('No user is currently signed in.');
       }
+      //organization in the firebase: uid/tableName/rows/id/values
 
+      //Get uid from curent user (used for the root collection)
       final uid = getCurrentUserUID()!;
       final database = await getDatabase();
-      // Get all table names from SQLite
+      // Get all table names from SQLite (used for the first level documents)
       final tableNames = await database.query(
         'sqlite_master',
         columns: ['name'],
@@ -199,11 +216,10 @@ class DatabaseHelper extends FirebaseHelper {
 
         // Reference to the Firestore document for the table
         final tableDocRef = FirebaseFirestore.instance.collection(uid).doc(tableName);
-
         // Delete old values if there is any
         tableDocRef.delete();
 
-        // Write rows to Firestore using a batch
+        // Write rows to Firestore using a batch (rows as the collection in the second level, and the ids on the third level and the values vinculated in the id on the fourth level)
         final batch = FirebaseFirestore.instance.batch();
 
         for (final row in rows) {
@@ -226,58 +242,79 @@ class DatabaseHelper extends FirebaseHelper {
       print('Firestore backup completed successfully.');
     } catch (e) {
       print('Error creating Firestore backup: $e');
-      throw e;
+      error = e.toString();
     }
+    return error;
   }
 
-  // Future<void> restoreFromFirestoreBackup() async {
-  //   try {
-  //     if (await isLoggedIn() == false) {
-  //       throw Exception('No user is currently signed in.');
-  //     }
-  //
-  //     final uid = getCurrentUserUID()!;
-  //     final database = await getDatabase();
-  //     await dropTables(database);
-  //     print("tables dropped");
-  //     await createTables(database);
-  //
-  //
-  //     // Get all table documents from Firestore
-  //     final tableDocsSnapshot = await FirebaseFirestore.instance.collection(uid).get();
-  //
-  //     // Start a transaction to ensure data integrity
-  //     await database.transaction((txn) async {
-  //
-  //
-  //       // Restore each table from Firestore
-  //       for (final tableDoc in tableDocsSnapshot.docs) {
-  //         final tableName = tableDoc.id;
-  //
-  //         // Check for metadata to recreate the table schema (if stored)
-  //         final schemaDoc = await tableDoc.reference.collection('metadata').doc('schema').get();
-  //         if (!schemaDoc.exists) {
-  //           throw Exception("Missing schema for table '$tableName' in Firestore.");
-  //         }
-  //
-  //         final createTableSQL = schemaDoc['createSQL'] as String;
-  //         await txn.execute(createTableSQL);
-  //
-  //         // Get all rows from the table document's rows collection
-  //         final rowsSnapshot = await tableDoc.reference.collection('rows').get();
-  //
-  //         for (final rowDoc in rowsSnapshot.docs) {
-  //           final rowData = rowDoc.data();
-  //           await txn.insert(tableName, Map<String, dynamic>.from(rowData));
-  //         }
-  //       }
-  //     });
-  //
-  //     print('Restore from Firestore backup completed successfully.');
-  //   } catch (e) {
-  //     print('Error restoring Firestore backup: $e');
-  //   }
-  // }
+  Future<String?> restoreFromFirestoreBackup() async {
+    String? error;
+    try {
+      if (await isLoggedIn() == false) {
+        throw Exception('No user is currently signed in.');
+      }
+
+      final uid = getCurrentUserUID()!;
+      final database = await getDatabase();
+      removeLocalDatabase();
+
+      //get table Names
+      final tableNames = await database.query(
+        'sqlite_master',
+        columns: ['name'],
+        where: 'type = ?',
+        whereArgs: ['table'],
+      );
+
+      //Foreach tableName, fill this table by the data value on the rows collection (copying the id's sequentially)
+      for (final tableMap in tableNames) {
+        final tableName = tableMap['name'] as String;
+        final instancies = await FirebaseFirestore.instance.collection(uid).doc(tableName).collection('rows');
+
+        //Start in the id=1 and end when there is no more id's
+        int id = 1;
+        var finalMap = await FirebaseFirestore.instance.collection(uid).doc(tableName).collection('rows').doc(id.toString()).get();
+        while (finalMap.data() != null) {
+          // Insert data into your local database
+          database.insert(tableName, finalMap.data()!);
+
+          id++;
+          finalMap = await FirebaseFirestore.instance.collection(uid).doc(tableName).collection('rows').doc(id.toString()).get();
+        }
+      }
+
+
+      // Get all table documents from Firestore
+      final tableDocsSnapshot = await FirebaseFirestore.instance.collection(uid).get();
+
+
+      // Start a transaction to ensure data integrity
+      // await database.transaction((txn) async {
+      print(tableDocsSnapshot.size);
+        // Restore each table from Firestore
+        for (final tableDoc in tableDocsSnapshot.docs) {
+          //set the name of the table as the name of the document in firebase
+          final tableName = tableDoc.id;
+
+          // Get all rows from the table document's rows collection
+          final rowsSnapshot = await tableDoc.reference.collection('rows').get();
+
+          for (final rowDoc in rowsSnapshot.docs) {
+            final rowData = rowDoc.data();
+            database.insert(tableName, Map<String, dynamic>.from(rowData));
+            print("Inserted ${Map<String, dynamic>.from(rowData)}");
+          }
+        }
+      // });
+
+      print('Restore from Firestore backup completed successfully.');
+    } catch (e) {
+      removeLocalDatabase();
+      print('Error restoring Firestore backup: $e');
+      error = e.toString();
+    }
+    return error;
+  }
 
 }
 

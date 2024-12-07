@@ -85,7 +85,6 @@ Future<void> createTables(Database db) async {
 }
 
 Future<void> dropTables(Database db) async {
-  await db.execute("DROP INDEX IF EXISTS idx_usuario_id");
   await db.execute("DROP INDEX IF EXISTS idx_pedido_id");
   await db.execute("DROP TABLE IF EXISTS contribuicao");
   await db.execute("DROP TABLE IF EXISTS unidade_produto");

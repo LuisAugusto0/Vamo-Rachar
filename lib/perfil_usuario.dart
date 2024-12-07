@@ -301,10 +301,38 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               ],
             ),
             TextButton(
-              onPressed: () {
-                _dbHelper.createFirestoreBackup();
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(await _dbHelper.createFirestoreBackup() ?? "Backup criado com sucesso")),
+                );
               },
               child: const Text('Create backup'),
+            ),
+            TextButton(
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(await _dbHelper.restoreFromFirestoreBackup() ?? "Restaurado com sucesso")),
+                );
+              },
+              child: const Text('Restore backup'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _dbHelper.removeLocalDatabase();
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Banco de dados local removido")),
+                );
+              },
+              child: const Text('Remove local history'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _dbHelper.resetLocalDatabase();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Banco de dados local resetado")),
+                );
+              },
+              child: const Text('Reset local history (debug initial values)'),
             ),
           ],
         ),
@@ -320,6 +348,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 heroTag: 'btnLogout',
                 onPressed: () async {
                   await _dbHelper.logOut();
+                  await _dbHelper.removeLocalDatabase();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
