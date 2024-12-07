@@ -118,10 +118,10 @@ class FirebaseHelper {
       } else {
         error = e.code;
       }
-      debugPrint('Error logging in: $error');
+      debugPrint('Error on singIn: $error');
     } catch (e) {
       // Handle errors (e.g., email already in use, invalid password)
-      debugPrint('Error creating user: $e');
+      debugPrint('Error on singIn: $e');
     }
     return error;
   }
