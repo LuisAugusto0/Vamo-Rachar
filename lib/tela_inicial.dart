@@ -121,7 +121,10 @@ class RachamentoButton extends StatelessWidget {
           heroTag: 'btnNovaDivisao',
           backgroundColor: Colors.white,
           onPressed: () {
-            NavigationHelper.pushNavigatorNoTransition(context, NovoRachamento());
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NovoRachamento()),
+            );
           },
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

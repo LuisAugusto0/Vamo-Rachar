@@ -22,13 +22,7 @@ class ConfirmarDivisao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Lista de Gastos',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: UserExpensesPage(participantes: participantes),
-    );
+    return UserExpensesPage(participantes: participantes);
   }
 }
 
@@ -55,12 +49,17 @@ class UserExpensesPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          ElevatedButton(
-            onPressed: () {
-              NavigationHelper.pushNavigatorNoTransition(
-                  context, NovoRachamento());
-            },
-            child: Text("cancelar"),
+          Padding(
+            padding: const EdgeInsets.only(
+              bottom: 50,
+              right: 15,
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("cancelar"),
+            ),
           ),
         ],
       ),
@@ -107,7 +106,10 @@ class _UserCardState extends State<UserCard> {
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             SizedBox(height: 16),
-            CustomDropdown(items: widget.itensConsumidos, onChanged: (value) {})
+            CustomDropdown(
+                hintText: "Itens Consumidos",
+                items: widget.itensConsumidos,
+                onChanged: (value) {})
           ],
         ),
       ),
