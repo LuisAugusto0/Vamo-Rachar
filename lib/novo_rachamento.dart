@@ -9,6 +9,7 @@ import 'widgets/validation_helpers.dart';
 import 'widgets/form_widgets.dart';
 import 'database/database_helper.dart';
 import 'widgets/navigation_helper.dart';
+import 'scanner.dart';
 
 class Item {
   late int id;
@@ -100,7 +101,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   //Lista de Itens
   late List<Item> itens = [];
 
-  void _scanner(BuildContext) {
+  /*void _scanner(BuildContext) {
     showDialog(
         context: context,
         builder: (context) {
@@ -121,6 +122,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
           );
         });
   }
+  */
 
   //Função criada para adicionar itens à lista
   void _adicionarItens(BuildContext context) {
@@ -378,7 +380,8 @@ class _NovoRachamentoState extends State<NovoRachamento> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  _scanner(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Scanner(participantes: participantes, itens: itens,ultimoIdUsado: ultimoIdUsado, ultimoIdItem: ultimoIdItem,)));
                 },
                 child: const Text(
                   "Scanner",

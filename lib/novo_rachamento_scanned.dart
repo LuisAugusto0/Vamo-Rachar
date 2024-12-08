@@ -15,14 +15,15 @@ class NovoRachamentoScanner extends StatelessWidget {
       {Key? key,
       required this.participantes,
       required this.itens,
-      required this.ultimoIdUsado}) {}
+      required this.ultimoIdUsado});
 
   @override
   Widget build(BuildContext context) {
     return ScannedScreen(
-        participantes: participantes,
-        itens: itens,
-        ultimoIdUsado: ultimoIdUsado);
+      participantes: participantes,
+      itens: itens,
+      ultimoIdUsado: ultimoIdUsado,
+    );
   }
 }
 
@@ -625,7 +626,9 @@ class _ScannedScreen extends State<ScannedScreen> {
                           ),
                           onPressed: () {
                             setState(() {
-                              _adicionarDivisor(context, index);
+                              if(itens[index].quantidade > 0){
+                                _adicionarDivisor(context, index);
+                              }
                               //aux.removeRange(0, aux.length);
                               qtd = itens[index].quantidade;
                               textoPadrao =

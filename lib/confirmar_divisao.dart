@@ -11,7 +11,8 @@ class ConfirmarDivisao extends StatelessWidget {
       {Key? key, required this.participantes, required this.instancias}) {
     for (int i = 0; i < instancias.length; i++) {
       for (int j = 0; j < participantes.length; j++) {
-        if (instancias[i].participantes.contains(participantes[j])) {
+        if (instancias[i].participantes.contains(participantes[j]) &&
+            participantes[j].totalPago == 0) {
           participantes[j].consumidos.add(instancias[i].item);
           participantes[j].totalPago +=
               (instancias[i].item.preco * instancias[i].item.quantidade);
@@ -56,7 +57,11 @@ class UserExpensesPage extends StatelessWidget {
             ),
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
+                for (int i = 0; i < participantes.length; i++){
+                  participantes[i].consumidos = [];
+                  participantes[i].totalPago = 0;
+                }
+                  Navigator.pop(context);
               },
               child: Text("cancelar"),
             ),
