@@ -9,9 +9,10 @@ import 'sql_tables.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'firebase_helper.dart';
 
 
-class DatabaseHelper {
+class DatabaseHelper extends FirebaseHelper {
 
   static const dbName = 'base';
 
@@ -26,7 +27,6 @@ class DatabaseHelper {
 
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   Database? _database;
-
   // Ensures only one instance exists
   factory DatabaseHelper() {
     return _instance;
@@ -163,240 +163,158 @@ class DatabaseHelper {
   }
 
 
+  // Firestore backup functions //
 
-
-
-  // Queries
-  // @Deprecated('old version that does not support providers as type safety')
-  // Future<void> createCurrentUser(String email) async {
-  //   final db = await getDatabase();
-  //   // Verifica se a tabela existe e cria se necessário
-  //   await db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
-  //   final dadosUsuario = findUser(email);
-  //   final id = await db.insert('usuarioAtual', (await dadosUsuario)!);
-  //   debugPrint('Salvo: $id');
-  //   listarUmUsuario(id);
-  // }
-  //
-  // @Deprecated('old version that does not support providers as type safety')
-  // Future<void> deleteCurrentUser() async {
-  //   final db = await getDatabase();
-  //   // Verifica se a tabela existe e cria se necessário
-  //   await db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
-  //   final retorno = await db.delete('usuarioAtual');
-  //   debugPrint('Itens excluídos: $retorno');
-  // }
-  //
-  // @Deprecated('old version that does not support providers as type safety')
-  // Future<Map<String, Object?>?> getCurrentUser() async {
-  //   final db = await getDatabase();
-  //   // Verifica se a tabela existe e cria se necessário
-  //   db.execute('CREATE TABLE IF NOT EXISTS usuarioAtual (id INTEGER PRIMARY KEY, nome VARCHAR, email VARCHAR, senha VARCHAR)');
-  //   const sql = 'SELECT * FROM usuarioAtual';
-  //   final usuario = await db.rawQuery(sql);
-  //   return usuario.isEmpty ? null : usuario.first;
-  // }
-  //
-  //
-  // @Deprecated('old version that does not support providers as type safety')
-  // Future<void> updateCurrentUser(String email) async{
-  //   if (await getCurrentUser() != null){
-  //     deleteCurrentUser();
-  //   }
-  //   createCurrentUser(email);
-  // }
-
-  // UNUSED
-  // @Deprecated('old version that does not support providers as type safety')
-  // Future<void> createLocalUser(String nome, String email, String senha) async {
-  //   debugPrint('here');
-  //   final db = await getDatabase();
-  //   debugPrint('here2');
-  //   final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
-  //   final id = await db.insert('usuario', dadosUsuario);
-  //   debugPrint('Salvo: $id');
-  //   listarUmUsuario(id);
-  // }
-
-
-  @Deprecated('Version that does not support providers as type safety but apply firebase')
-  Future<void> createUser(String name, String email, String password, String? photoURL) async {
-    try {
-      // Create a user with email and password
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      //set the user name and photo URL
-      await userCredential.user?.updateDisplayName(name);
-      if (photoURL != null) await userCredential.user?.updatePhotoURL(photoURL);
-
-      // Get the user ID of the newly created user
-      String id = userCredential.user?.uid ?? "Unknown ID";
-      String userName = userCredential.user?.displayName ?? "Unknown user name";
-
-      // Debug log for the saved user ID
-      debugPrint('User created successfully: $id, $userName');
-    } catch (e) {
-      // Handle errors (e.g., email already in use, invalid password)
-      debugPrint('Error creating user: $e');
-    }
+  Future<void> removeLocalDatabase() async {
+    Database db = await getDatabase();
+    await dropTables(db);
+    await createTables(db);
+    print("db removed");
   }
 
-  @Deprecated('Version that does not support providers as type safety but apply firebase')
-  Future<String?> login(String email, String password) async {
+  Future<void> resetLocalDatabase() async {
+    Database db = await getDatabase();
+    await dropTables(db);
+    await createTables(db);
+    await initTestData(db);
+    print("db reseted");
+  }
+
+  Future<String?> createFirestoreBackup() async {
     String? error;
     try {
-      // Create a user with email and password
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+      if (await isLoggedIn() == false) {
+        throw Exception('No user is currently signed in.');
+      }
+      //organization in the firebase: uid/tableName/rows/id/values
 
-      // Get the user ID of the newly created user
-      String id = userCredential.user?.uid ?? "Unknown ID";
-      String userName = userCredential.user?.displayName ?? "Unknown user name";
+      //Get uid from curent user (used for the root collection)
+      final uid = getCurrentUserUID()!;
+      final database = await getDatabase();
+      // Get all table names from SQLite (used for the first level documents)
+      final tableNames = await database.query(
+        'sqlite_master',
+        columns: ['name'],
+        where: 'type = ?',
+        whereArgs: ['table'],
+      );
 
-      // Debug log for the saved user ID
-      debugPrint('User logged successfully: $id, $userName');
+      for (final tableNameMap in tableNames) {
+        final tableName = tableNameMap['name'] as String;
+
+        if (tableName == 'android_metadata' || tableName == 'sqlite_sequence') {
+          // Skip system tables
+          continue;
+        }
+
+        // Get all rows from the table
+        final rows = await database.query(tableName);
+
+        if (rows.isEmpty) {
+          continue; // Skip empty tables
+        }
+
+        // Reference to the Firestore document for the table
+        final tableDocRef = FirebaseFirestore.instance.collection(uid).doc(tableName);
+        // Delete old values if there is any
+        tableDocRef.delete();
+
+        // Write rows to Firestore using a batch (rows as the collection in the second level, and the ids on the third level and the values vinculated in the id on the fourth level)
+        final batch = FirebaseFirestore.instance.batch();
+
+        for (final row in rows) {
+          final rowId = row['id']; // Assuming 'id' is the primary key
+          if (rowId == null) {
+            continue; // Skip rows without an 'id'
+          }
+
+          // Reference to the document for the row
+          final rowDocRef = tableDocRef.collection('rows').doc(rowId.toString());
+
+          // Add the set operation to the batch
+          batch.set(rowDocRef, row);
+        }
+
+        // Commit the batch
+        await batch.commit();
+      }
+
+      print('Firestore backup completed successfully.');
     } catch (e) {
-      // Handle errors (e.g., email already in use, invalid password)
-      debugPrint('Error logging in: $e');
+      print('Error creating Firestore backup: $e');
       error = e.toString();
     }
     return error;
   }
 
-  @Deprecated('Version that does not support providers as type safety but apply firebase')
-  Future<String?> getCurrentUserName() async {
-    String? userName;
-    // Get current user name from firebaseAuth actual instance
-    User? user = FirebaseAuth.instance.currentUser;
-    if(user != null){
-      userName = user.displayName;
-    }
-
-    debugPrint('Current user name: $userName');
-    return userName;
-  }
-
-  @Deprecated('Version that does not support providers as type safety but apply firebase')
-  Future<String?> getCurrentUserEmail() async {
-    String? userEmail;
-    // Get current user email from firebaseAuth actual instance
-    User? user = FirebaseAuth.instance.currentUser;
-    if(user != null){
-      userEmail = user.email;
-    }
-
-    debugPrint('Current user e-mail: $userEmail');
-    return userEmail;
-  }
-
-  @Deprecated('Version that does not support providers as type safety but apply firebase')
-  Future<bool> findEmail(String email) async {
-    // Verify user email from firebaseAuth actual instance
-    return FirebaseAuth.instance.isSignInWithEmailLink(email);
-  }
-
-  @Deprecated('Version that does not support providers as type safety but apply firebase')
-  Future<bool> isLoggedIn() async {
-    // Verify if has current user in this instance
-    bool logged = false;
-    await FirebaseAuth.instance.authStateChanges().listen((User? user){
-      if (user == null) {
-        print('User is currently signed out!');
-      } else {
-        logged = true;
-        print('User is signed in!');
-        String name = user.displayName!;
-        print('Current user: $name');
-      }
-    });
-    print(logged);
-    return logged;
-  }
-
-  // Logout function
-  Future<void> logOut() async {
+  Future<String?> restoreFromFirestoreBackup() async {
+    String? error;
     try {
-      _createLogoutTimestamp(FirebaseAuth.instance.currentUser?.uid);
-      await FirebaseAuth.instance.signOut();
-    } catch (e) {
-      print("Erro ao fazer logout: ${e.toString()}");
-    }
-  }
-
-  Future<void> _createLogoutTimestamp(String? uid) async {
-    if (uid != null) {
-      final timestamp = Timestamp.now();
-      try {
-        await FirebaseFirestore.instance.collection('LogOutTimes').doc(uid).set(
-            {
-              'timestamp': timestamp,
-            });
-      } catch (e) {
-        print("Erro ao fazer logout: ${e.toString()}");
+      if (await isLoggedIn() == false) {
+        throw Exception('No user is currently signed in.');
       }
+
+      final uid = getCurrentUserUID()!;
+      final database = await getDatabase();
+      removeLocalDatabase();
+
+      //get table Names
+      final tableNames = await database.query(
+        'sqlite_master',
+        columns: ['name'],
+        where: 'type = ?',
+        whereArgs: ['table'],
+      );
+
+      //Foreach tableName, fill this table by the data value on the rows collection (copying the id's sequentially)
+      for (final tableMap in tableNames) {
+        final tableName = tableMap['name'] as String;
+        final instancies = await FirebaseFirestore.instance.collection(uid).doc(tableName).collection('rows');
+
+        //Start in the id=1 and end when there is no more id's
+        int id = 1;
+        var finalMap = await FirebaseFirestore.instance.collection(uid).doc(tableName).collection('rows').doc(id.toString()).get();
+        while (finalMap.data() != null) {
+          // Insert data into your local database
+          database.insert(tableName, finalMap.data()!);
+
+          id++;
+          finalMap = await FirebaseFirestore.instance.collection(uid).doc(tableName).collection('rows').doc(id.toString()).get();
+        }
+      }
+
+
+      // Get all table documents from Firestore
+      final tableDocsSnapshot = await FirebaseFirestore.instance.collection(uid).get();
+
+
+      // Start a transaction to ensure data integrity
+      // await database.transaction((txn) async {
+      print(tableDocsSnapshot.size);
+        // Restore each table from Firestore
+        for (final tableDoc in tableDocsSnapshot.docs) {
+          //set the name of the table as the name of the document in firebase
+          final tableName = tableDoc.id;
+
+          // Get all rows from the table document's rows collection
+          final rowsSnapshot = await tableDoc.reference.collection('rows').get();
+
+          for (final rowDoc in rowsSnapshot.docs) {
+            final rowData = rowDoc.data();
+            database.insert(tableName, Map<String, dynamic>.from(rowData));
+            print("Inserted ${Map<String, dynamic>.from(rowData)}");
+          }
+        }
+      // });
+
+      print('Restore from Firestore backup completed successfully.');
+    } catch (e) {
+      removeLocalDatabase();
+      print('Error restoring Firestore backup: $e');
+      error = e.toString();
     }
+    return error;
   }
-
-
-  // @Deprecated('old version that does not support providers as type safety')
-  // Future<Map<String, Object?>?> findUser(String email) async {
-  //   final db = await getDatabase();
-  //
-  //   final usuario = await db.query(
-  //     'login',
-  //     columns: ['id', 'nome', 'email', 'senha'],
-  //     where: 'email = ?',
-  //     whereArgs: [email],
-  //   );
-  //
-  //   return usuario.isEmpty ? null : usuario.first;
-  // }
-  //
-  //
-  //
-  //
-  // @Deprecated('old version that does not support providers as type safety')
-  // Future<void> listarUmUsuario(int id) async {
-  //   final db = await getDatabase();
-  //   final usuario = await db.query(
-  //     'login',
-  //     columns: ['id', 'nome', 'email', 'senha'],
-  //     where: 'id = ?',
-  //     whereArgs: [id],
-  //   );
-  //   for (var usuario in usuario) {
-  //     debugPrint('id: ${usuario['id']}, nome: ${usuario['nome']}, email: ${usuario['email']}, senha: ${usuario['senha']}');
-  //   }
-  // }
-
-  // Future<void> removeUser(String nome, String email) async {
-  //   final db = await _getDatabase();
-  //   final retorno = await db.delete(
-  //     'usuario',
-  //     where: 'nome = ? AND email = ?',
-  //     whereArgs: [nome, email],
-  //   );
-  //   print('Itens excluidos: $retorno');
-  // }
-
-  @Deprecated('old version that does not support providers as type safety')
-  Future<void> updateUser(int id, String nome, String email, String senha) async {
-    final db = await getDatabase();
-    final dadosUsuario = {'nome': nome, 'email': email, 'senha': senha};
-    final retorno = await db.update(
-      'login',
-      dadosUsuario,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    debugPrint('Itens atualizados: $retorno');
-  }
-
-
-
-
 
 }
 

@@ -95,8 +95,19 @@ class _MyHomePageState extends State<MyHomePage> {
       print(_passwordController.value.text);
       print(_passwordConfirmationController.value.text);
 
-      LoginProvider provider = LoginProvider(dbHelper);
-      dbHelper.createUser(_userController.text,_emailController.text, _passwordController.text, null);
+      String? singInResult = await dbHelper.createUser(_userController.text,_emailController.text, _passwordController.text, null);
+
+      if(singInResult == null){
+        Navigator.of(context).pushAndRemoveUntil( _homeRoute(), (Route<dynamic> route) => false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text((await dbHelper.login(_userController.text, _passwordController.text)) ?? "Login efetuado com sucesso")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(singInResult)),
+        );
+      }
+      // LoginProvider provider = LoginProvider(dbHelper);
       // provider.insert(LoginSql(name: _userController.text, email: _emailController.text, password: _passwordController.text));
 
       // OLD IMPLEMENTATION
@@ -104,13 +115,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
       // Navigator.of(context).push(_homeRoute());
-      Navigator.of(context).pushAndRemoveUntil( _homeRoute(), (Route<dynamic> route) => false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login efetuado com sucesso')),
-      );
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(validateUser(_passwordController) ?? 'Erro desconhecido')),
+        SnackBar(content: Text(passwordError ?? emailError ?? passwordError ?? passwordConfirmationError ?? 'Erro desconhecido')),
       );
       print("Erro - os seguintes campos estão incorretos:");
       userError != null ? print(userError) : null;

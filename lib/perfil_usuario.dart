@@ -39,6 +39,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   int _currentUserId = 0;
   bool isKeyboardVisible = false;
+  String profileUrl = '';
 
   @override
   void dispose() {
@@ -86,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     // if (userData != null) {
     if (await _dbHelper.isLoggedIn()){
-      setState(await () async {
+      setState(() async {
         // _userController.text = userData['nome'] as String;
         // _emailController.text = userData['email'] as String;
         // _passwordController.text = userData['senha'] as String;
@@ -113,52 +114,60 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     // }
   }
 
-  void _updateUserProfile() async {
-    LoginProvider provider = new LoginProvider(_dbHelper);
+  void _updateUserName() async {
+    // LoginProvider provider = new LoginProvider(_dbHelper);
+    //
+    // await provider.updateByAutoIncrementId(
+    //     LoginSql(name: _userController.text, email: _emailController.text, password: _passwordController.text),
+    //     _currentUserId
+    // );
 
-    await provider.updateByAutoIncrementId(
-        LoginSql(name: _userController.text, email: _emailController.text, password: _passwordController.text),
-        _currentUserId
-    );
-
-    //REFAZER UPDATEEE
+    //REFAZER UPDATE
     // await _dbHelper.updateCurrentUser(_emailController.text);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Perfil atualizado com sucesso!')),
+      SnackBar(content: Text(await _dbHelper.updateUserName(_userController.text) ?? "Perfil atualizado com sucesso")),
     );
   }
 
-  void _alterarSenha() {
-    // Verifica se a senha antiga está correta
-    String? oldPasswordError =
-    validateOldPassword(_oldPasswordController, _passwordController);
-    if (oldPasswordError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(oldPasswordError)),
-      );
-      return;
-    }
+  void _updateUserPassword() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(await _dbHelper.updateUserPassword(await _dbHelper.getCurrentUserEmail() as String, _oldPasswordController.text, _newPasswordController.text) ?? "Perfil atualizado com sucesso")),
+    );
+  }
 
-    // Verifica se a nova senha é válida
-    String? newPasswordError = validatePassword(_newPasswordController);
-    if (newPasswordError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(newPasswordError)),
-      );
-      return;
-    }
+
+  // void _alterarSenha() {
+    // Verifica se a senha antiga está correta
+    // String? oldPasswordError = validateOldPassword(_oldPasswordController, _passwordController);
+    // if (oldPasswordError != null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text(oldPasswordError)),
+    //   );
+    //   return;
+    // }
+    //
+    // // Verifica se a nova senha é válida
+    // String? newPasswordError = validatePassword(_newPasswordController);
+    // if (newPasswordError != null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text(newPasswordError)),
+    //   );
+    //   return;
+    // }
+
 
     // Atualiza a senha se as validações passarem
-    setState(() {
-      _passwordController.text = _newPasswordController.text;
-    });
-    _updateUserProfile(); // Salva a nova senha no banco de dados
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Senha alterada com sucesso!')),
-    );
-  }
+    // setState(() {
+    //   _passwordController.text = _newPasswordController.text;
+    // });
+    // _updateUserProfile(); // Salva a nova senha no banco de dados
+  //   _updateUserPassword();
+  //
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     const SnackBar(content: Text('Senha alterada com sucesso!')),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +196,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   FloatingActionButton(
                     heroTag: 'btnSaveTopRight',
                     onPressed: () {
-                      _updateUserProfile();
+                      // _updateUserProfile();
+                      _updateUserName();
                       Navigator.pop(context);
                     },
                     foregroundColor: const Color(verdeSecundario),
@@ -207,7 +217,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  userAvatarCustom("https://thispersondoesnotexist.com"),
+                  userAvatarCustom(_dbHelper.getCurrentUserProfileURL()!),
                 ],
               ),
             ),
@@ -216,7 +226,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               Icons.account_circle_outlined,
               TextInputType.text,
               _userController,
-              validateUser(_userController),
+              null,
                   (text) => setState(() {}),
               true,
             ),
@@ -225,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               Icons.email_outlined,
               TextInputType.emailAddress,
               _emailController,
-              validateEmail(_emailController),
+              null,
                   (text) => setState(() {}),
               false,
             ),
@@ -237,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     Icons.key_outlined,
                     TextInputType.text,
                     _passwordController,
-                    validatePassword(_passwordController),
+                    null,
                         (text) => setState(() {}),
                     false,
                   ),
@@ -277,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                             ),
                             TextButton(
                               onPressed: () {
-                                _alterarSenha();
+                                _updateUserPassword();
                                 Navigator.pop(context);
                               },
                               child: const Text('Alterar'),
@@ -289,6 +299,40 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   },
                 ),
               ],
+            ),
+            TextButton(
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(await _dbHelper.createFirestoreBackup() ?? "Backup criado com sucesso")),
+                );
+              },
+              child: const Text('Create backup'),
+            ),
+            TextButton(
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(await _dbHelper.restoreFromFirestoreBackup() ?? "Restaurado com sucesso")),
+                );
+              },
+              child: const Text('Restore backup'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _dbHelper.removeLocalDatabase();
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Banco de dados local removido")),
+                );
+              },
+              child: const Text('Remove local history'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _dbHelper.resetLocalDatabase();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Banco de dados local resetado")),
+                );
+              },
+              child: const Text('Reset local history (debug initial values)'),
             ),
           ],
         ),
@@ -304,6 +348,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 heroTag: 'btnLogout',
                 onPressed: () async {
                   await _dbHelper.logOut();
+                  await _dbHelper.removeLocalDatabase();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -317,7 +362,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               FloatingActionButton.large(
                 heroTag: 'btnSave',
                 onPressed: () {
-                  _updateUserProfile();
+                  // _updateUserProfile();
+                  _updateUserName();
                   Navigator.pop(context);
                 },
                 foregroundColor: const Color(verdeSecundario),
