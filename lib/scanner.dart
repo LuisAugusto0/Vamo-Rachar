@@ -113,6 +113,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
+  //Função que cria os intens com as informações extraídas pela IA
   void buildingItens(String? arrayProdutos) {
     if (arrayProdutos == null) {
       debugPrint("Erro ao ler os produtos");
@@ -131,14 +132,18 @@ class _ScannerScreenState extends State<ScannerScreen> {
           double? preco = double.tryParse(produto[2]);
           if (preco != null) {
             Item item = Item.padrao(ultimoIdItem, quantidade, nome, preco);
-            itens.add(item);
-            ultimoIdItem++;
+            if(!jaExiste(item)){
+              itens.add(item);
+              ultimoIdItem++;
+            }
           } else {
             debugPrint("Erro ao converter o preço para double");
             preco = 0.0;
             Item item = Item.padrao(ultimoIdItem, quantidade, nome, preco);
-            itens.add(item);
-            ultimoIdItem++;
+            if(!jaExiste(item)){
+              itens.add(item);
+              ultimoIdItem++;
+            }
           }
         } else {
           debugPrint("Erro ao ler o produto");
@@ -155,13 +160,25 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
-  // Função para enviar a imagem para a IA
+  //Função auxiliar que confirma itens duplicados
+  bool jaExiste(Item item){
+    bool existe = false;
+    for(int i = 0; i < itens.length; i++){
+      if(item.nome == itens[i].nome && item.preco == itens[i].preco){
+        existe = true;
+      }
+    }
+
+    return existe;
+  }
+
+  // Função para enviar a imagem para a IA;
   Future<void> _sendImageToAI() async {
     if (_selectedImage == null) {
       return;
     }
 
-    final apiKey = 'API_KEY';
+    final apiKey = 'AIzaSyDWm6pxL0QzX_yo2Roskdv2eZZUtomoxss';
     if (apiKey.isEmpty) {
       print('No \$API_KEY environment variable');
       exit(1);
@@ -188,25 +205,48 @@ class _ScannerScreenState extends State<ScannerScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            /*_selectedImage == null
-                ? const Text('Nenhuma imagem selecionada.')
-                : Image.file(_selectedImage!)*/
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _chooseImageSource,
-              child: const Text('Selecionar/Tirar Foto'),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: 1150,
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _sendImageToAI,
-              child: const Text('Enviar para análise'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _selectedImage == null
+                    ? const Text('Nenhuma imagem selecionada.')
+                    : Image.file(_selectedImage!,
+                    width: 400,
+                    height: 900,
+                    fit: BoxFit.cover,
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _chooseImageSource,
+                  child: const Text(
+                    'Selecionar/Tirar Foto',
+                    style: TextStyle(
+                      color: Colors.green,
+                    ),
+
+                    ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _sendImageToAI,
+                  child: const Text(
+                    'Enviar para análise',
+                    style: TextStyle(
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        )
       ),
     );
   }

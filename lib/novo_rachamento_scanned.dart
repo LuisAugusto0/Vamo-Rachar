@@ -534,6 +534,106 @@ class _ScannedScreen extends State<ScannedScreen> {
     }
   }
 
+  //Método que edita as informações de um determinado item
+  void _editarItem(BuildContext context, int index) {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController quantidadeController = TextEditingController();
+    final TextEditingController precoController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: AlertDialog(
+            title: const Text('Preencha apenas os campos que deseja alterar'),
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                form(
+                    "Nome atual: ${itens[index].nome}", //Label do TextField
+                    Icons.account_circle_outlined, //Ícone do TextField
+                    TextInputType.text, //Tipo do Teclado
+                    nameController, // Controlador do TextField
+                    validateUser(nameController), // Verifica se há erro
+                    (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                    ),
+                form(
+                    "Quantidade atual: ${itens[index].quantidade}", //Label do TextField
+                    Icons.account_circle_outlined, //Ícone do TextField
+                    TextInputType.number, //Tipo do Teclado
+                    quantidadeController, // Controlador do TextField
+                    validateUser(quantidadeController), // Verifica se há erro
+                    (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                    ),
+                form(
+                    "Preço atual: ${itens[index].preco}", //Label do TextField
+                    Icons.account_circle_outlined, //Ícone do TextField
+                    TextInputType.number, //Tipo do Teclado
+                    precoController, // Controlador do TextField
+                    validateUser(precoController), // Verifica se há erro
+                    (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                    ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  if (nameController.text.isNotEmpty &&
+                      nameController.text != itens[index].nome &&
+                      nameController.text != " " &&
+                      nameController.text != "") {
+                    setState(() {
+                      itens[index].nome = nameController.text;
+                    });
+                  }
+                  if (quantidadeController.text.isNotEmpty &&
+                      quantidadeController.text !=
+                          itens[index].quantidade.toString() &&
+                      quantidadeController.text != " " &&
+                      quantidadeController.text != "") {
+                    setState(() {
+                      itens[index].quantidade =
+                          int.parse(quantidadeController.text);
+                    });
+                  }
+                  if (precoController.text.isNotEmpty &&
+                      precoController.text != itens[index].preco.toString() &&
+                      precoController.text != " " &&
+                      precoController.text != "") {
+                    setState(() {
+                      itens[index].preco = double.parse(precoController.text);
+                    });
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'Enviar',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 54, 226, 143),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'Cancelar',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 54, 226, 143),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   //Método Build
   @override
   Widget build(BuildContext context) {
@@ -608,10 +708,33 @@ class _ScannedScreen extends State<ScannedScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
+                      
                       children: [
-                        Text(
+                        Flexible(
+                          child: Text(
                           textAlign: TextAlign.center,
                           textoPadrao,
+                          softWrap: true,
+                          ),
+                        )
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            _editarItem(context, index);
+                          },
+                          child: Icon(
+                            Icons.edit,
+                            color: Colors.green,
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            shadowColor: Colors.transparent,
+                            backgroundColor: Colors.transparent,
+                          ),
                         ),
                       ],
                     ),
@@ -626,7 +749,7 @@ class _ScannedScreen extends State<ScannedScreen> {
                           ),
                           onPressed: () {
                             setState(() {
-                              if(itens[index].quantidade > 0){
+                              if (itens[index].quantidade > 0) {
                                 _adicionarDivisor(context, index);
                               }
                               //aux.removeRange(0, aux.length);

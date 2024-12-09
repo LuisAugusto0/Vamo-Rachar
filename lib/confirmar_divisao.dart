@@ -57,13 +57,35 @@ class UserExpensesPage extends StatelessWidget {
             ),
             child: ElevatedButton(
               onPressed: () {
-                for (int i = 0; i < participantes.length; i++){
+                for (int i = 0; i < participantes.length; i++) {
                   participantes[i].consumidos = [];
                   participantes[i].totalPago = 0;
                 }
-                  Navigator.pop(context);
+                Navigator.pop(context);
               },
-              child: Text("cancelar"),
+              child: Text(
+                "cancelar",
+                style: TextStyle(
+                  color: Colors.green,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              bottom: 50,
+              right: 15,
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                //Ainda tem que ser implementado
+              },
+              child: Text(
+                "enviar",
+                style: TextStyle(
+                  color: Colors.green,
+                ),
+              ),
             ),
           ),
         ],
