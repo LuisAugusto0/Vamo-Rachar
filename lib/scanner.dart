@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'novo_rachamento_scanned.dart';
 import 'novo_rachamento.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /*void main() async {
   runApp(Scanner());
@@ -178,7 +179,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
       return;
     }
 
-    final apiKey = 'AIzaSyDWm6pxL0QzX_yo2Roskdv2eZZUtomoxss';
+    final apiKey = dotenv.env['GEMINI_API_KEY']!;
     if (apiKey.isEmpty) {
       print('No \$API_KEY environment variable');
       exit(1);
