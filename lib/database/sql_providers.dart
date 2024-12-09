@@ -39,20 +39,21 @@ abstract class SqlProvider<T extends SqlTable> {
 
 
   /// Insert
-  Future<void> insert(T wrapper) async {
+  Future<int> insert(T wrapper) async {
     Database db = await helper.getDatabase();
 
-    final map = wrapper.toMap();
+    // final map = wrapper.toMap();
     // for (String column in wrapper.getColumns()) {
     //   if (map.containsKey(column)) throw Exception("Contraint Violation: Insert is not allowed to have primary keys");
     // }
 
-    db.insert(this.table, wrapper.toMap());
+    int id = await db.insert(this.table, wrapper.toMap());
+    return id;
   }
 
 
   /// Update
-  Future<void> updateByKey(T wrapper, String primaryKeyColumn, Object key) async {
+  Future<int> updateByKey(T wrapper, String primaryKeyColumn, Object key) async {
     Database db = await helper.getDatabase();
 
     final map = wrapper.toMap();
@@ -60,12 +61,14 @@ abstract class SqlProvider<T extends SqlTable> {
     //   if (map.containsKey(column)) throw Exception("Contraint Violation: Update is not allowed to have primary keys");
     // }
 
-    final retorno = await db.update(
+    int count = await db.update(
       table,
       map,
       where: '$primaryKeyColumn = ?',
       whereArgs: [key],
     );
+
+    return count;
   }
 
 

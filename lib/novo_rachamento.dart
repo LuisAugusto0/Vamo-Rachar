@@ -1,9 +1,13 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 //import 'package:image_picker/image_picker.dart';
 //import 'package:gallery_picker/gallery_picker.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:vamorachar/database/sql_providers.dart';
 import 'package:vamorachar/novo_rachamento_scanned.dart';
 import 'confirmar_divisao.dart';
+import 'database/sql_tables.dart';
 import 'tela_inicial.dart';
 import 'widgets/validation_helpers.dart';
 import 'widgets/form_widgets.dart';
@@ -52,6 +56,8 @@ class Participante {
     nome = "";
     email = "";
   }
+
+
 }
 
 class InstanciaItem {
@@ -61,7 +67,7 @@ class InstanciaItem {
 
   InstaciaItem() {
     id = -1;
-    item = new Item();
+    item = Item();
     participantes = [];
   }
 
@@ -70,7 +76,11 @@ class InstanciaItem {
     this.item = item;
     this.participantes = participantes;
   }
+
+
 }
+
+
 
 class MyApp extends StatelessWidget {
   //const MyApp({super.key});

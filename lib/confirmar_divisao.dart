@@ -1,7 +1,99 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'database/database_helper.dart';
+import 'database/sql_providers.dart';
+import 'database/sql_tables.dart';
 import 'novo_rachamento.dart';
 import 'package:vamorachar/widgets/navigation_helper.dart';
 import 'package:flutter/material.dart';
+
+class DatabaseAdder {
+
+  static void addToDatabase(List<Participante> participantes, List<InstanciaItem> instanciaItems, List<Item> items) async {
+    debugPrint("ADD TO DATABASE SUBMIT");
+    // For now the email for logins are ignored
+    DatabaseHelper dbHelper = DatabaseHelper();
+
+    // Each annonymous user will receive its own entity on the database with unique uid
+    List<UserSql> users = participantes.map((participante) => UserSql(name: participante.nome)).toList();
+    UserProvider userProvider = UserProvider(dbHelper);
+    Map<Participante, int> userIdMap = {};
+
+    for (int i = 0; i < users.length; i++) {
+      int id = await userProvider.insert(users[i]);
+
+      // Map for later associations
+      userIdMap[participantes[i]] = id;
+    }
+
+    PurchaseSql purchaseSql = PurchaseSql(
+        dateTimeInUnix: DateTime.now().millisecondsSinceEpoch,
+
+        // NOT IMPLEMENTED
+        longitude: 0,
+        latitude: 0,
+
+        // FETCH THE KEY!
+        fkeyLogin: 2
+    );
+
+    PurchaseProvider purchaseProvider = PurchaseProvider(dbHelper);
+    int purchaseId = await purchaseProvider.insert(purchaseSql);
+
+
+    // Add in foreign key order -> purchase -> product -> productUnit -> contribution
+    List<ProductSql> products = items.map(
+            (item) => ProductSql(name: item.nome, price: item.preco, fkeyPurchase: purchaseId)
+    ).toList();
+
+    ProductProvider productProvider = ProductProvider(dbHelper);
+    Map<Item, int> itemIdMap = {};
+
+    for (int i = 0; i < products.length; i++) {
+      // Insert
+      int id = await productProvider.insert(products[i]);
+
+      // associate item instances to their corresponding ids
+      itemIdMap[items[i]] = id;
+    }
+
+
+    List<ContributionSql> contributions = [];
+    ProductUnitProvider productUnitProvider = ProductUnitProvider(dbHelper);
+
+
+    for (final instance in instanciaItems) {
+      final item = instance.item;
+      int? productId = itemIdMap[item];
+      if (productId != null) {
+        final sql = ProductUnitSql(fkeyProduct: productId);
+        int unitId = await productUnitProvider.insert(sql);
+
+        double paidPartitions = item.preco / instance.participantes.length;
+        for (final contribution in instance.participantes) {
+          int? userId = userIdMap[contribution];
+          if (userId == null) throw Exception("Key ${instance.item} not found in userIdMap.");
+
+          contributions.add(ContributionSql(paid: paidPartitions, fkeyProductUnit: unitId, fkeyUser: userId));
+        }
+      } else {
+        // Handle the case where the key doesn't exist
+        throw Exception("Key ${instance.item} not found in itemIdMap.");
+      }
+    }
+
+    ContributionProvider contributionProvider = ContributionProvider(dbHelper);
+    for (final contribution in contributions) {
+      contributionProvider.insert(contribution);
+    }
+
+  }
+}
+
+
+
+
+
+
 
 class ConfirmarDivisao extends StatelessWidget {
   final List<Participante> participantes;
@@ -78,7 +170,7 @@ class UserExpensesPage extends StatelessWidget {
             ),
             child: ElevatedButton(
               onPressed: () {
-                //Ainda tem que ser implementado
+                //DatabaseAdder.addToDatabase(participantes, instanciaItems, items);
               },
               child: Text(
                 "enviar",
