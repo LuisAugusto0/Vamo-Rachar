@@ -12,13 +12,18 @@ import 'cadastro.dart';
 import 'login_inicial.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';  // Import sqflite_common_ffi
 import 'package:flutter/foundation.dart';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize dotenv
+  await dotenv.load(fileName: ".env");
+
+  print(dotenv.env);
 
   // Initialize sqflite FFI and database asynchronously
   await initializeDatabase();
@@ -83,16 +88,6 @@ Future<void> initializeDatabase() async {
   } catch (e){
     print("An error ocurred in the firebase initialization: $e");
   }
-
-  FirebaseAuth.instance.authStateChanges().listen((User? user) {
-    if (user == null) {
-      print('User is currently signed out!');
-    } else {
-      print('User is signed in!');
-      String name = user.displayName!;
-      print('Current user: $name');
-    }
-  });
 
   // Initialize the database based on the platform
   if (kIsWeb) {
