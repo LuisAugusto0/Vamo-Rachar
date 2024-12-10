@@ -200,51 +200,46 @@ class _ScannedScreen extends State<ScannedScreen> {
   //Método utilizado para criar instâncias de itens
   void addItem(List<Participante> lista, Item item) {
     double auw = item.preco;
+    auw = auw / lista.length;
     bool achou = false;
-    Item aux = new Item.padrao(item.id, 1, item.nome, auw / lista.length);
     if (instancias.length > 0) {
-      for (int i = 0; i < lista.length; i++) {
+      for (int i = 0; i < lista.length; i++) { 
         debugPrint("LISTA[${i}]: ${lista[i].nome}");
       }
       for (int i = 0; i < instancias.length; i++) {
         debugPrint(
-            "INSTANCIAS.ITEM.ID: ${instancias[i].item.id} - ITEM.ID: ${aux.id} ");
+            "INSTANCIAS.ITEM.ID: ${instancias[i].item.id} - ITEM.ID: ${item.id} ");
         debugPrint(
-            "INSTANCIAS.ITEM.PRECO: ${instancias[i].item.preco} - ITEM.PRECO: ${aux.preco}");
+            "INSTANCIAS.ITEM.PRECO: ${instancias[i].precoPago} - ITEM.PRECO: ${auw}");
         debugPrint(
             "INSTANCIAS.PARTICIPANTES.LENGTH: ${instancias[i].participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
-        if (instancias[i].item.id == aux.id &&
-            instancias[i].item.preco == aux.preco &&
-            instancias[i].participantes.length == lista.length) {
+        if (instancias[i].item.id == item.id &&
+            instancias[i].precoPago == auw && instancias[i].participantes.length == lista.length) {
           debugPrint("CAI AQUI!");
           int iguais = 0;
           int z = 0, j = 0;
           for (j = 0; j < instancias[i].participantes.length; j++) {
             for (z = 0; z < lista.length; z++) {
-              if (instancias[i]
-                      .participantes[j]
-                      .nome
-                      .compareTo(lista[z].nome) ==
-                  0) {
+              if (instancias[i].participantes[j].nome.compareTo(lista[z].nome) == 0) {
                 iguais++;
               }
             }
           }
           if (iguais == lista.length) {
-            instancias[i].item.quantidade++;
+            instancias[i].quantidade++;
             debugPrint("Lista tem os mesmos integrantes da instância");
             achou = true;
           }
         }
       }
       if (!achou) {
-        instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
+        instancias.add(new InstanciaItem.create(ultimoIdInstancia, item, lista, auw, 1));
         ultimoIdInstancia++;
         debugPrint("Lista não tem os mesmos integrantes");
       }
     } else {
       debugPrint("PRIMEIRO ELSE");
-      instancias.add(new InstanciaItem.create(ultimoIdInstancia, aux, lista));
+      instancias.add(new InstanciaItem.create(ultimoIdInstancia, item, lista, auw, 1));
       ultimoIdInstancia++;
     }
   }
@@ -284,10 +279,12 @@ class _ScannedScreen extends State<ScannedScreen> {
                     for (int i = 0; i < aux.length; i++) {
                       debugPrint("AUX[${i}]: ${aux[i].nome}");
                     }
-                    addItem(aux, itens[index]);
-                    setState(() {
-                      itens[index].quantidade--;
-                    });
+                    if(aux.length > 0){
+                      addItem(aux, itens[index]);
+                      setState(() {
+                        itens[index].quantidade--;
+                      });  
+                    }
                     Navigator.of(context).pop();
                   },
                   child: const Text(
@@ -354,8 +351,8 @@ class _ScannedScreen extends State<ScannedScreen> {
     debugPrint(
         "INSTANCIAS.LENGTH: ${instancia.participantes.length} - PARTICIPANTES.LENGTH: ${lista.length}");
     if (instancia.participantes.length == lista.length) {
-      if (instancia.item.quantidade > 1) {
-        instancia.item.quantidade--;
+      if (instancia.quantidade > 1) {
+        instancia.quantidade--;
         itens[instancia.item.id].quantidade++;
         debugPrint("1");
       } else {
@@ -368,20 +365,16 @@ class _ScannedScreen extends State<ScannedScreen> {
       Set<Participante> auy = instancia.participantes.toSet();
       aux = auy.intersection(aux);
       auy = auy.difference(aux);
-      if (instancia.item.quantidade > 1) {
-        instancia.item.quantidade--;
-        Item auz = new Item.padrao(instancia.item.id, 1, instancia.item.nome,
-            (instancia.item.preco + (instancia.item.preco / auy.length)));
+      if (instancia.quantidade > 1) {
+        instancia.quantidade--;
         instancias.add(
-            new InstanciaItem.create(ultimoIdInstancia, auz, auy.toList()));
+            new InstanciaItem.create(ultimoIdInstancia, instancia.item, auy.toList(), instancia.precoPago, 1));
         ultimoIdInstancia++;
         debugPrint("3");
       } else {
         instancias.remove(instancia);
-        Item auz = new Item.padrao(instancia.item.id, 1, instancia.item.nome,
-            (instancia.item.preco + (instancia.item.preco / lista.length)));
         instancias.add(
-            new InstanciaItem.create(ultimoIdInstancia, auz, auy.toList()));
+            new InstanciaItem.create(ultimoIdInstancia, instancia.item, auy.toList(), instancia.precoPago, 1));
         ultimoIdInstancia++;
         debugPrint("4");
       }
@@ -405,9 +398,7 @@ class _ScannedScreen extends State<ScannedScreen> {
         for (int j = 0; j < instancias[i].participantes.length - 1; j++) {
           temp += instancias[i].participantes[j].nome + ", ";
         }
-        temp += instancias[i]
-            .participantes[instancias[i].participantes.length - 1]
-            .nome;
+        temp += instancias[i].participantes[instancias[i].participantes.length - 1].nome;
         participantesElegiveis.add(temp);
       }
       showDialog(
@@ -422,38 +413,20 @@ class _ScannedScreen extends State<ScannedScreen> {
                       hintText: "Quem rachou esse item?",
                       items: participantesElegiveis,
                       onChanged: (value) {
-                        if (instancias.length == 0) {
-                          _instanciaNaoEncontrada(context);
-                        }
-                        aux.removeRange(0, aux.length);
                         debugPrint(value);
                         String? temp = "";
                         if (value != null) {
                           temp += value.characters.elementAt(0);
                         }
                         identificadorDeInstancia = int.parse(temp) - 1;
-                        for (int i = 0;
-                            i <
-                                instancias[identificadorDeInstancia]
-                                    .participantes
-                                    .length;
-                            i++) {
-                          Participante auy =
-                              instancias[identificadorDeInstancia]
-                                  .participantes[i];
-                          if (!aux.contains(auy)) {
-                            aux.add(auy);
-                          }
-                        }
                         if (quemPodeSerRemovido.length > 0) {
                           setState(() {
-                            quemPodeSerRemovido.removeRange(
-                                0, quemPodeSerRemovido.length);
+                            quemPodeSerRemovido.removeRange(0, quemPodeSerRemovido.length);
                           });
                         }
                         setState(() {
-                          for (int i = 0; i < aux.length; i++) {
-                            quemPodeSerRemovido.add(aux[i].nome);
+                          for (int i = 0; i < instancias[identificadorDeInstancia].participantes.length; i++) {
+                            quemPodeSerRemovido.add(instancias[identificadorDeInstancia].participantes[i].nome);
                           }
                         });
                       }),
@@ -465,20 +438,13 @@ class _ScannedScreen extends State<ScannedScreen> {
                         for (int i = 0; i < value.length; i++) {
                           debugPrint("VALUE[${i}]: ${value.elementAt(i)}");
                         }
-                        debugPrint(
-                            "Tam instância: ${instancias[identificadorDeInstancia].participantes.length}");
-                        for (int i = 0;
-                            i <
-                                instancias[identificadorDeInstancia]
-                                    .participantes
-                                    .length;
-                            i++) {
+                        debugPrint("Tam instância: ${instancias[identificadorDeInstancia].participantes.length}");
+                        for (int i = 0; i < instancias[identificadorDeInstancia].participantes.length; i++) {
                           debugPrint(
                               "Participantes da instância: ${instancias[identificadorDeInstancia].participantes[i].nome}");
                         }
                         for (int i = 0; i < value.length; i++) {
-                          Participante auy =
-                              participantes[identificarParticipante(value[i])];
+                          Participante auy = participantes[identificarParticipante(value[i])];
                           if (!aux.contains(auy)) {
                             aux.add(auy);
                           }
@@ -487,14 +453,8 @@ class _ScannedScreen extends State<ScannedScreen> {
                           debugPrint(
                               "Participantes[${i}]: ${aux.elementAt(i).nome}");
                         }
-                        for (int i = 0;
-                            i <
-                                instancias[identificadorDeInstancia]
-                                    .participantes
-                                    .length;
-                            i++) {
-                          debugPrint(
-                              "Participantes da instância: ${instancias[identificadorDeInstancia].participantes[i].nome}");
+                        for (int i = 0; i < instancias[identificadorDeInstancia].participantes.length; i++) {
+                          debugPrint("Participantes da instância: ${instancias[identificadorDeInstancia].participantes[i].nome}");
                         }
                       }),
                 ],
@@ -695,8 +655,7 @@ class _ScannedScreen extends State<ScannedScreen> {
             final Item item = itens[index];
             int qtd = item.quantidade;
             String preco = item.preco.toStringAsFixed(2);
-            late String textoPadrao =
-                "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
+            late String textoPadrao = "${item.nome}\nQuantidade - ${qtd}\nPreço - R\$${preco}";
             return Container(
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,

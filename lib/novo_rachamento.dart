@@ -37,33 +37,28 @@ class Item {
 }
 
 class Participante {
-  late int id;
   late String nome;
   late String email;
-  late List<Item> consumidos;
   late double totalPago;
 
   Participante.create(String nome, int id, String email) {
-    this.id = id;
     this.nome = nome;
     this.email = email;
-    consumidos = [];
     totalPago = 0;
   }
 
   Participante() {
-    id = -1;
     nome = "";
     email = "";
   }
-
-
 }
 
 class InstanciaItem {
   late Item item;
   late List<Participante> participantes;
   late int id;
+  late double precoPago;
+  late int quantidade;
 
   InstaciaItem() {
     id = -1;
@@ -71,16 +66,15 @@ class InstanciaItem {
     participantes = [];
   }
 
-  InstanciaItem.create(int id, Item item, List<Participante> participantes) {
+  InstanciaItem.create(int id, Item item, List<Participante> participantes,
+      double precoPago, int quantidade) {
     this.id = id;
     this.item = item;
     this.participantes = participantes;
+    this.precoPago = precoPago;
+    this.quantidade = quantidade;
   }
-
-
 }
-
-
 
 class MyApp extends StatelessWidget {
   //const MyApp({super.key});
@@ -110,29 +104,6 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   List<String> options = [];
   //Lista de Itens
   late List<Item> itens = [];
-
-  /*void _scanner(BuildContext) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text(
-                "Ainda não implementado, favor aguardar atualizações futuras"),
-            content: FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "Voltar",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 54, 226, 143),
-                ),
-              ),
-            ),
-          );
-        });
-  }
-  */
 
   //Função criada para adicionar itens à lista
   void _adicionarItens(BuildContext context) {
@@ -390,8 +361,15 @@ class _NovoRachamentoState extends State<NovoRachamento> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Scanner(participantes: participantes, itens: itens,ultimoIdUsado: ultimoIdUsado, ultimoIdItem: ultimoIdItem,)));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Scanner(
+                                participantes: participantes,
+                                itens: itens,
+                                ultimoIdUsado: ultimoIdUsado,
+                                ultimoIdItem: ultimoIdItem,
+                              )));
                 },
                 child: const Text(
                   "Scanner",

@@ -7,14 +7,16 @@ import 'package:vamorachar/widgets/navigation_helper.dart';
 import 'package:flutter/material.dart';
 
 class DatabaseAdder {
-
-  static void addToDatabase(List<Participante> participantes, List<InstanciaItem> instanciaItems, List<Item> items) async {
+  static void addToDatabase(List<Participante> participantes,
+      List<InstanciaItem> instanciaItems, List<Item> items) async {
     debugPrint("ADD TO DATABASE SUBMIT");
     // For now the email for logins are ignored
     DatabaseHelper dbHelper = DatabaseHelper();
 
     // Each annonymous user will receive its own entity on the database with unique uid
-    List<UserSql> users = participantes.map((participante) => UserSql(name: participante.nome)).toList();
+    List<UserSql> users = participantes
+        .map((participante) => UserSql(name: participante.nome))
+        .toList();
     UserProvider userProvider = UserProvider(dbHelper);
     Map<Participante, int> userIdMap = {};
 
@@ -33,17 +35,16 @@ class DatabaseAdder {
         latitude: 0,
 
         // FETCH THE KEY!
-        fkeyLogin: 2
-    );
+        fkeyLogin: 2);
 
     PurchaseProvider purchaseProvider = PurchaseProvider(dbHelper);
     int purchaseId = await purchaseProvider.insert(purchaseSql);
 
-
     // Add in foreign key order -> purchase -> product -> productUnit -> contribution
-    List<ProductSql> products = items.map(
-            (item) => ProductSql(name: item.nome, price: item.preco, fkeyPurchase: purchaseId)
-    ).toList();
+    List<ProductSql> products = items
+        .map((item) => ProductSql(
+            name: item.nome, price: item.preco, fkeyPurchase: purchaseId))
+        .toList();
 
     ProductProvider productProvider = ProductProvider(dbHelper);
     Map<Item, int> itemIdMap = {};
@@ -56,10 +57,8 @@ class DatabaseAdder {
       itemIdMap[items[i]] = id;
     }
 
-
     List<ContributionSql> contributions = [];
     ProductUnitProvider productUnitProvider = ProductUnitProvider(dbHelper);
-
 
     for (final instance in instanciaItems) {
       final item = instance.item;
@@ -71,9 +70,11 @@ class DatabaseAdder {
         double paidPartitions = item.preco / instance.participantes.length;
         for (final contribution in instance.participantes) {
           int? userId = userIdMap[contribution];
-          if (userId == null) throw Exception("Key ${instance.item} not found in userIdMap.");
+          if (userId == null)
+            throw Exception("Key ${instance.item} not found in userIdMap.");
 
-          contributions.add(ContributionSql(paid: paidPartitions, fkeyProductUnit: unitId, fkeyUser: userId));
+          contributions.add(ContributionSql(
+              paid: paidPartitions, fkeyProductUnit: unitId, fkeyUser: userId));
         }
       } else {
         // Handle the case where the key doesn't exist
@@ -85,29 +86,23 @@ class DatabaseAdder {
     for (final contribution in contributions) {
       contributionProvider.insert(contribution);
     }
-
   }
 }
-
-
-
-
-
-
 
 class ConfirmarDivisao extends StatelessWidget {
   final List<Participante> participantes;
   final List<InstanciaItem> instancias;
+  List<String> itensConsumidos = [];
 
   ConfirmarDivisao(
       {Key? key, required this.participantes, required this.instancias}) {
+    debugPrint("Quantidade de instâncias: ${instancias.length}");
+
     for (int i = 0; i < instancias.length; i++) {
       for (int j = 0; j < participantes.length; j++) {
-        if (instancias[i].participantes.contains(participantes[j]) &&
-            participantes[j].totalPago == 0) {
-          participantes[j].consumidos.add(instancias[i].item);
+        if (instancias[i].participantes.contains(participantes[j])) {
           participantes[j].totalPago +=
-              (instancias[i].item.preco * instancias[i].item.quantidade);
+              (instancias[i].precoPago * instancias[i].quantidade);
         }
       }
     }
@@ -115,15 +110,16 @@ class ConfirmarDivisao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return UserExpensesPage(participantes: participantes);
+    return UserExpensesPage(participantes: participantes, instancias: instancias);
   }
 }
 
 class UserExpensesPage extends StatelessWidget {
+  final List<InstanciaItem> instancias;
   final List<Participante> participantes;
   final NavigationHelper _navigationHelper = NavigationHelper();
 
-  UserExpensesPage({Key? key, required this.participantes});
+  UserExpensesPage({Key? key, required this.participantes, required this.instancias});
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +131,7 @@ class UserExpensesPage extends StatelessWidget {
         itemCount: participantes.length,
         itemBuilder: (context, index) {
           final participante = participantes[index];
-          return UserCard(participante: participante);
+          return UserCard(participante: participante, instancias: instancias);
         },
       ),
       bottomNavigationBar: Row(
@@ -150,7 +146,6 @@ class UserExpensesPage extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 for (int i = 0; i < participantes.length; i++) {
-                  participantes[i].consumidos = [];
                   participantes[i].totalPago = 0;
                 }
                 Navigator.pop(context);
@@ -188,13 +183,15 @@ class UserExpensesPage extends StatelessWidget {
 
 class UserCard extends StatefulWidget {
   final Participante participante;
+  final List<InstanciaItem> instancias;
   List<String> itensConsumidos = [];
 
-  UserCard({Key? key, required this.participante}) {
-    for (int i = 0; i < participante.consumidos.length; i++) {
-      itensConsumidos.add(participante.consumidos[i].nome +
-          " - " +
-          participante.consumidos[i].quantidade.toString());
+  UserCard({Key? key, required this.participante, required this.instancias}) {
+    for(int i = 0; i < instancias.length; i++) {
+      if(instancias[i].participantes.contains(participante)) {
+        String temp = instancias[i].item.nome + " - " + instancias[i].quantidade.toString();
+        itensConsumidos.add(temp);
+      }
     }
   }
 
