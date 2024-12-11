@@ -5,21 +5,21 @@ import 'database/sql_tables.dart';
 import 'novo_rachamento.dart';
 import 'package:vamorachar/widgets/navigation_helper.dart';
 import 'package:flutter/material.dart';
+import 'tela_inicial.dart';
 
 class DatabaseAdder {
-
-  static void _assertParticipanteInsideInstancia(Map<Participante, int> userIdMap,
-      List<InstanciaItem> instancias) {
-
+  static void _assertParticipanteInsideInstancia(
+      Map<Participante, int> userIdMap, List<InstanciaItem> instancias) {
     for (final instancia in instancias) {
       for (final participant in instancia.participantes) {
-        assert(userIdMap.containsKey(participant), "participante nao encontrado");
+        assert(
+            userIdMap.containsKey(participant), "participante nao encontrado");
       }
     }
   }
 
-  static Future<Map<Participante, int>> _addParicipantesAsUser(List<Participante> participantes,
-      DatabaseHelper dbHelper)  async {
+  static Future<Map<Participante, int>> _addParicipantesAsUser(
+      List<Participante> participantes, DatabaseHelper dbHelper) async {
     // Each annonymous user will receive its own entity on the database with unique uid
     List<UserSql> users = participantes
         .map((participante) => UserSql(name: participante.nome))
@@ -37,19 +37,19 @@ class DatabaseAdder {
     return userIdMap;
   }
 
-  static _assertItemInsideInstancia(Map<Item, int> itemIdMap,
-      List<InstanciaItem> instancias) {
-
+  static _assertItemInsideInstancia(
+      Map<Item, int> itemIdMap, List<InstanciaItem> instancias) {
     for (final instancia in instancias) {
       assert(itemIdMap.containsKey(instancia.item), "item nao encontrado");
     }
   }
 
-  static Future<Map<Item, int>> _addItemAsProduct(List<Item> items, int purchaseId, DatabaseHelper dbHelper) async {
+  static Future<Map<Item, int>> _addItemAsProduct(
+      List<Item> items, int purchaseId, DatabaseHelper dbHelper) async {
     // Add in foreign key order -> purchase -> product -> productUnit -> contribution
     List<ProductSql> products = items
         .map((item) => ProductSql(
-        name: item.nome, price: item.preco, fkeyPurchase: purchaseId))
+            name: item.nome, price: item.preco, fkeyPurchase: purchaseId))
         .toList();
 
     ProductProvider productProvider = ProductProvider(dbHelper);
@@ -66,16 +66,15 @@ class DatabaseAdder {
     return itemIdMap;
   }
 
-
   static void addToDatabase(List<Participante> participantes,
       List<InstanciaItem> instanciaItems, List<Item> items) async {
-
     debugPrint("ADD TO DATABASE SUBMIT");
 
     // For now the email for logins are ignored
     DatabaseHelper dbHelper = DatabaseHelper();
 
-    Map<Participante, int> userIdMap = await _addParicipantesAsUser(participantes, dbHelper);
+    Map<Participante, int> userIdMap =
+        await _addParicipantesAsUser(participantes, dbHelper);
     _assertParticipanteInsideInstancia(userIdMap, instanciaItems);
 
     PurchaseSql purchaseSql = PurchaseSql(
@@ -91,10 +90,9 @@ class DatabaseAdder {
     PurchaseProvider purchaseProvider = PurchaseProvider(dbHelper);
     int purchaseId = await purchaseProvider.insert(purchaseSql);
 
-
-    Map<Item, int> itemIdMap = await _addItemAsProduct(items, purchaseId, dbHelper);
+    Map<Item, int> itemIdMap =
+        await _addItemAsProduct(items, purchaseId, dbHelper);
     _assertItemInsideInstancia(itemIdMap, instanciaItems);
-
 
     List<ContributionSql> contributions = [];
     ProductUnitProvider productUnitProvider = ProductUnitProvider(dbHelper);
@@ -103,7 +101,6 @@ class DatabaseAdder {
       final item = instance.item;
       int? productId = itemIdMap[item];
       if (productId != null) {
-
         for (int i = 0; i < instance.quantidade; i++) {
           final sql = ProductUnitSql(fkeyProduct: productId);
           int unitId = await productUnitProvider.insert(sql);
@@ -116,9 +113,10 @@ class DatabaseAdder {
             }
 
             contributions.add(ContributionSql(
-                paid: paidPartitions, fkeyProductUnit: unitId, fkeyUser: userId));
-        }
-
+                paid: paidPartitions,
+                fkeyProductUnit: unitId,
+                fkeyUser: userId));
+          }
         }
       } else {
         // Handle the case where the key doesn't exist
@@ -143,9 +141,6 @@ class DatabaseAdder {
   }
 }
 
-
-
-
 class ConfirmarDivisao extends StatelessWidget {
   final List<Participante> participantes;
   final List<InstanciaItem> instancias;
@@ -167,7 +162,8 @@ class ConfirmarDivisao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return UserExpensesPage(participantes: participantes, instancias: instancias);
+    return UserExpensesPage(
+        participantes: participantes, instancias: instancias);
   }
 }
 
@@ -176,7 +172,8 @@ class UserExpensesPage extends StatelessWidget {
   final List<Participante> participantes;
   final NavigationHelper _navigationHelper = NavigationHelper();
 
-  UserExpensesPage({Key? key, required this.participantes, required this.instancias});
+  UserExpensesPage(
+      {Key? key, required this.participantes, required this.instancias});
 
   @override
   Widget build(BuildContext context) {
@@ -244,9 +241,11 @@ class UserCard extends StatefulWidget {
   List<String> itensConsumidos = [];
 
   UserCard({Key? key, required this.participante, required this.instancias}) {
-    for(int i = 0; i < instancias.length; i++) {
-      if(instancias[i].participantes.contains(participante)) {
-        String temp = instancias[i].item.nome + " - " + instancias[i].quantidade.toString();
+    for (int i = 0; i < instancias.length; i++) {
+      if (instancias[i].participantes.contains(participante)) {
+        String temp = instancias[i].item.nome +
+            " - " +
+            instancias[i].quantidade.toString();
         itensConsumidos.add(temp);
       }
     }
