@@ -77,7 +77,7 @@ class _ScannedScreen extends State<ScannedScreen> {
       builder: (context) {
         return AlertDialog(
           title: const Text(
-              'Preencha seu nome e seu email, para adicionar um novo participante à lista'),
+              'Preencha seu nome, para adicionar um novo participante à lista'),
           content: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -86,16 +86,7 @@ class _ScannedScreen extends State<ScannedScreen> {
                   Icons.account_circle_outlined, //Ícone do TextField
                   TextInputType.text, //Tipo do Teclado
                   nameController, // Controlador do TextField
-                  validateUser(nameController), // Verifica se há erro
-                  (text) => setState(() => ()), // OnChanged
-                  true // Enabled?
-                  ),
-              form(
-                  "Seu endereço de email", //Label do TextField
-                  Icons.account_circle_outlined, //Ícone do TextField
-                  TextInputType.text, //Tipo do Teclado
-                  emailController, // Controlador do TextField
-                  validateEmail(emailController), // Verifica se há erro
+                  "", // Verifica se há erro
                   (text) => setState(() => ()), // OnChanged
                   true // Enabled?
                   ),

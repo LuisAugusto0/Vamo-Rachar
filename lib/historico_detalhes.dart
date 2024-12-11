@@ -365,7 +365,8 @@ class ProductTileImage extends StatelessWidget {
   Widget getDefault() {
     return const Icon(
         Icons.image,
-        size: 50
+        size: 50,
+        color: Colors.transparent,
     );
   }
   Widget? getImage() {

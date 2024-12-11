@@ -40,7 +40,7 @@ String? validatePassword(TextEditingController controller) {
 String? validateInteiro(TextEditingController controller) {
   String value = controller.text;
   if(int.tryParse(value) == null){
-    return "Favor inserir apenas valores numéricos sem vírgula";
+    return "Apenas números sem vírgula";
   }
   return null;
 }
@@ -48,7 +48,7 @@ String? validateInteiro(TextEditingController controller) {
 String? validadeDouble(TextEditingController controller) {
   String value = controller.text;
   if(double.tryParse(value) == null){
-    return "Favor inserir apenas valores numéricos (Em caso de número quebrado, usar '.')";
+    return "Números com vírgula, devem usar ' . ' ao invés de ' ,'";
   }
   return null;
 }

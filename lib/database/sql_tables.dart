@@ -383,12 +383,6 @@ class PurchaseSql implements EntityTable {
     assert (data.containsKey(dateTimeInUnixString) && data[dateTimeInUnixString] is int,
     'Map is missing the correct $dateTimeInUnixString field');
 
-    assert (data.containsKey(longitudeString) && data[longitudeString] is double?,
-    'Map is missing the correct $longitudeString field');
-
-    assert (data.containsKey(latitudeString) && data[latitudeString] is double?,
-    'Map is missing the correct $latitudeString field');
-
     assert (data.containsKey(fkeyLoginString) && data[fkeyLoginString] is int,
     'Map is missing the correct $fkeyLoginString field');
   }

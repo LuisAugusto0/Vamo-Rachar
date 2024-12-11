@@ -226,9 +226,11 @@ class UserExpensesPage extends StatelessWidget {
           title: Text(
               "Antes de confirmar a divisão, precisamos que digite o nome do estabelecimento no campo abaixo:"),
           content: TextField(
+            style: TextStyle(
+              color: Color.fromARGB(255, 54, 226, 143)
+            ),
             onChanged: (value) {
               temp = value;
-
               debugPrint("Nome do estabelecimento: ${temp} - $value");
             },
           ),
@@ -237,7 +239,12 @@ class UserExpensesPage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("Cancelar"),
+              child: Text(
+                "Cancelar",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 54, 226, 143),
+                ),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -245,11 +252,16 @@ class UserExpensesPage extends StatelessWidget {
                     DatabaseAdder.getUniqueItems(instancias), temp);
                 int count = 0;
                 while (count < 4 && Navigator.canPop(context)) {
-                  //Navigator.pop(context);
+                  Navigator.pop(context);
                   count++;
                 }
               },
-              child: Text("Confirmar"),
+              child: Text(
+                "Confirmar",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 54, 226, 143),
+                ),
+              ),
             ),
           ],
         );
@@ -289,7 +301,7 @@ class UserExpensesPage extends StatelessWidget {
               child: Text(
                 "cancelar",
                 style: TextStyle(
-                  color: Colors.green,
+                  color: Color.fromARGB(255, 54, 226, 143),
                 ),
               ),
             ),
@@ -307,7 +319,7 @@ class UserExpensesPage extends StatelessWidget {
               child: Text(
                 "enviar",
                 style: TextStyle(
-                  color: Colors.green,
+                  color: Color.fromARGB(255, 54, 226, 143),
                 ),
               ),
             ),
