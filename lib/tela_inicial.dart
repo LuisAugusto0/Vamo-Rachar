@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'historico.dart';
 import 'constants/colors.dart';
 import 'widgets/navigation_helper.dart';
@@ -6,16 +8,45 @@ import 'database/database_helper.dart';
 import 'login_inicial.dart';
 import 'novo_rachamento.dart';
 import 'perfil_usuario.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // For JSON decoding
 
 class Home extends StatelessWidget {
   Home({super.key});
   // Scaffold de scaffold??
   @override
   Widget build(BuildContext context) {
+    _fetchLocation();
+
     return Scaffold(
       appBar: HomePageAppBar(),
       body: const MyHomePage(),
     );
+  }
+
+  Future<void> _fetchLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+      );
+
+
+
+
+      //
+      //
+      // final url = 'https://nominatim.openstreetmap.org/search?format=json&limit=10&q=restaurant&lat=${position.latitude}&lon=${position.longitude}';
+      // print(url);
+      // final response = await http.get(Uri.parse(url));
+
+      // if (response.statusCode == 200) {
+      //   print(json.decode(response.body));
+      // } else {
+      //   throw Exception('Falha ao carregar restaurantes');
+      // }
+
+    } catch (e) {
+      print("Error fetching location: $e");
+    }
   }
 }
 
@@ -69,6 +100,8 @@ class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
     } else {
       // // Remove todas as telas anteriores até a primeira
       // Navigator.popUntil(context, (route) => route.isFirst);
+
+
 
       Navigator.of(context).popUntil( (Route<dynamic> route) => false );
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginInicial()));

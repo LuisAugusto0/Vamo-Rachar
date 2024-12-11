@@ -1,11 +1,13 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'database/database_helper.dart';
 import 'database/sql_providers.dart';
 import 'database/sql_tables.dart';
 import 'novo_rachamento.dart';
 import 'package:vamorachar/widgets/navigation_helper.dart';
 import 'package:flutter/material.dart';
-import 'tela_inicial.dart';
+//import 'tela_inicial.dart';
 
 class DatabaseAdder {
   static void _assertParticipanteInsideInstancia(
@@ -66,8 +68,34 @@ class DatabaseAdder {
     return itemIdMap;
   }
 
-  static void addToDatabase(List<Participante> participantes,
-      List<InstanciaItem> instanciaItems, List<Item> items) async {
+  //Função acessória para identificar se o usuário permite ou não o acesso à localização
+  static Future<void> determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+      return Future.error('Serviço de localização desativado');
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Permissão de localização negada');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Permissão de localização negada permanentemente');
+    }
+  }
+
+  static void addToDatabase(
+      List<Participante> participantes,
+      List<InstanciaItem> instanciaItems,
+      List<Item> items,
+      String? estabelecimentoNome) async {
     debugPrint("ADD TO DATABASE SUBMIT");
 
     // For now the email for logins are ignored
@@ -77,12 +105,23 @@ class DatabaseAdder {
         await _addParicipantesAsUser(participantes, dbHelper);
     _assertParticipanteInsideInstancia(userIdMap, instanciaItems);
 
+    double? latitude;
+    double? longitude;
+    try {
+      Position position = await Geolocator.getCurrentPosition();
+      latitude = position.latitude;
+      longitude = position.longitude;
+    } catch (e) {
+      debugPrint("Error fetching location: $e");
+    }
+
     PurchaseSql purchaseSql = PurchaseSql(
         dateTimeInUnix: DateTime.now().millisecondsSinceEpoch,
+        establishmentName: estabelecimentoNome,
 
         // NOT IMPLEMENTED
-        longitude: 0,
-        latitude: 0,
+        longitude: longitude,
+        latitude: latitude,
 
         // NO LONGER USED. LINKED ALL TO ADMIN DUMMY USER
         fkeyLogin: 1);
@@ -175,6 +214,49 @@ class UserExpensesPage extends StatelessWidget {
   UserExpensesPage(
       {Key? key, required this.participantes, required this.instancias});
 
+  //Variável global para armazenar o nome do estabelecimento
+
+  //Popup para adicionar o nome do estabelecimento antes de confirmar a divisão
+  void _showDialog(BuildContext context) {
+    String temp = "";
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+              "Antes de confirmar a divisão, precisamos que digite o nome do estabelecimento no campo abaixo:"),
+          content: TextField(
+            onChanged: (value) {
+              temp = value;
+
+              debugPrint("Nome do estabelecimento: ${temp} - $value");
+            },
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancelar"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                DatabaseAdder.addToDatabase(participantes, instancias,
+                    DatabaseAdder.getUniqueItems(instancias), temp);
+                int count = 0;
+                while (count < 4 && Navigator.canPop(context)) {
+                  //Navigator.pop(context);
+                  count++;
+                }
+              },
+              child: Text("Confirmar"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -219,7 +301,8 @@ class UserExpensesPage extends StatelessWidget {
             ),
             child: ElevatedButton(
               onPressed: () {
-                DatabaseAdder.addToDatabase(participantes, instancias, DatabaseAdder.getUniqueItems(instancias));
+                DatabaseAdder.determinePosition();
+                _showDialog(context);
               },
               child: Text(
                 "enviar",
