@@ -514,7 +514,7 @@ class HistoryItemText extends StatelessWidget {
 
   String getTimeDifference() {
 
-    final Duration difference = currentTime.difference(historyData.dateTime);
+    final Duration difference = DateTime.now().difference(historyData.dateTime);
 
 
     if (difference.inDays == 0) {

@@ -101,7 +101,7 @@ class DatabaseHelper extends FirebaseHelper {
 
 
     if (created) {
-      await initTestData(res);
+      await initLaunchData(res);
     }
     assertAllTableWrappers(res);
 

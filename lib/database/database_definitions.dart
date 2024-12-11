@@ -95,6 +95,16 @@ Future<void> dropTables(Database db) async {
   await db.execute("DROP TABLE IF EXISTS login");
 }
 
+Future<void> initLaunchData(Database db) async {
+
+  debugPrint('Initializing new data');
+
+  // LOGIN NOT USED ANYMORE, BUT THIS IS USED TO FULFILL FKEY REQUIREMENTS
+  await db.execute('''
+        INSERT INTO login (nome, email, senha) 
+        VALUES ('Admin', 'admin@email.com', '123456#'); -- linked to login
+    ''');
+}
 // Example data
 Future<void> initTestData(Database db) async {
 

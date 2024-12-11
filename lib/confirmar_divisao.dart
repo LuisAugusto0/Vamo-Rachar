@@ -7,12 +7,19 @@ import 'package:vamorachar/widgets/navigation_helper.dart';
 import 'package:flutter/material.dart';
 
 class DatabaseAdder {
-  static void addToDatabase(List<Participante> participantes,
-      List<InstanciaItem> instanciaItems, List<Item> items) async {
-    debugPrint("ADD TO DATABASE SUBMIT");
-    // For now the email for logins are ignored
-    DatabaseHelper dbHelper = DatabaseHelper();
 
+  static void _assertParticipanteInsideInstancia(Map<Participante, int> userIdMap,
+      List<InstanciaItem> instancias) {
+
+    for (final instancia in instancias) {
+      for (final participant in instancia.participantes) {
+        assert(userIdMap.containsKey(participant), "participante nao encontrado");
+      }
+    }
+  }
+
+  static Future<Map<Participante, int>> _addParicipantesAsUser(List<Participante> participantes,
+      DatabaseHelper dbHelper)  async {
     // Each annonymous user will receive its own entity on the database with unique uid
     List<UserSql> users = participantes
         .map((participante) => UserSql(name: participante.nome))
@@ -27,23 +34,22 @@ class DatabaseAdder {
       userIdMap[participantes[i]] = id;
     }
 
-    PurchaseSql purchaseSql = PurchaseSql(
-        dateTimeInUnix: DateTime.now().millisecondsSinceEpoch,
+    return userIdMap;
+  }
 
-        // NOT IMPLEMENTED
-        longitude: 0,
-        latitude: 0,
+  static _assertItemInsideInstancia(Map<Item, int> itemIdMap,
+      List<InstanciaItem> instancias) {
 
-        // FETCH THE KEY!
-        fkeyLogin: 2);
+    for (final instancia in instancias) {
+      assert(itemIdMap.containsKey(instancia.item), "item nao encontrado");
+    }
+  }
 
-    PurchaseProvider purchaseProvider = PurchaseProvider(dbHelper);
-    int purchaseId = await purchaseProvider.insert(purchaseSql);
-
+  static Future<Map<Item, int>> _addItemAsProduct(List<Item> items, int purchaseId, DatabaseHelper dbHelper) async {
     // Add in foreign key order -> purchase -> product -> productUnit -> contribution
     List<ProductSql> products = items
         .map((item) => ProductSql(
-            name: item.nome, price: item.preco, fkeyPurchase: purchaseId))
+        name: item.nome, price: item.preco, fkeyPurchase: purchaseId))
         .toList();
 
     ProductProvider productProvider = ProductProvider(dbHelper);
@@ -57,6 +63,39 @@ class DatabaseAdder {
       itemIdMap[items[i]] = id;
     }
 
+    return itemIdMap;
+  }
+
+
+  static void addToDatabase(List<Participante> participantes,
+      List<InstanciaItem> instanciaItems, List<Item> items) async {
+
+    debugPrint("ADD TO DATABASE SUBMIT");
+
+    // For now the email for logins are ignored
+    DatabaseHelper dbHelper = DatabaseHelper();
+
+    Map<Participante, int> userIdMap = await _addParicipantesAsUser(participantes, dbHelper);
+    _assertParticipanteInsideInstancia(userIdMap, instanciaItems);
+
+    PurchaseSql purchaseSql = PurchaseSql(
+        dateTimeInUnix: DateTime.now().millisecondsSinceEpoch,
+
+        // NOT IMPLEMENTED
+        longitude: 0,
+        latitude: 0,
+
+        // NO LONGER USED. LINKED ALL TO ADMIN DUMMY USER
+        fkeyLogin: 1);
+
+    PurchaseProvider purchaseProvider = PurchaseProvider(dbHelper);
+    int purchaseId = await purchaseProvider.insert(purchaseSql);
+
+
+    Map<Item, int> itemIdMap = await _addItemAsProduct(items, purchaseId, dbHelper);
+    _assertItemInsideInstancia(itemIdMap, instanciaItems);
+
+
     List<ContributionSql> contributions = [];
     ProductUnitProvider productUnitProvider = ProductUnitProvider(dbHelper);
 
@@ -64,17 +103,22 @@ class DatabaseAdder {
       final item = instance.item;
       int? productId = itemIdMap[item];
       if (productId != null) {
-        final sql = ProductUnitSql(fkeyProduct: productId);
-        int unitId = await productUnitProvider.insert(sql);
 
-        double paidPartitions = item.preco / instance.participantes.length;
-        for (final contribution in instance.participantes) {
-          int? userId = userIdMap[contribution];
-          if (userId == null)
-            throw Exception("Key ${instance.item} not found in userIdMap.");
+        for (int i = 0; i < instance.quantidade; i++) {
+          final sql = ProductUnitSql(fkeyProduct: productId);
+          int unitId = await productUnitProvider.insert(sql);
 
-          contributions.add(ContributionSql(
-              paid: paidPartitions, fkeyProductUnit: unitId, fkeyUser: userId));
+          double paidPartitions = item.preco / instance.participantes.length;
+          for (final contribution in instance.participantes) {
+            int? userId = userIdMap[contribution];
+            if (userId == null) {
+              throw Exception("Key ${instance.item} not found in userIdMap.");
+            }
+
+            contributions.add(ContributionSql(
+                paid: paidPartitions, fkeyProductUnit: unitId, fkeyUser: userId));
+        }
+
         }
       } else {
         // Handle the case where the key doesn't exist
@@ -87,7 +131,20 @@ class DatabaseAdder {
       contributionProvider.insert(contribution);
     }
   }
+
+  static List<Item> getUniqueItems(List<InstanciaItem> instanciaItems) {
+    final Set<Item> uniqueItemsSet = {};
+
+    for (final instancia in instanciaItems) {
+      uniqueItemsSet.add(instancia.item);
+    }
+
+    return uniqueItemsSet.toList();
+  }
 }
+
+
+
 
 class ConfirmarDivisao extends StatelessWidget {
   final List<Participante> participantes;
@@ -165,7 +222,7 @@ class UserExpensesPage extends StatelessWidget {
             ),
             child: ElevatedButton(
               onPressed: () {
-                //DatabaseAdder.addToDatabase(participantes, instanciaItems, items);
+                DatabaseAdder.addToDatabase(participantes, instancias, DatabaseAdder.getUniqueItems(instancias));
               },
               child: Text(
                 "enviar",
