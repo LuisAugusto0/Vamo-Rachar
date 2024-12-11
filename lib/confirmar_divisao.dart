@@ -223,6 +223,11 @@ class UserExpensesPage extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 DatabaseAdder.addToDatabase(participantes, instancias, DatabaseAdder.getUniqueItems(instancias));
+                int count = 0;
+                while (count < 3 && Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                  count++;
+                }
               },
               child: Text(
                 "enviar",

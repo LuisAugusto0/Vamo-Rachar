@@ -398,6 +398,10 @@ class HistoryList extends StatelessWidget {
                     bodySmall: const TextStyle(
                       color: Colors.grey, // Set caption text color here
                     ),
+                    bodyLarge: const TextStyle(
+                      color: Colors.black, // Set body text color here
+                      fontSize: 16
+                    ),
                   ),
                 ),
                 child: HistoryWidget(data: historyItem),
@@ -546,22 +550,29 @@ class HistoryItemText extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (historyData.establishment != null)
-            Text(
-              historyData.establishment!,
-              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
+          // Ignore location for now
+          // if (historyData.establishment != null)
+          //   Text(
+          //     historyData.establishment!,
+          //     style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          //   ),
+          // Text(
+          //   historyData.location,
+          //   style: textTheme.bodyMedium, // Use default body style from TextTheme
+          // ),
           Text(
-            historyData.location,
-            style: textTheme.bodyMedium, // Use default body style from TextTheme
+            getTimeDifference(),
+            style: textTheme.bodyLarge, // Use caption style from TextTheme
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Text(
-              getTimeDifference(),
-              style: textTheme.bodySmall, // Use caption style from TextTheme
-            ),
-          ),
+
+          // TEMPORARILY REMOVED AS THERE IS NO SUITABLE DESCRIPTION
+          // Padding(
+          //   padding: const EdgeInsets.only(top: 10),
+          //   child: Text(
+          //     getTimeDifference(),
+          //     style: textTheme.bodyLarge, // Use caption style from TextTheme
+          //   ),,
+          // ),
         ],
       ),
     );
