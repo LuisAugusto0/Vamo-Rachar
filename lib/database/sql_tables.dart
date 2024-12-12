@@ -332,16 +332,16 @@ class PurchaseSql implements EntityTable {
   final int? id;
   final String? establishmentName;
   final int dateTimeInUnix;
-  final double longitude;
-  final double latitude;
+  final double? longitude;
+  final double? latitude;
   final int fkeyLogin;
 
   const PurchaseSql({
     this.id,
     this.establishmentName,
     required this.dateTimeInUnix,
-    required this.longitude,
-    required this.latitude,
+    this.longitude,
+    this.latitude,
     required this.fkeyLogin
   });
 
@@ -383,10 +383,10 @@ class PurchaseSql implements EntityTable {
     assert (data.containsKey(dateTimeInUnixString) && data[dateTimeInUnixString] is int,
     'Map is missing the correct $dateTimeInUnixString field');
 
-    assert (data.containsKey(longitudeString) && data[longitudeString] is double,
+    assert (data.containsKey(longitudeString) && data[longitudeString] is double?,
     'Map is missing the correct $longitudeString field');
 
-    assert (data.containsKey(latitudeString) && data[latitudeString] is double,
+    assert (data.containsKey(latitudeString) && data[latitudeString] is double?,
     'Map is missing the correct $latitudeString field');
 
     assert (data.containsKey(fkeyLoginString) && data[fkeyLoginString] is int,
@@ -402,8 +402,8 @@ class PurchaseSql implements EntityTable {
       id: data[idString] as int,
       establishmentName: data[establishmentNameString] as String?,
       dateTimeInUnix: data[dateTimeInUnixString] as int,
-      longitude: data[longitudeString] as double,
-      latitude: data[latitudeString] as double,
+      longitude: data[longitudeString] as double?,
+      latitude: data[latitudeString] as double?,
       fkeyLogin: data[fkeyLoginString] as int
     );
   }

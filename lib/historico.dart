@@ -9,20 +9,24 @@ import 'package:vamorachar/widgets/navigation_helper.dart';
 
 class HistoryData {
   const HistoryData({
-    required this.location,
+    this.adress,
     required this.dateTime,
     required this.users,
     required this.id,
     this.establishment,
     this.image,
+    this.latitude,
+    this.longitude
   });
 
   final String? establishment;
   final String? image;
-  final String location;
+  final String? adress;
   final DateTime dateTime;
   final List<UserSql> users;
   final int id;
+  final double? latitude;
+  final double? longitude;
 
   static Future<HistoryData> buildFromSql (DatabaseHelper dbHelper, PurchaseSql purchase) async {
     // Need a new structure where id is never null... this is getting too unsafe
@@ -58,16 +62,17 @@ class HistoryData {
     List<UserSql>? users = await userProvider.getByAutoIncrementIdList(userIds);
     if (users == null) throw Exception("Users not found");
 
-    String? locationName = "LOCATION NOT IMPLEMENTED";
 
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(purchase.dateTimeInUnix);
     print(purchase.dateTimeInUnix);
     return HistoryData(
       id: purchaseId,
-      location: locationName,
+      adress: null,
       dateTime: dateTime,
       users: users,
       establishment: purchase.establishmentName,
+      latitude: purchase.latitude,
+      longitude: purchase.longitude
       //image: NOT IMPLEMENTED
     );
   }
@@ -217,17 +222,17 @@ class _HistoricoState extends State<Historico> {
   void onSearchBarChanged(String input) {
     // You can't directly modify a Future-based list; this would apply filtering
     // only after the list has been loaded
-    setState(() {
-      _futureList = _futureList.then((currentList) {
-        if (input.isEmpty) {
-          return currentList;
-        } else {
-          return currentList
-              .where((item) => item.location.toLowerCase().contains(input.toLowerCase()))
-              .toList();
-        }
-      });
-    });
+    // setState(() {
+    //   _futureList = _futureList.then((currentList) {
+    //     if (input.isEmpty) {
+    //       return currentList;
+    //     } else {
+    //       return currentList
+    //           .where((item) => item.adress != null && item.adress!.toLowerCase().contains(input.toLowerCase()))
+    //           .toList();
+    //     }
+    //   });
+    // });
   }
 
   @override
@@ -324,21 +329,21 @@ class HistoricoAppbar extends StatelessWidget implements PreferredSizeWidget {
       //   ),
       // ),
 
-      title: Expanded(
-        child: Row (
-          children: [
-            Expanded(
-              child: SearchBar(
-                padding: const WidgetStatePropertyAll<EdgeInsets>(
-                  EdgeInsets.symmetric(horizontal: 16.0),
-                ),
-                leading: const Icon(Icons.search),
-                onChanged: onChanged,
-              )
-            ),
-          ]
-        )
-      ),
+      // title: Expanded(
+      //   child: Row (
+      //     children: [
+      //       Expanded(
+      //         child: SearchBar(
+      //           padding: const WidgetStatePropertyAll<EdgeInsets>(
+      //             EdgeInsets.symmetric(horizontal: 16.0),
+      //           ),
+      //           leading: const Icon(Icons.search),
+      //           onChanged: onChanged,
+      //         )
+      //       ),
+      //     ]
+      //   )
+      // ),
 
     );
   }
@@ -551,28 +556,37 @@ class HistoryItemText extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Ignore location for now
-          // if (historyData.establishment != null)
-          //   Text(
-          //     historyData.establishment!,
-          //     style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          //   ),
+          if (historyData.establishment != null)
+            Text(
+              historyData.establishment!,
+              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          if (historyData.adress != null)
+            Text(
+              historyData.adress!,
+              style: textTheme.bodyMedium, // Use default body style from TextTheme
+            ),
+          if (historyData.longitude != null && historyData.latitude != null)
+            Text(
+              "latitude: ${historyData.latitude!.toStringAsFixed(4)}, longitude ${historyData.longitude!.toStringAsFixed(4)}",
+              style: textTheme.bodyMedium, // Use default body style from TextTheme
+            ),
+
+
+
           // Text(
-          //   historyData.location,
-          //   style: textTheme.bodyMedium, // Use default body style from TextTheme
+          //   getTimeDifference(),
+          //   style: textTheme.bodyLarge, // Use caption style from TextTheme
           // ),
-          Text(
-            getTimeDifference(),
-            style: textTheme.bodyLarge, // Use caption style from TextTheme
-          ),
 
           // TEMPORARILY REMOVED AS THERE IS NO SUITABLE DESCRIPTION
-          // Padding(
-          //   padding: const EdgeInsets.only(top: 10),
-          //   child: Text(
-          //     getTimeDifference(),
-          //     style: textTheme.bodyLarge, // Use caption style from TextTheme
-          //   ),,
-          // ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Text(
+              getTimeDifference(),
+              style: textTheme.bodyMedium, // Use caption style from TextTheme
+            ),
+          ),
         ],
       ),
     );

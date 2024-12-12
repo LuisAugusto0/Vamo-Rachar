@@ -1,4 +1,5 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:geolocator/geolocator.dart';
 import 'database/database_helper.dart';
 import 'database/sql_providers.dart';
 import 'database/sql_tables.dart';
@@ -15,6 +16,7 @@ class DatabaseAdder {
       for (final participant in instancia.participantes) {
         assert(userIdMap.containsKey(participant), "participante nao encontrado");
       }
+
     }
   }
 
@@ -68,7 +70,7 @@ class DatabaseAdder {
 
 
   static void addToDatabase(List<Participante> participantes,
-      List<InstanciaItem> instanciaItems, List<Item> items) async {
+      List<InstanciaItem> instanciaItems, List<Item> items, String? estabelecimentoNome) async {
 
     debugPrint("ADD TO DATABASE SUBMIT");
 
@@ -78,12 +80,26 @@ class DatabaseAdder {
     Map<Participante, int> userIdMap = await _addParicipantesAsUser(participantes, dbHelper);
     _assertParticipanteInsideInstancia(userIdMap, instanciaItems);
 
+    double? latitude;
+    double? longitude;
+    try {
+      Position position = await Geolocator.getCurrentPosition();
+      latitude = position.latitude;
+      longitude = position.longitude;
+
+    } catch (e) {
+      debugPrint("Error fetching location: $e");
+    }
+
+
     PurchaseSql purchaseSql = PurchaseSql(
         dateTimeInUnix: DateTime.now().millisecondsSinceEpoch,
 
+        establishmentName: estabelecimentoNome,
+
         // NOT IMPLEMENTED
-        longitude: 0,
-        latitude: 0,
+        longitude: longitude,
+        latitude: latitude,
 
         // NO LONGER USED. LINKED ALL TO ADMIN DUMMY USER
         fkeyLogin: 1);
@@ -222,7 +238,8 @@ class UserExpensesPage extends StatelessWidget {
             ),
             child: ElevatedButton(
               onPressed: () {
-                DatabaseAdder.addToDatabase(participantes, instancias, DatabaseAdder.getUniqueItems(instancias));
+                // ADICIONAR NOME ESTABELECIMENTO
+                DatabaseAdder.addToDatabase(participantes, instancias, DatabaseAdder.getUniqueItems(instancias), null);
                 int count = 0;
                 while (count < 3 && Navigator.canPop(context)) {
                   Navigator.pop(context);

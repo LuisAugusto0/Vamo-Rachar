@@ -31,8 +31,8 @@ Future<void> createTables(Database db) async {
         id INTEGER PRIMARY KEY,
         estabelecimento_nome TEXT,
         date_time INTEGER NOT NULL,  -- Assuming Unix timestamp
-        longitude REAL NOT NULL,
-        latitude REAL NOT NULL,
+        longitude REAL,
+        latitude REAL,
         login_responsavel_id INTEGER NOT NULL,
         FOREIGN KEY (login_responsavel_id) REFERENCES login(id)
       );
