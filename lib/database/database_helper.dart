@@ -168,17 +168,12 @@ class DatabaseHelper extends FirebaseHelper {
   Future<void> removeLocalDatabase() async {
     Database db = await getDatabase();
     await dropTables(db);
+
     await createTables(db);
     print("db removed");
+    await initLaunchData(db);
   }
 
-  Future<void> resetLocalDatabase() async {
-    Database db = await getDatabase();
-    await dropTables(db);
-    await createTables(db);
-    await initTestData(db);
-    print("db reseted");
-  }
 
   Future<String?> createFirestoreBackup() async {
     String? error;

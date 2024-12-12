@@ -239,7 +239,7 @@ class UserExpensesPage extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 // ADICIONAR NOME ESTABELECIMENTO
-                DatabaseAdder.addToDatabase(participantes, instancias, DatabaseAdder.getUniqueItems(instancias), null);
+                DatabaseAdder.addToDatabase(participantes, instancias, DatabaseAdder.getUniqueItems(instancias), "AAAA");
                 int count = 0;
                 while (count < 3 && Navigator.canPop(context)) {
                   Navigator.pop(context);

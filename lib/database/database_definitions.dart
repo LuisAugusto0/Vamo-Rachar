@@ -105,6 +105,8 @@ Future<void> initLaunchData(Database db) async {
         VALUES ('Admin', 'admin@email.com', '123456#'); -- linked to login
     ''');
 }
+
+
 // Example data
 Future<void> initTestData(Database db) async {
 

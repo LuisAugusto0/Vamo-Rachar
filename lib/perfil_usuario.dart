@@ -325,15 +325,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               },
               child: const Text('Remove local history'),
             ),
-            TextButton(
-              onPressed: () async {
-                await _dbHelper.resetLocalDatabase();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Banco de dados local resetado")),
-                );
-              },
-              child: const Text('Reset local history (debug initial values)'),
-            ),
+
+
           ],
         ),
       ),
