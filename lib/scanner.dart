@@ -204,7 +204,16 @@ class _ScannerScreenState extends State<ScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: IconButton(
+          onPressed: () {
+          Navigator.pop(context);
+        },
+        icon: const Icon(
+          Icons.arrow_back_outlined,
+          size: 40,
+        ),
+      ),
+      toolbarHeight: 100,
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
