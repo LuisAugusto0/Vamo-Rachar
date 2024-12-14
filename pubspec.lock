@@ -121,8 +121,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
-<<<<<<< HEAD
-=======
   csslib:
     dependency: transitive
     description:
@@ -131,7 +129,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
->>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -265,8 +262,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
-<<<<<<< HEAD
-=======
   flutter_native_splash:
     dependency: "direct main"
     description:
@@ -275,7 +270,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.3"
->>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -382,8 +376,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.6"
-<<<<<<< HEAD
-=======
   html:
     dependency: transitive
     description:
@@ -392,7 +384,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.5"
->>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   http:
     dependency: "direct main"
     description:
@@ -409,8 +400,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
-<<<<<<< HEAD
-=======
   image:
     dependency: transitive
     description:
@@ -419,7 +408,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.4.0"
->>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   image_picker:
     dependency: "direct main"
     description:
@@ -564,8 +552,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.0"
-<<<<<<< HEAD
-=======
   petitparser:
     dependency: transitive
     description:
@@ -574,7 +560,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.2"
->>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   platform:
     dependency: transitive
     description:
@@ -591,8 +576,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
-<<<<<<< HEAD
-=======
   posix:
     dependency: transitive
     description:
@@ -601,7 +584,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.1"
->>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   sky_engine:
     dependency: transitive
     description: flutter
@@ -735,8 +717,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-<<<<<<< HEAD
-=======
   universal_io:
     dependency: transitive
     description:
@@ -745,7 +725,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.2"
->>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   uuid:
     dependency: transitive
     description:
@@ -778,8 +757,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-<<<<<<< HEAD
-=======
   xml:
     dependency: transitive
     description:
@@ -796,7 +773,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
->>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
 sdks:
   dart: ">=3.5.3 <4.0.0"
   flutter: ">=3.24.0"
