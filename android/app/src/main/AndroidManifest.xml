@@ -4,7 +4,11 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
+<<<<<<< HEAD
         android:label="vamorachar"
+=======
+        android:label="Vamo Rachar"
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

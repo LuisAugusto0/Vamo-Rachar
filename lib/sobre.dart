@@ -39,7 +39,7 @@ class SobreNos extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 30.0),
           child: Row(
             children: [
               IconButton(
@@ -148,6 +148,7 @@ class SobreNos extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 50), // Espaçamento abaixo do container
             ],
           ),
         ),

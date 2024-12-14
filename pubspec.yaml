@@ -45,6 +45,10 @@ dependencies:
   geolocator: ^13.0.2
   geocoding: ^3.0.0 # Optional, for converting coordinates to addresses
   http: ^1.1.0
+<<<<<<< HEAD
+=======
+  flutter_native_splash: ^2.4.3
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

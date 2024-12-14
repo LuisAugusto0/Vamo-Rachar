@@ -17,6 +17,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
+  ansicolor:
+    dependency: transitive
+    description:
+      name: ansicolor
+      sha256: "50e982d500bc863e1d703448afdbf9e5a72eb48840a4f766fa361ffd6877055f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.3"
+  archive:
+    dependency: transitive
+    description:
+      name: archive
+      sha256: "08064924cbf0ab88280a0c3f60db9dd24fec693927e725ecb176f16c629d1cb8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.1"
+  args:
+    dependency: transitive
+    description:
+      name: args
+      sha256: bf9f5caeea8d8fe6721a9c358dd8a5c1947b27f1cfaa18b39c301273594919e6
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.0"
   async:
     dependency: transitive
     description:
@@ -97,6 +121,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
+<<<<<<< HEAD
+=======
+  csslib:
+    dependency: transitive
+    description:
+      name: csslib
+      sha256: "09bad715f418841f976c77db72d5398dc1253c21fb9c0c7f0b0b985860b2d58e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -230,6 +265,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+<<<<<<< HEAD
+=======
+  flutter_native_splash:
+    dependency: "direct main"
+    description:
+      name: flutter_native_splash
+      sha256: "1152ab0067ca5a2ebeb862fe0a762057202cceb22b7e62692dcbabf6483891bb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.3"
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -336,6 +382,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.6"
+<<<<<<< HEAD
+=======
+  html:
+    dependency: transitive
+    description:
+      name: html
+      sha256: "1fc58edeaec4307368c60d59b7e15b9d658b57d7f3125098b6294153c75337ec"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.15.5"
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   http:
     dependency: "direct main"
     description:
@@ -352,6 +409,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+<<<<<<< HEAD
+=======
+  image:
+    dependency: transitive
+    description:
+      name: image
+      sha256: "599d08e369969bdf83138f5b4e0a7e823d3f992f23b8a64dd626877c37013533"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.4.0"
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   image_picker:
     dependency: "direct main"
     description:
@@ -496,6 +564,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.0"
+<<<<<<< HEAD
+=======
+  petitparser:
+    dependency: transitive
+    description:
+      name: petitparser
+      sha256: c15605cd28af66339f8eb6fbe0e541bfe2d1b72d5825efc6598f3e0a31b9ad27
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.2"
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   platform:
     dependency: transitive
     description:
@@ -512,6 +591,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+<<<<<<< HEAD
+=======
+  posix:
+    dependency: transitive
+    description:
+      name: posix
+      sha256: a0117dc2167805aa9125b82eee515cc891819bac2f538c83646d355b16f58b9a
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.1"
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   sky_engine:
     dependency: transitive
     description: flutter
@@ -645,6 +735,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+<<<<<<< HEAD
+=======
+  universal_io:
+    dependency: transitive
+    description:
+      name: universal_io
+      sha256: "1722b2dcc462b4b2f3ee7d188dad008b6eb4c40bbd03a3de451d82c78bba9aad"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.2"
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
   uuid:
     dependency: transitive
     description:
@@ -677,6 +778,25 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+<<<<<<< HEAD
+=======
+  xml:
+    dependency: transitive
+    description:
+      name: xml
+      sha256: b015a8ad1c488f66851d762d3090a21c600e479dc75e68328c52774040cf9226
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.5.0"
+  yaml:
+    dependency: transitive
+    description:
+      name: yaml
+      sha256: "75769501ea3489fca56601ff33454fe45507ea3bfb014161abc3b43ae25989d5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
+>>>>>>> dcaa3d821ee7055152992fe93cc9f4157cd1a377
 sdks:
   dart: ">=3.5.3 <4.0.0"
   flutter: ">=3.24.0"

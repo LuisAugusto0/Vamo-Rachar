@@ -133,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
             .spaceBetween, // Spread content between top and bottom
         children: [
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 30.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
