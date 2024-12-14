@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "807369736427",
+    "project_id": "vamo-rachar-d0a09",
+    "storage_bucket": "vamo-rachar-d0a09.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:807369736427:android:8b8989c09c99b93b523eae",
+        "android_client_info": {
+          "package_name": "com.example.vamorachar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMqdVQJsQOquHzIYo2KhGPyuIE6HQ-wME"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

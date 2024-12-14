@@ -1,165 +1,166 @@
 import 'package:flutter/material.dart';
+import 'package:vamorachar/widgets/navigation_helper.dart';
+import 'database/database_helper.dart';
+import 'database/historico_detalhes_classes.dart';
+import 'package:intl/intl.dart';
 
-class Purchase {
-  const Purchase({
-    required this.productId,
-    required this.productName,
-    required this.productPrice,
-    required this.amount
-  });
-
-  final int productId;
-  final String productName;
-  final double productPrice;
-  final int amount;
-}
-
-class Participant {
-  const Participant({
-    required this.name,
-    required this.purchases,
-    required this.id,
-    this.email,
-    this.image,
-  });
+import 'database/sql_providers.dart';
+import 'database/sql_tables.dart';
 
 
-  final String name;
+
+
+
+
+
+
+PurchaseHistory productPurchaseHistory = defaultProductPurchaseHistory;
+
+
+class HistoricoDetails extends StatefulWidget {
   final int id;
-  final List<Purchase> purchases;
-  final String? email;
-  final String? image;
+
+  HistoricoDetails({required this.id, super.key});
+
+  @override
+  _HistoricoDetailsState createState() => _HistoricoDetailsState();
 }
 
-class HistoryData {
-  const HistoryData({
-    required this.participants,
-    required this.totalSpends,
-    required this.participantSpends,
-    required this.currency
-  });
+class _HistoricoDetailsState extends State<HistoricoDetails> {
+  late Future<PurchaseHistory> purchaseHistory;
 
-  final List<Participant> participants;
-  final double totalSpends;
-  final Map<int, double> participantSpends;
-  final String currency;
-  // Add additional fields like currecy, etc
-}
-
-const List<Participant> fallbackParticipantsList = [
-  Participant(
-    name: 'Alice Smith',
-    email: 'alice.smith@example.com',
-    id: 0,
-    image: null,
-    purchases: [
-      Purchase(
-        productId: 1,
-        productName: 'Pizza',
-        productPrice: 15.99, // Adjusted to a realistic pizza price
-        amount: 1,
-      ),
-      Purchase(
-        productId: 2,
-        productName: 'Queijo', // Cheese
-        productPrice: 5.50, // Adjusted to a realistic cheese price
-        amount: 2,
-      ),
-    ],
-  ),
-  Participant(
-    name: 'Bob Johnson',
-    email: 'bob.johnson@example.com',
-    image: null,
-    id: 1,
-    purchases: [
-      Purchase(
-        productId: 3,
-        productName: 'Omelet',
-        productPrice: 9.99, // Adjusted to a realistic omelet price
-        amount: 1,
-      ),
-    ],
-  ),
-  Participant(
-    name: 'Charlie Brown',
-    email: 'charlie.brown@example.com',
-    image: null,
-    id: 2,
-    purchases: [
-      Purchase(
-        productId: 4,
-        productName: 'Caviar',
-        productPrice: 49.99, // Adjusted to a realistic caviar price
-        amount: 1,
-      ),
-      Purchase(
-        productId: 5,
-        productName: 'Pao de Queijo', // Brazilian cheese bread
-        productPrice: 4.99, // Adjusted to a realistic price
-        amount: 1,
-      ),
-    ],
-  ),
-];
-
-
-class HistoryDataExtractor {
-  static Map<int, double> _getIndividualPrices(List<Participant> participants) {
-    Map<int, double> participantCosts = {};
-    for (var participant in fallbackParticipantsList) {
-      double individualCost = 0.0;
-
-      for (var purchase in participant.purchases) {
-        individualCost += purchase.productPrice * purchase.amount;
-      }
-
-      participantCosts[participant.id] = individualCost;
-    }
-
-    return participantCosts;
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the data asynchronously
+    purchaseHistory = _initializePurchaseHistory();
   }
 
-  static double _getTotalPrice(Map<int,double> individualPrices) {
-    return individualPrices.values.reduce((sum, cost) => sum + cost);
+  Future<PurchaseHistory> _initializePurchaseHistory() async {
+    DatabaseHelper dbHelper = DatabaseHelper();
+    PurchaseProvider provider = PurchaseProvider(dbHelper);
+    final purchase = await provider.getByAutoIncrementId(widget.id);
+    if (purchase == null) throw Exception("Id ${widget.id} is invalid");
+
+    return await PurchaseHistory.buildFromSql(dbHelper, purchase);
   }
-
-
-  // fallback function for now
-  static HistoryData fetchHistoryFullData() {
-    List<Participant> list = fallbackParticipantsList;
-    Map<int,double> individualPrices = _getIndividualPrices(list);
-    double totalCost = _getTotalPrice(individualPrices);
-
-    // Fallback implementation
-    return HistoryData(
-        participants: list,
-        participantSpends: individualPrices,
-        totalSpends: totalCost,
-        currency: 'real'
-    );
-  }
-}
-
-
-
-
-class HistoricoDetails extends StatelessWidget {
-  const HistoricoDetails({required this.id, super.key});
-  final int id;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: Appbar(),
-      body: Body(data: HistoryDataExtractor.fetchHistoryFullData()),
+    return FutureBuilder<PurchaseHistory>(
+      future: purchaseHistory,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Loading...")),
+            body: Center(child: CircularProgressIndicator()),  // Show loading indicator
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Error")),
+            body: Center(child: Text('Error: ${snapshot.error}')),  // Show error message
+          );
+        } else if (snapshot.hasData) {
+          // If the data is loaded successfully
+          PurchaseHistory purchaseHistoryData = snapshot.data!;
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Historico Details"),
+              actions: [
+                // You can use purchaseHistoryData here
+                // Example: Appbar(onChanged: (String str) => {}, total: purchaseHistoryData.spendings)
+              ],
+            ),
+            body: Body(data: purchaseHistoryData),  // Pass the loaded data to the body
+          );
+        } else {
+          return Scaffold(
+            appBar: AppBar(title: Text("No Data")),
+            body: Center(child: Text("No data available")),  // In case no data is found
+          );
+        }
+      },
     );
   }
 }
 
 
+// class HistoricoDetails extends StatelessWidget {
+//   HistoricoDetails({required this.id, super.key}) : {
+//   initializePurchaseHistory();
+//   }
+//   final int id;
+//
+//   late PurchaseHistory purchaseHistory;
+//
+//   Future<void> initializePurchaseHistory() async {
+//     DatabaseHelper dbHelper = DatabaseHelper();
+//     PurchaseProvider provider = PurchaseProvider(dbHelper);
+//     final purchase = await provider.getByAutoIncrementId(id);
+//
+//     purchaseHistory = await PurchaseHistory.buildFromSql(dbHelper, purchase);
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//
+//     return Scaffold(
+//       appBar: Appbar(onChanged: (String str) => {}, total: productPurchaseHistory.spendings),
+//       body: Body(data: productPurchaseHistory),
+//     );
+//   }
+// }
+
+/*
+ @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Historical Details'),
+      ),
+      body: FutureBuilder<ProductPurchaseHistory>(
+        future: _productPurchaseHistoryFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // While waiting for the data, show a placeholder text or loading indicator
+            return const Center(child: Text('Loading...'));
+          } else if (snapshot.hasError) {
+
+            // If an error occurred, show an error message
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            // Once the data is available, build the actual widget
+            final productPurchaseHistory = snapshot.data!;
+            return Column(
+              children: [
+                AppBar(
+                  title: Text('Total Spendings: ${productPurchaseHistory.spendings}'),
+                ),
+                Expanded(
+                  child: Body(data: productPurchaseHistory),
+                ),
+              ],
+            );
+          } else {
+            // If somehow no data was returned
+            return const Center(child: Text('No data available'));
+          }
+        },
+      ),
+    );
+  }
+ */
+
 class Appbar extends StatelessWidget implements PreferredSizeWidget {
-  const Appbar({super.key});
+  const Appbar({
+    required this.onChanged,
+    required this.total,
+    super.key
+  });
+
+  final Function(String) onChanged;
+  final double total;
 
   @override
   Size get preferredSize => const Size.fromHeight(80);
@@ -174,79 +175,84 @@ class Appbar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       toolbarHeight: 80,
 
-
       leading: IconButton(
-
         onPressed: () {
           Navigator.pop(context);
         },
         icon: const Icon(
-          Icons.close,
-          size: 35,
-        )
+          Icons.arrow_back_outlined,
+          size: 40,
+        ),
       ),
+
+      title: Row (
+          mainAxisAlignment: MainAxisAlignment.end,  // Align children to the right
+        children: [
+
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text("Total:  ${total.toStringAsFixed(2)}")
+          )
+        ]
+      )
+
+
     );
   }
 }
 
 class Body extends StatelessWidget {
   const Body({required this.data, super.key});
-  final HistoryData data;
+  final PurchaseHistory data;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(25.0),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(5.0),
-            child: Container(
-              color: Colors.transparent,
-              height: 30,
-              child: Text(
-                "R\$ ${data.totalSpends.toStringAsFixed(2)}",
-                style: const TextStyle(
-                  fontSize: 24.0, // Adjust this value to make the text size larger
-                  fontWeight: FontWeight.bold, // Make the text bold
-                ),
-              ),
-            ),
-          ),
-        ),
-        Expanded(child: ParticipantList(data: data))
-      ],
+
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: ProductPurchasesViewer(data: data)
     );
+
+
   }
 
 }
 
-class ParticipantList extends StatelessWidget {
-  const ParticipantList({required this.data, super.key});
-  final HistoryData data;
+class ProductPurchasesViewer extends StatelessWidget {
+  const ProductPurchasesViewer({required this.data, super.key});
+  final PurchaseHistory data;
 
   @override
   Widget build(BuildContext context) {
-    List<Participant> list = data.participants;
+    List<Product> list = data.products;
     return ListView.builder(
         itemCount: list.length,
         itemBuilder: (context, index) {
-          final participant = list[index];
+          final product = list[index];
+          final productTotalSpending = product.price * product.instances.length;
 
-          if (!data.participantSpends.containsKey(participant.id)) {
-            throw Exception('Total spends not found for participant with id: ${participant.id}');
-          }
-          final double totalSpends = data.participantSpends[participant.id]!;
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 8.0, vertical: 4.0),
-
-            child: ParticipantDisplay(
-                participant: participant,
-                totalSpends: totalSpends
-            ),
+          return Theme(
+                data: Theme.of(context).copyWith(
+                  textTheme: Theme.of(context).textTheme.copyWith(
+                    titleMedium: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    bodyLarge: const TextStyle(
+                      color: Colors.black,
+                    ),
+                    bodyMedium: const TextStyle(
+                      color: Colors.black,
+                    ),
+                    bodySmall: const TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+                child: ProductTile(
+                  product: product,
+                  totalSpendings: productTotalSpending,
+                )
           );
         }
     );
@@ -254,48 +260,138 @@ class ParticipantList extends StatelessWidget {
 }
 
 
-class ParticipantDisplay extends StatelessWidget {
-  const ParticipantDisplay({
-    required this.participant,
-    required this.totalSpends,
+
+class ProductTile extends StatefulWidget {
+  const ProductTile({
+    required this.product,
+    required this.totalSpendings,
     super.key
   });
 
-  final Participant participant;
-  final double totalSpends;
+  final Product product;
+  final double totalSpendings;
 
 
-  Widget defaultImage() {
-    return const Icon (
-        Icons.account_circle_outlined,
-        size: 100
+  @override
+  // ignore: library_private_types_in_public_api
+  _ProductTile createState() => _ProductTile();
+}
+
+
+
+class _ProductTile extends State<ProductTile> {
+  bool _showExtraDetails = false;
+
+  void _toggleExtraDetails() {
+    setState(() {
+      _showExtraDetails = !_showExtraDetails;
+    });
+  }
+
+  Widget mainTile(BuildContext context) {
+    return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ProductTileImage(
+            image: widget.product.image, // Add default image
+          ),
+
+          Expanded(
+              child: ProductTileDescription(
+                product: widget.product,
+                totalSpendings: widget.totalSpendings,
+              )
+          ),
+
+          Padding(
+            padding: const EdgeInsets.only(right: 24, left: 8, bottom: 50),
+            child: Icon(
+              _showExtraDetails ? Icons.expand_less : Icons.expand_more,
+            ),
+          )
+        ],
+
     );
   }
 
-  Widget getImage(String? image) {
-    if (image == null || image == "") {
-      return defaultImage();
-    }
 
-    if (image.startsWith("http")) {
+
+  Widget buildWidgetLayout(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      child: InkWell(
+        onTap: () => {
+          _toggleExtraDetails()
+        },
+
+        child: Column(
+          children: [
+
+            mainTile(context),
+            if (_showExtraDetails)
+              InstanceTile(
+                instances: widget.product.instances,
+                totalPrice: widget.product.price,
+              )
+          ],
+        )      ,
+      ),
+  );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+          right: 8.0, left: 8.0, top: 12.0, bottom: 4.0
+      ),
+      child: ClipRRect (
+        borderRadius: BorderRadius.circular(15.0),
+        child: buildWidgetLayout(context)
+      )
+    );
+  }
+}
+
+
+
+
+class ProductTileImage extends StatelessWidget {
+  const ProductTileImage({required this.image, super.key});
+
+  final String? image;
+
+
+  Widget getDefault() {
+    return const Icon(
+        Icons.image,
+        size: 50,
+        color: Colors.transparent,
+    );
+  }
+  Widget? getImage() {
+    if (image == "" || image == null) return getDefault();
+
+    String validImage = image!;
+    if (validImage.startsWith("http")) {
 
       return Image.network(
-        image,
+        validImage,
         width: 100,
         height: 100,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return defaultImage();
+          return getDefault();
         },
       );
     } else {
       return Image.asset(
-        image,
+        validImage,
         width: 100,
         height: 100,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return defaultImage();
+          return getDefault();
         },
       );
     }
@@ -303,38 +399,188 @@ class ParticipantDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4.0,
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: SizedBox(
-        height: 120.0, // Increase height to fit the image
-        child: ListTile(
-          leading: getImage(participant.image),
-          title: Text(
-            participant.name,
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Text(
-            "Gasto total: R\$ ${totalSpends.toStringAsFixed(2)}",
-            style: TextStyle(
-              fontSize: 16.0,
-            ),
-          ),
-          onTap: () {
-            print("Participant ${participant.name} tapped");
-          },
-        ),
-      ),
+    return Center(
+          child: ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              child: SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: getImage()
+              )
+          )
+    );
+  }
+}
+
+
+
+
+class InstanceTile extends StatelessWidget {
+  const InstanceTile({
+    required this.instances,
+    required this.totalPrice,
+    super.key
+  });
+
+  final List<ProductInstances> instances;
+  final double totalPrice;
+
+
+  // The participant list rendering function
+  Widget getInstanceList(List<ProductInstances> instances) {
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      scrollDirection: Axis.vertical,
+      children: instances.map((instance) {
+        return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding( // Horizontal divider
+                  padding: EdgeInsets.symmetric(horizontal: 5),
+                  child: Divider(
+                    color: Colors.black54,
+                    thickness: 1,
+                    height: 10,
+                  )
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 5),
+                  child: getInstanceTile(instance),
+              )
+
+            ],
+        );
+      }).toList(),
+
+
     );
   }
 
+  Widget getInstanceTile(ProductInstances instance) {
+    return SizedBox(
+      height: 40,
+      child:
+        ListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          children: instance.contributions.map((contribution) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: contributionNamePair(contribution),
+            );
+          }).toList(),
+        )
+    );
+  }
+
+  Widget contributionNamePair(Contributions contribution) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        color: const Color.fromARGB(255, 195,195,195),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 60),
+                child: Text(contribution.participant.name),
+            ),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 6),
+              child: VerticalDivider (
+                color: Colors.black54,  // Color of the divider
+                thickness: 1,           // Thickness of the divider
+                width: 10,              // Space around the divider
+              ),
+            ),
+
+            Text("R\$ ${contribution.paid.toStringAsFixed(2)}"),
+          ],
+        )
+      )
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return  Column(
+        children: [
+          getInstanceList(instances)
+        ]
+    );
+  }
+}
 
 
+class ProductTileDescription extends StatelessWidget {
+  const ProductTileDescription({
+    required this.product,
+    required this.totalSpendings,
+    super.key
+  });
+
+  final Product product;
+  final double totalSpendings;
 
 
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Text(
+                      "R\$ ${product.price.toStringAsFixed(2)}",
+                      style: textTheme.bodyMedium, // Use default body style from TextTheme
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Padding(
+                padding: const EdgeInsets.only(right: 25.0),
+                child: Column(
+                  children: [
+                    Text(
+                        "Quantidade: ${product.instances.length.toString()}",
+                        style: textTheme.bodyMedium
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Text(
+                        "Total: R\$ ${totalSpendings.toStringAsFixed(2)}",
+                        style: textTheme.bodySmall, // Use default body style from TextTheme
+                      ),
+                    ),
+
+                  ],
+                )
+            )
+
+          ],
+        )
+    );
+  }
 }
 
 

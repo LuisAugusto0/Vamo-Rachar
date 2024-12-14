@@ -1,11 +1,11 @@
 {
-    "name": "vamorachar_telacadastro",
-    "short_name": "vamorachar_telacadastro",
+    "name": "vamorachar",
+    "short_name": "vamorachar",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Cadastro.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

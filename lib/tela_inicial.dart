@@ -1,18 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:vamorachar_telacadastro/historico.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart';
-import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'historico.dart';
+import 'constants/colors.dart';
+import 'widgets/navigation_helper.dart';
+import 'database/database_helper.dart';
+import 'login_inicial.dart';
 import 'novo_rachamento.dart';
 import 'perfil_usuario.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // For JSON decoding
 
 class Home extends StatelessWidget {
-  const Home({super.key});
+  Home({super.key});
   // Scaffold de scaffold??
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: MyHomePage(),
+    _fetchLocation();
+
+    return Scaffold(
+      appBar: HomePageAppBar(),
+      body: const MyHomePage(),
     );
+  }
+
+  Future<void> _fetchLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+      );
+
+
+
+
+      //
+      //
+      // final url = 'https://nominatim.openstreetmap.org/search?format=json&limit=10&q=restaurant&lat=${position.latitude}&lon=${position.longitude}';
+      // print(url);
+      // final response = await http.get(Uri.parse(url));
+
+      // if (response.statusCode == 200) {
+      //   print(json.decode(response.body));
+      // } else {
+      //   throw Exception('Falha ao carregar restaurantes');
+      // }
+
+    } catch (e) {
+      print("Error fetching location: $e");
+    }
   }
 }
 
@@ -25,11 +59,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
         backgroundColor: Color(verdePrimario),
-        appBar: HomePageAppBar(),
+        //appBar: HomePageAppBar(),
         body: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -47,7 +82,36 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const HomePageAppBar({super.key});
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  // final bool _isLoggedIn = false;
+  final bool _isLoggedIn = false;
+  HomePageAppBar({super.key});
+
+  Future<void> userProfileRoute(BuildContext context) async {
+    //OLD IMPLEMENTATION
+    // final userData = await _dbHelper.getCurrentUser();
+    //
+    // if (userData != null) {
+    if(await _dbHelper.isLoggedIn()){
+      return NavigationHelper.pushNavigatorTransitionDown(
+        context,
+        Usuario(),
+      );
+    } else {
+      // // Remove todas as telas anteriores até a primeira
+      // Navigator.popUntil(context, (route) => route.isFirst);
+
+
+
+      Navigator.of(context).popUntil( (Route<dynamic> route) => false );
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginInicial()));
+
+      // Exibe mensagem informando que o usuário não está logado
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não há nenhum usuário logado, faça login')),
+      );
+    }
+  }
 
   @override
   Size get preferredSize => const Size.fromHeight(80);
@@ -61,16 +125,14 @@ class HomePageAppBar extends StatelessWidget implements PreferredSizeWidget {
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(15))),
       automaticallyImplyLeading: false,
       centerTitle: true,
-      toolbarHeight: 80, // Ajuste a altura da AppBar aqui
+      toolbarHeight: 100, // Ajuste a altura da AppBar aqui
       title: IconButton(
             icon: const Icon(
                 Icons.account_circle_outlined,
                 color: Colors.green,
                 size: 50
             ),
-            onPressed: () {
-              NavigationHelper.pushNavigatorTransitionDown(context, const Usuario());
-            },
+            onPressed: () => userProfileRoute(context),
           ),
       );
   }
@@ -92,7 +154,10 @@ class RachamentoButton extends StatelessWidget {
           heroTag: 'btnNovaDivisao',
           backgroundColor: Colors.white,
           onPressed: () {
-            NavigationHelper.pushNavigatorNoTransition(context, NovoRachamento());
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NovoRachamento()),
+            );
           },
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

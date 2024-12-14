@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart';
-import 'package:vamorachar_telacadastro/sobre.dart';
-import 'package:vamorachar_telacadastro/widgets/navigation_helper.dart';
+import 'constants/colors.dart';
+import 'sobre.dart';
+import 'database/database_helper.dart'  ;
+import 'widgets/navigation_helper.dart';
 import 'tela_inicial.dart';
 import 'cadastro.dart';
 import 'login.dart';
@@ -34,8 +35,15 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _userText = TextEditingController();
   final TextEditingController _emailText = TextEditingController();
   final TextEditingController _passwordText = TextEditingController();
-  final TextEditingController _passwordConfirmationText =
-      TextEditingController();
+  final TextEditingController _passwordConfirmationText = TextEditingController();
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  bool isLoggedIn = false;
+
+  @override
+  void initState() {
+    verifyLogin();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -44,6 +52,16 @@ class _MyHomePageState extends State<MyHomePage> {
     _passwordText.dispose();
     _passwordConfirmationText.dispose();
     super.dispose();
+  }
+
+  Future<void> verifyLogin() async{
+    // OLD IMPLEMENTATION
+    // Map<String, Object?>? user = await _dbHelper.getCurrentUser();
+    
+    // if (user != null){
+    if (await _dbHelper.isLoggedIn()){
+      NavigationHelper.pushNavigatorNoTransition(context, Home());
+    }
   }
 
   Route _cadastroRoute() {
@@ -67,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Route _homeRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const Home(),
+      pageBuilder: (context, animation, secondaryAnimation) => Home(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
@@ -109,12 +127,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       backgroundColor: const Color(verdePrimario),
-      body: Column(
+      body:
+      Column(
         mainAxisAlignment: MainAxisAlignment
             .spaceBetween, // Spread content between top and bottom
         children: [
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 30.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -170,43 +189,44 @@ class _MyHomePageState extends State<MyHomePage> {
                       ))
                 ],
               ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  // Essa coluna representa a parte inferior
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // Linha horizontal
+                    Container(
+                      width: 400,
+                      height: 2,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent, // Fading start
+                            Colors.black,
+                            Colors.transparent, // Fading end
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10), // Space between the line and text
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(_homeRoute());
+                      },
+                      child: const Text(
+                        "Entrar como convidado",
+                        style: TextStyle(
+                          color: Color(0xEEEEEEEE), // Text color changed to blue
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              // Essa coluna representa a parte inferior
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // Linha horizontal
-                Container(
-                  width: 400,
-                  height: 2,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent, // Fading start
-                        Colors.black,
-                        Colors.transparent, // Fading end
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10), // Space between the line and text
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(_homeRoute());
-                  },
-                  child: const Text(
-                    "Entrar como convidado",
-                    style: TextStyle(
-                      color: Color(0xEEEEEEEE), // Text color changed to blue
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Text(""),
         ],
       ),
     );

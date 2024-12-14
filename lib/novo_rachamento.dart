@@ -1,87 +1,79 @@
-import 'package:flutter/foundation.dart';
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 //import 'package:image_picker/image_picker.dart';
 //import 'package:gallery_picker/gallery_picker.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
-//import 'package:novorachamento/card.dart';
+import 'package:vamorachar/database/sql_providers.dart';
+import 'package:vamorachar/novo_rachamento_scanned.dart';
+import 'confirmar_divisao.dart';
+import 'database/sql_tables.dart';
 import 'tela_inicial.dart';
+import 'widgets/validation_helpers.dart';
+import 'widgets/form_widgets.dart';
+import 'database/database_helper.dart';
+import 'widgets/navigation_helper.dart';
+import 'scanner.dart';
 
 class Item {
+  late int id;
   late String nome;
   late int quantidade;
+  late double preco;
 
   Item() {
+    id = -1;
     quantidade = -1;
     nome = "";
+    preco = -1;
   }
 
-  Item.padrao(int quantidade, String nome) {
+  Item.padrao(int id, int quantidade, String nome, double preco) {
+    this.id = id;
     this.quantidade = quantidade;
     this.nome = nome;
+    this.preco = preco;
   }
 }
 
 class Participante {
-  late int id;
   late String nome;
-  late List<Item> itens = [];
+  late String email;
+  late double totalPago;
 
-  int identificarPosItem(String nome) {
-    int pos = -1;
-    for (int i = 0; i < this.itens.length; i++) {
-      if (this.itens[i].nome.compareTo(nome) == 0) {
-        pos = i;
-        i = this.itens.length;
-      }
-    }
-    return pos;
-  }
-
-  void removeItem(Item item) {
-    for (int i = 0; i < this.itens.length; i++) {
-      if (this.itens[i].nome.compareTo(item.nome) == 0) {
-        if (this.itens[i].quantidade > 1) {
-          this.itens[i].quantidade--;
-        } else {
-          this.itens.remove(item);
-        }
-      }
-    }
-  }
-
-  void addItem(Item item) {
-    if (this.itens.isNotEmpty) {
-      bool itemFound = false;
-      for (int i = 0; i < this.itens.length; i++) {
-        if (this.itens[i].nome.compareTo(item.nome) == 0) {
-          itemFound = true;
-          this.itens[i].quantidade++;
-          i = this.itens.length;
-        }
-      }
-      if (!itemFound) {
-        this.itens.add(item);
-        this.itens[this.itens.length].quantidade++;
-      }
-    } else {
-      this.itens.add(item);
-    }
-  }
-
-  Participante.create(String nome, int id) {
-    this.id = id;
+  Participante.create(String nome, int id, String email) {
     this.nome = nome;
+    this.email = email;
+    totalPago = 0;
   }
 
   Participante() {
-    this.id = -1;
-    this.nome = "";
-    this.itens = [];
+    nome = "";
+    email = "";
   }
 }
 
-void main(List<String> args) {
-  runApp(MyApp());
+class InstanciaItem {
+  late Item item;
+  late List<Participante> participantes;
+  late int id;
+  late double precoPago;
+  late int quantidade;
+
+  InstaciaItem() {
+    id = -1;
+    item = Item();
+    participantes = [];
+  }
+
+  InstanciaItem.create(int id, Item item, List<Participante> participantes,
+      double precoPago, int quantidade) {
+    this.id = id;
+    this.item = item;
+    this.participantes = participantes;
+    this.precoPago = precoPago;
+    this.quantidade = quantidade;
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -103,60 +95,148 @@ class NovoRachamento extends StatefulWidget {
 }
 
 class _NovoRachamentoState extends State<NovoRachamento> {
-  //Criando controladores dos cards
-  //final TextEditingController _cardIdentifier = TextEditingController();
-  //Indicador do estado da tela/ indicador de qual tela estamos
-  int estado = 0;
-
-  //Lista dos participantes acessível ao usuário
-  List<String> options = [
-    "Participante 1",
-  ];
+  final DatabaseHelper _dbHelper = DatabaseHelper();
 
   //Lista dos participantes real
-  int ultimoIdUsado = 1;
-  List<Participante> participantes = [
-    Participante.create("Participante 1", 1),
-  ];
-
+  int ultimoIdUsado = 0;
+  int ultimoIdItem = 0;
+  List<Participante> participantes = [];
+  List<String> options = [];
   //Lista de Itens
-  List<Item> itens = [
-    Item.padrao(5, "1"),
-    Item.padrao(2, "2"),
-    Item.padrao(6, "3"),
-    Item.padrao(3, "4")
-  ];
+  late List<Item> itens = [];
 
-  List<String> selectedOptions = [];
-
-  //Função criada para adicionar participantes
-  void _showPopup(BuildContext context) {
+  //Função criada para adicionar itens à lista
+  void _adicionarItens(BuildContext context) {
     final TextEditingController nameController = TextEditingController();
-
+    final TextEditingController quantidadeController = TextEditingController();
+    final TextEditingController precoCrontroller = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Preencha seu nome'),
-          content: TextField(
-            controller: nameController,
-            decoration: const InputDecoration(hintText: 'Seu nome'),
+          title: const Text(
+              'Preencha o nome do Item, a quantidade consumida e seu preço'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                form(
+                    "Nome do Item", //Label do TextField
+                    Icons.abc, //Ícone do TextField
+                    TextInputType.text, //Tipo do Teclado
+                    nameController, // Controlador do TextField
+                    "", // Verifica se há erro
+                    (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                    ),
+                form(
+                    "Quantidade de itens consumidos", //Label do TextField
+                    Icons.add_circle_outline, //Ícone do TextField
+                    TextInputType.text, //Tipo do Teclado
+                    quantidadeController, // Controlador do TextField
+                    validateInteiro(
+                        quantidadeController), // Verifica se há erro
+                    (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                    ),
+                form(
+                    "Preço do item consumidos", //Label do TextField
+                    Icons.add_circle_outline, //Ícone do TextField
+                    TextInputType.text, //Tipo do Teclado
+                    precoCrontroller, // Controlador do TextField
+                    validadeDouble(precoCrontroller), // Verifica se há erro
+                    (text) => setState(() => ()), // OnChanged
+                    true // Enabled?
+                    ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                options.add(nameController.text);
-                participantes.add(
-                    Participante.create(nameController.text, ++ultimoIdUsado));
+                setState(() {
+                  itens.add(new Item.padrao(
+                      ultimoIdItem,
+                      int.parse(quantidadeController.text),
+                      nameController.text,
+                      double.parse(precoCrontroller.text)));
+                  ultimoIdItem++;
+                });
                 Navigator.of(context).pop();
               },
-              child: const Text('Enviar'),
+              child: const Text(
+                'Enviar',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 54, 226, 143),
+                ),
+              ),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancelar'),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 54, 226, 143),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //Função criada para adicionar participantes
+  void _adicionarParticipanteLista(BuildContext context) {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+              'Preencha seu nome, para adicionar um novo participante à lista'),
+          content: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              form(
+                  "Usuário", //Label do TextField
+                  Icons.account_circle_outlined, //Ícone do TextField
+                  TextInputType.text, //Tipo do Teclado
+                  nameController, // Controlador do TextField
+                  "", // Verifica se há erro
+                  (text) => setState(() => ()), // OnChanged
+                  true // Enabled?
+                  ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                options.add(nameController.text);
+                participantes.add(Participante.create(nameController.text,
+                    ++ultimoIdUsado, emailController.text));
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Enviar',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 54, 226, 143),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 54, 226, 143),
+                ),
+              ),
             ),
           ],
         );
@@ -165,7 +245,7 @@ class _NovoRachamentoState extends State<NovoRachamento> {
   }
 
 //Função criada para remover participantes
-  void _showPopup2(BuildContext context) {
+  void _removerParticipanteLista(BuildContext context) {
     List<String> aux = [];
     showDialog(
         context: context,
@@ -193,99 +273,55 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                   }
                   Navigator.of(context).pop();
                 },
-                child: const Text("Aceitar"),
+                child: const Text(
+                  "Aceitar",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 54, 226, 143),
+                  ),
+                ),
               ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text("Cancelar"),
+                child: const Text(
+                  "Cancelar",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 54, 226, 143),
+                  ),
+                ),
               ),
             ],
           );
         });
   }
 
-//Função para identificar a posição de uma String num vetor
-  int indentificarParticipante(String comparativo) {
-    int pos = -1;
-    for (int i = 0; i < this.participantes.length; i++) {
-      if (this.participantes[i].nome.compareTo(comparativo) == 0) {
-        pos = i;
-        i = this.participantes.length;
-      }
-    }
-    return pos;
-  }
-
-  int indentificarItem(String comparativo) {
-    int pos = -1;
-    for (int i = 0; i < this.itens.length; i++) {
-      if (this.itens[i].nome.compareTo(comparativo) == 0) {
-        pos = i;
-        i = this.itens.length;
-      }
-    }
-    return pos;
-  }
-
-//Função para adicionar itens
-  void addItem(String nome, String nomeItem) {
-    int posParticipante;
-
-    posParticipante = indentificarParticipante(nome);
-
-    int posItem = indentificarItem(nomeItem);
-
-    if (itens[posItem].quantidade > 0) {
-      participantes[posParticipante].addItem(itens[posItem]);
-      print("Antes de subtrair a quantidade: ${itens[posItem].quantidade}");
-      itens[posItem].quantidade--;
-      print("Depois de subtrair a quantidade: ${itens[posItem].quantidade}");
-    }
-  }
-
-//Função para subtrair itens
-  void subItem(nome, String nomeItem) {
-    int posParticipante;
-
-    posParticipante = indentificarParticipante(nome);
-
-    int posItem = indentificarItem(nomeItem);
-
-    if (participantes[posParticipante].itens.contains(itens[posItem])) {
-      participantes[posParticipante].removeItem(itens[posItem]);
-      itens[posItem].quantidade++;
-    }
-  }
-
-  Scaffold iniciarTela() {
-    String dropdownText = "Participantes";
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF64C278),
       appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_outlined,
+              size: 40,
+            ),
+          ),
           toolbarHeight: 100,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomDropdown<String>.multiSelectSearch(
-                  hintText: dropdownText,
-                  items: options,
-                  onListChanged: (value) {
-                    List<String> aux = [];
-                    for (int i = 0; i < value.length; i++) {
-                      aux.add(value[i]);
-                    }
-                    selectedOptions = aux;
-                  }),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => _showPopup(context),
+                      onPressed: () => _adicionarParticipanteLista(context),
                       child: const Text(
-                        "Adicionar Participante",
+                        "Adicionar",
                         style: TextStyle(
                           color: Colors.green,
                         ),
@@ -294,9 +330,9 @@ class _NovoRachamentoState extends State<NovoRachamento> {
                   ),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => _showPopup2(context),
+                      onPressed: () => _removerParticipanteLista(context),
                       child: const Text(
-                        "Remover Participante",
+                        "Remover",
                         style: TextStyle(
                           color: Colors.green,
                         ),
@@ -311,16 +347,36 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ElevatedButton(
                 onPressed: () {
-                  setState(() {
-                    estado = 1;
-                  });
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Scanner(
+                                participantes: participantes,
+                                itens: itens,
+                                ultimoIdUsado: ultimoIdUsado,
+                                ultimoIdItem: ultimoIdItem,
+                              )));
                 },
                 child: const Text(
                   "Scanner",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 54, 226, 143),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 21,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _adicionarItens(context);
+                },
+                child: const Text(
+                  "Inserir Itens Manualmente",
                   style: TextStyle(
                     color: Color.fromARGB(255, 54, 226, 143),
                     fontWeight: FontWeight.bold,
@@ -333,183 +389,31 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         ],
       ),
       bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                "Cancelar",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 54, 226, 143),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            padding: const EdgeInsets.only(
+              bottom: 50,
+              right: 15,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Scaffold scanedScream() {
-    String dropdownText = "Participantes";
-    return Scaffold(
-      backgroundColor: const Color(0xFF64C278),
-      appBar: AppBar(
-          toolbarHeight: 100,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomDropdown<String>.multiSelectSearch(
-                  hintText: dropdownText,
-                  items: options,
-                  onListChanged: (value) {
-                    List<String> aux = [];
-                    for (int i = 0; i < value.length; i++) {
-                      aux.add(value[i]);
-                    }
-                    selectedOptions = aux;
-                  }),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => _showPopup(context),
-                        child: const Text(
-                          "Adicionar Participante",
-                          style: TextStyle(
-                            color: Colors.green,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => _showPopup2(context),
-                        child: const Text(
-                          "Remover Participante",
-                          style: TextStyle(
-                            color: Colors.green,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          )),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Quantidade de caixas por linha
-            crossAxisSpacing: 16.0,
-            mainAxisSpacing: 16.0,
-          ),
-          itemCount: itens.length, // Quantidade total de itens
-          itemBuilder: (context, index) {
-            final item = itens[index];
-            int qtd = item.quantidade;
-            late String textoPadrao = "Quantidade - $qtd";
-            return Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.image,
-                        )
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          textoPadrao,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shadowColor: Colors.transparent,
-                            backgroundColor: Colors.transparent,
-                          ),
-                          onPressed: () {
-                            for (int i = 0; i < selectedOptions.length; i++) {
-                              addItem(selectedOptions[i], itens[index].nome);
-                            }
-                            //setState(() {
-                            //qtd = itens[index].quantidade;
-                            //textoPadrao = "Quantidade - $qtd";
-                            //});
-                          },
-                          child: const Icon(
-                            Icons.add_rounded,
-                            color: Colors.green,
-                          ),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shadowColor: Colors.transparent,
-                            backgroundColor: Colors.transparent,
-                          ),
-                          onPressed: () {
-                            for (int i = 0; i < selectedOptions.length; i++) {
-                              subItem(selectedOptions[i], itens[index].nome);
-                            }
-                            //setState(() {
-                            //qtd = itens[index].quantidade;
-                            //textoPadrao = "Quantidade - $qtd";
-                            //});
-                          },
-                          child: const Icon(
-                            Icons.remove,
-                            color: Colors.green,
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ));
-          },
-        ),
-      ),
-      bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () {
                 setState(() {
-                  estado = 0;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NovoRachamentoScanner(
+                            participantes: participantes,
+                            itens: itens,
+                            ultimoIdUsado: ultimoIdUsado)),
+                  );
                 });
               },
               child: const Text(
-                "Cancelar",
+                "Prosseguir",
                 style: TextStyle(
                   color: Color.fromARGB(255, 54, 226, 143),
-                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -517,17 +421,5 @@ class _NovoRachamentoState extends State<NovoRachamento> {
         ],
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    switch (estado) {
-      case 0:
-        return iniciarTela();
-      case 1:
-        return scanedScream();
-      default:
-        return const Text("Deu bobs, confere aí");
-    }
   }
 }

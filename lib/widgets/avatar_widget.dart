@@ -1,6 +1,6 @@
 // lib/widgets/avatar_widget.dart
 import 'package:flutter/material.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart';
+import 'package:vamorachar/constants/colors.dart';
 
 Widget userAvatarCustom(String url) {
   return Stack(

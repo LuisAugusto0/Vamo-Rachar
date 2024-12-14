@@ -1,6 +1,6 @@
 // lib/widgets/form_widgets.dart
 import 'package:flutter/material.dart';
-import 'package:vamorachar_telacadastro/constants/colors.dart'; // Importa as cores
+import 'package:vamorachar/constants/colors.dart'; // Importa as cores
 
 // Widget de campo de formulário genérico
 Widget form(
@@ -74,7 +74,7 @@ Widget senhaOculta(
       style: TextStyle(
         fontSize: 15.0,
         color: enabled ? Colors.black : Colors.grey,
-      ), // Cor condicional)
+      ), // Cor condicional
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
